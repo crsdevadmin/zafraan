@@ -1,0 +1,1514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZAFRAAN — Fresh, Pure, Ready.</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --cream: #fdf6f0;
+            --warm-white: #faf4ee;
+            --rose: #b5685a;
+            --rose-light: #d4927f;
+            --rose-deep: #8c4a3c;
+            --rose-pale: #f0ddd6;
+            --text-dark: #2a1e1a;
+            --text-mid: #6b4a40;
+            --text-light: #a07060;
+            --border: rgba(181,104,90,0.15);
+            --gold: #c9a96e;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Jost', sans-serif;
+            background: var(--cream);
+            color: var(--text-dark);
+            font-weight: 300;
+        }
+
+        /* ---- NAV ---- */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--cream);
+            border-bottom: 1px solid var(--border);
+            padding: 18px 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-logo {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .nav-logo-mark {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-flower {
+            width: 32px;
+            height: 32px;
+        }
+
+        .nav-brand {
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 500;
+            font-size: 26px;
+            letter-spacing: 5px;
+            color: var(--rose-deep);
+        }
+
+        .nav-tagline {
+            font-size: 10px;
+            letter-spacing: 3px;
+            color: var(--text-light);
+            text-transform: uppercase;
+            margin-left: 42px;
+            margin-top: 2px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 40px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-mid);
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover { color: var(--rose); }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .cart-toggle {
+            position: relative;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--rose);
+            color: #fff;
+            font-size: 9px;
+            font-weight: 600;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ---- CART DRAWER ---- */
+        .cart-drawer {
+            position: fixed;
+            top: 0;
+            right: -420px;
+            width: 420px;
+            height: 100vh;
+            background: #fff;
+            z-index: 1000;
+            box-shadow: -20px 0 50px rgba(42,30,26,0.1);
+            transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cart-drawer.open { right: 0; }
+
+        .cart-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(42,30,26,0.4);
+            backdrop-filter: blur(4px);
+            z-index: 999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .cart-overlay.open { opacity: 1; pointer-events: all; }
+
+        .cart-header {
+            padding: 30px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cart-header h2 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 24px;
+            font-weight: 500;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .cart-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-mid);
+        }
+
+        .cart-items {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .cart-item {
+            display: grid;
+            grid-template-columns: 80px 1fr 60px;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .cart-item-img {
+            width: 80px;
+            height: 80px;
+            background: var(--warm-white);
+            border-radius: 4px;
+            object-fit: cover;
+        }
+
+        .cart-item-info h4 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 18px;
+            margin-bottom: 4px;
+        }
+
+        .cart-item-size {
+            font-size: 10px;
+            letter-spacing: 1px;
+            color: var(--text-light);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .cart-item-qty {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 12px;
+        }
+
+        .qty-btn {
+            width: 24px;
+            height: 24px;
+            border: 1px solid var(--border);
+            background: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .cart-item-price {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 18px;
+            color: var(--rose);
+            text-align: right;
+        }
+
+        .cart-footer {
+            padding: 30px;
+            background: var(--warm-white);
+            border-top: 1px solid var(--border);
+        }
+
+        .cart-total-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .cart-total-label {
+            font-size: 12px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-mid);
+        }
+
+        .cart-total-val {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 28px;
+            font-weight: 500;
+            color: var(--rose-deep);
+        }
+
+        /* ---- HERO ---- */
+        .hero {
+            min-height: 88vh;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            align-items: center;
+            padding: 80px 60px;
+            gap: 60px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -100px;
+            right: -100px;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(181,104,90,0.07) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero-text { z-index: 1; }
+
+        .hero-eyebrow {
+            font-size: 11px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--rose);
+            margin-bottom: 28px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .hero-eyebrow::before {
+            content: '';
+            width: 40px;
+            height: 1px;
+            background: var(--rose);
+        }
+
+        .hero h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 76px;
+            font-weight: 300;
+            line-height: 1.05;
+            color: var(--text-dark);
+            margin-bottom: 30px;
+            letter-spacing: -1px;
+        }
+
+        .hero h1 em {
+            font-style: italic;
+            color: var(--rose);
+        }
+
+        .hero-sub {
+            font-size: 14px;
+            color: var(--text-mid);
+            line-height: 1.9;
+            max-width: 400px;
+            margin-bottom: 50px;
+            letter-spacing: 0.3px;
+        }
+
+        .hero-cta {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .btn-main {
+            background: var(--rose);
+            color: #fff;
+            border: none;
+            padding: 16px 44px;
+            font-family: 'Jost', sans-serif;
+            font-size: 11px;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 400;
+        }
+
+        .btn-main:hover { background: var(--rose-deep); }
+
+        .btn-ghost {
+            font-size: 11px;
+            letter-spacing: 2px;
+            color: var(--text-mid);
+            text-transform: uppercase;
+            cursor: pointer;
+            border: none;
+            background: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Jost', sans-serif;
+        }
+
+        .btn-ghost::after {
+            content: '→';
+            font-size: 16px;
+        }
+
+        /* Hero Visual */
+        .hero-visual {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .hero-logo-large {
+            width: 100%;
+            max-width: 480px;
+        }
+
+        /* ---- MARQUEE ---- */
+        .marquee-bar {
+            background: var(--rose);
+            padding: 14px 0;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .marquee-inner {
+            display: inline-flex;
+            animation: marquee 20s linear infinite;
+            gap: 0;
+        }
+
+        .marquee-item {
+            font-size: 11px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.9);
+            padding: 0 40px;
+        }
+
+        .marquee-dot {
+            color: rgba(255,255,255,0.4);
+            padding: 0;
+        }
+
+        @keyframes marquee {
+            from { transform: translateX(0); }
+            to { transform: translateX(-50%); }
+        }
+
+        /* ---- PILLARS ---- */
+        .pillars {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .pillar {
+            padding: 50px 40px;
+            border-right: 1px solid var(--border);
+            transition: background 0.3s;
+        }
+
+        .pillar:last-child { border-right: none; }
+        .pillar:hover { background: var(--warm-white); }
+
+        .pillar-num {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 38px;
+            color: var(--rose-pale);
+            margin-bottom: 16px;
+            font-weight: 300;
+        }
+
+        .pillar-title {
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--rose);
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .pillar-desc {
+            font-size: 13px;
+            color: var(--text-light);
+            line-height: 1.7;
+        }
+
+        /* ---- PRODUCTS SECTION ---- */
+        .products-section {
+            padding: 100px 60px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            margin-bottom: 70px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 30px;
+        }
+
+        .section-label {
+            font-size: 10px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--rose);
+            margin-bottom: 12px;
+        }
+
+        .section-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 48px;
+            font-weight: 300;
+            color: var(--text-dark);
+            letter-spacing: -0.5px;
+        }
+
+        /* Category tabs */
+        .category-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 50px;
+            flex-wrap: wrap;
+        }
+
+        .cat-tab {
+            padding: 10px 24px;
+            font-size: 11px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            border: 1px solid var(--border);
+            background: none;
+            cursor: pointer;
+            font-family: 'Jost', sans-serif;
+            color: var(--text-light);
+            transition: all 0.25s;
+        }
+
+        .cat-tab.active, .cat-tab:hover {
+            background: var(--rose);
+            border-color: var(--rose);
+            color: #fff;
+        }
+
+        /* Product Grid */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 2px;
+        }
+
+        .product-card {
+            background: #fff;
+            cursor: pointer;
+            transition: all 0.35s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-card:hover { transform: translateY(-6px); box-shadow: 0 20px 50px rgba(140,74,60,0.12); z-index: 2; }
+
+        .product-img-wrap {
+            height: 220px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-badge {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: var(--rose);
+            color: #fff;
+            font-size: 9px;
+            letter-spacing: 1.5px;
+            padding: 5px 10px;
+            text-transform: uppercase;
+        }
+
+        .product-body {
+            padding: 20px 24px 24px;
+            border-top: 1px solid var(--border);
+        }
+
+        .product-cat {
+            font-size: 9px;
+            letter-spacing: 2px;
+            color: var(--rose);
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .product-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 20px;
+            font-weight: 500;
+            color: var(--text-dark);
+            margin-bottom: 6px;
+        }
+
+        .product-sizes {
+            font-size: 11px;
+            color: var(--text-light);
+            margin-bottom: 14px;
+            line-height: 1.6;
+        }
+
+        .product-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .product-price {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 22px;
+            color: var(--rose-deep);
+            font-weight: 500;
+        }
+
+        .product-arrow {
+            width: 32px;
+            height: 32px;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--rose);
+            font-size: 14px;
+            transition: all 0.25s;
+        }
+
+        .product-card:hover .product-arrow {
+            background: var(--rose);
+            color: #fff;
+            border-color: var(--rose);
+        }
+
+        /* ---- ABOUT ---- */
+        .about {
+            background: var(--text-dark);
+            padding: 120px 60px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 100px;
+            align-items: center;
+        }
+
+        .about-left .eyebrow {
+            font-size: 10px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--rose-light);
+            margin-bottom: 24px;
+        }
+
+        .about-left h2 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 56px;
+            font-weight: 300;
+            color: var(--cream);
+            line-height: 1.1;
+            margin-bottom: 32px;
+        }
+
+        .about-left h2 em {
+            font-style: italic;
+            color: var(--rose-light);
+        }
+
+        .about-left p {
+            font-size: 14px;
+            color: rgba(253,246,240,0.6);
+            line-height: 1.9;
+        }
+
+        .about-right {
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+
+        .about-stat {
+            border-left: 2px solid var(--rose);
+            padding-left: 24px;
+        }
+
+        .about-stat-num {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 44px;
+            font-weight: 300;
+            color: var(--cream);
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+
+        .about-stat-label {
+            font-size: 11px;
+            letter-spacing: 2px;
+            color: rgba(253,246,240,0.5);
+            text-transform: uppercase;
+        }
+
+        /* ---- FOOTER ---- */
+        footer {
+            background: var(--rose-deep);
+            padding: 60px 60px 40px;
+        }
+
+        .footer-top {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 60px;
+            padding-bottom: 50px;
+            border-bottom: 1px solid rgba(255,255,255,0.15);
+        }
+
+        .footer-brand {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 32px;
+            letter-spacing: 4px;
+            color: #fff;
+            margin-bottom: 16px;
+        }
+
+        .footer-brand-sub {
+            font-size: 11px;
+            color: rgba(255,255,255,0.6);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 24px;
+        }
+
+        .footer-contact-item {
+            font-size: 13px;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 8px;
+        }
+
+        .footer-col-title {
+            font-size: 10px;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 20px;
+        }
+
+        .footer-links {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .footer-links a {
+            text-decoration: none;
+            font-size: 13px;
+            color: rgba(255,255,255,0.7);
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover { color: #fff; }
+
+        .footer-bottom {
+            padding-top: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            color: rgba(255,255,255,0.4);
+            letter-spacing: 0.5px;
+        }
+
+        /* ---- MODAL ---- */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(42,30,26,0.7);
+            z-index: 500;
+            backdrop-filter: blur(4px);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.open { display: flex; }
+
+        .modal-box {
+            background: var(--cream);
+            width: 520px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-top {
+            height: 260px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 36px;
+            height: 36px;
+            border: 1px solid var(--border);
+            background: #fff;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-mid);
+        }
+
+        .modal-body {
+            padding: 36px 44px 44px;
+        }
+
+        .modal-eyebrow {
+            font-size: 10px;
+            letter-spacing: 2px;
+            color: var(--rose);
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .modal-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 36px;
+            font-weight: 400;
+            color: var(--text-dark);
+            margin-bottom: 20px;
+        }
+
+        .modal-sizes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 28px;
+        }
+
+        .size-chip {
+            padding: 8px 16px;
+            border: 1px solid var(--border);
+            font-size: 12px;
+            color: var(--text-mid);
+            letter-spacing: 0.5px;
+        }
+
+        .modal-desc {
+            font-size: 13px;
+            color: var(--text-light);
+            line-height: 1.8;
+            margin-bottom: 32px;
+        }
+
+        .modal-price-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 28px;
+        }
+
+        .modal-price-label {
+            font-size: 11px;
+            letter-spacing: 1px;
+            color: var(--text-light);
+            text-transform: uppercase;
+        }
+
+        .modal-price-val {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 32px;
+            color: var(--rose-deep);
+            font-weight: 500;
+        }
+
+        .modal-qty-row {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 32px;
+            padding: 16px;
+            background: var(--warm-white);
+            border-radius: 4px;
+        }
+
+        .modal-qty-ctrl {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .modal-qty-ctrl button {
+            width: 32px;
+            height: 32px;
+            border: 1px solid var(--border);
+            background: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        #modalQty {
+            font-weight: 500;
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .modal-btn {
+            width: 100%;
+            background: var(--rose-deep);
+            color: #fff;
+            border: none;
+            padding: 18px;
+            font-family: 'Jost', sans-serif;
+            font-size: 11px;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .modal-btn:hover { background: var(--rose); }
+
+        /* ---- Responsive ---- */
+        @media (max-width: 900px) {
+            .hero { grid-template-columns: 1fr; padding: 60px 24px; gap: 40px; }
+            .hero h1 { font-size: 52px; }
+            .about { grid-template-columns: 1fr; padding: 80px 24px; gap: 50px; }
+            .footer-top { grid-template-columns: 1fr; gap: 40px; }
+            nav { padding: 16px 24px; }
+            .nav-links { display: none; }
+            .pillars { grid-template-columns: repeat(2, 1fr); }
+            .products-section { padding: 60px 24px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+    <div class="nav-logo">
+        <div class="nav-logo-mark">
+            <svg class="nav-flower" viewBox="0 0 80 90" xmlns="http://www.w3.org/2000/svg">
+                <!-- Saffron flower SVG matching logo -->
+                <g fill="none" stroke="#8c4a3c" stroke-width="1.2">
+                    <!-- petals -->
+                    <path d="M40 45 C 32 38, 28 28, 34 18 C 38 12, 42 12, 46 18 C 52 28, 48 38, 40 45" stroke-width="1" fill="rgba(181,104,90,0.08)"/>
+                    <path d="M40 45 C 26 42, 18 34, 20 22 C 22 16, 28 14, 32 20 C 38 30, 36 40, 40 45" stroke-width="1" fill="rgba(181,104,90,0.08)"/>
+                    <path d="M40 45 C 52 42, 60 34, 58 22 C 56 16, 50 14, 48 20 C 42 30, 42 40, 40 45" stroke-width="1" fill="rgba(181,104,90,0.08)"/>
+                    <!-- stamens -->
+                    <line x1="40" y1="44" x2="36" y2="28" stroke="#c9a96e" stroke-width="0.8"/>
+                    <line x1="40" y1="44" x2="40" y2="26" stroke="#c9a96e" stroke-width="0.8"/>
+                    <line x1="40" y1="44" x2="44" y2="28" stroke="#c9a96e" stroke-width="0.8"/>
+                    <circle cx="36" cy="27" r="1.5" fill="#c9a96e"/>
+                    <circle cx="40" cy="25" r="1.5" fill="#c9a96e"/>
+                    <circle cx="44" cy="27" r="1.5" fill="#c9a96e"/>
+                    <!-- stem -->
+                    <path d="M40 45 Q 42 60, 38 78" stroke-width="1"/>
+                </g>
+            </svg>
+            <span class="nav-brand">ZAFRAAN</span>
+        </div>
+        <div class="nav-tagline">Fresh, Pure, Ready.</div>
+    </div>
+    <ul class="nav-links">
+        <li><a href="#products">Products</a></li>
+        <li><a href="#about">Our Story</a></li>
+        <li><a href="#contact">Contact</a></li>
+    </ul>
+    <div class="nav-actions">
+        <button class="cart-toggle" onclick="toggleCart()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+            <span class="cart-badge" id="cartBadge">0</span>
+        </button>
+    </div>
+</nav>
+
+<!-- CART DRAWER -->
+<div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+<div class="cart-drawer" id="cartDrawer">
+    <div class="cart-header">
+        <h2>Your Shopping Bag</h2>
+        <button class="cart-close" onclick="toggleCart()">×</button>
+    </div>
+    <div class="cart-items" id="cartItems">
+        <!-- Items injected by JS -->
+    </div>
+    <div class="cart-footer">
+        <div class="cart-total-row">
+            <span class="cart-total-label">Subtotal</span>
+            <span class="cart-total-val" id="cartTotal">₹0</span>
+        </div>
+        <button class="btn-main" style="width:100%" onclick="checkoutWhatsApp()">Checkout via WhatsApp</button>
+    </div>
+</div>
+
+<!-- MARQUEE -->
+<div class="marquee-bar">
+    <div class="marquee-inner" id="marqueeInner">
+        <span class="marquee-item">100% Natural</span><span class="marquee-dot"> · </span>
+        <span class="marquee-item">No Additives</span><span class="marquee-dot"> · </span>
+        <span class="marquee-item">Handcrafted in Chennai</span><span class="marquee-dot"> · </span>
+        <span class="marquee-item">Fresh Daily</span><span class="marquee-dot"> · </span>
+        <span class="marquee-item">Premium Grade</span><span class="marquee-dot"> · </span>
+        <span class="marquee-item">No Preservatives</span><span class="marquee-dot"> · </span>
+        <span class="marquee-item">Est. 2024</span><span class="marquee-dot"> · </span>
+        <span class="marquee-item">100% Natural</span><span class="marquee-dot"> · </span>
+        <span class="marquee-item">No Additives</span><span class="marquee-dot"> · </span>
+        <span class="marquee-item">Handcrafted in Chennai</span><span class="marquee-dot"> · </span>
+        <span class="marquee-item">Fresh Daily</span><span class="marquee-dot"> · </span>
+        <span class="marquee-item">Premium Grade</span><span class="marquee-dot"> · </span>
+        <span class="marquee-item">No Preservatives</span><span class="marquee-dot"> · </span>
+        <span class="marquee-item">Est. 2024</span><span class="marquee-dot"> · </span>
+    </div>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-text">
+        <div class="hero-eyebrow">Est. 2024 · Chennai</div>
+        <h1>Pure<br><em>Essence</em><br>From Nature</h1>
+        <p class="hero-sub">Handcrafted in Chennai. No additives. No compromises. Just pure, fresh, premium ingredients that transform your kitchen.</p>
+        <div class="hero-cta">
+            <button class="btn-main" onclick="document.getElementById('products').scrollIntoView({behavior:'smooth'})">Explore Collection</button>
+            <button class="btn-ghost">Our Story</button>
+        </div>
+    </div>
+    <div class="hero-visual">
+        <!-- Large Logo SVG in brand style -->
+        <svg class="hero-logo-large" viewBox="0 0 500 380" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <style>
+                    .logo-text { font-family: 'Cormorant Garamond', Georgia, serif; }
+                </style>
+            </defs>
+            <!-- Background circle -->
+            <circle cx="250" cy="160" r="140" fill="rgba(181,104,90,0.04)" stroke="rgba(181,104,90,0.08)" stroke-width="1"/>
+            <circle cx="250" cy="160" r="110" fill="none" stroke="rgba(181,104,90,0.05)" stroke-width="1"/>
+
+            <!-- Saffron flower - large -->
+            <g transform="translate(170, 40)" fill="none" stroke="#8c4a3c" stroke-width="1.5">
+                <!-- petals -->
+                <path d="M80 110 C 60 90, 50 65, 65 42 C 72 28, 88 28, 95 42 C 110 65, 100 90, 80 110" fill="rgba(181,104,90,0.1)"/>
+                <path d="M80 110 C 48 100, 32 78, 38 52 C 42 36, 56 30, 65 42 C 78 60, 72 90, 80 110" fill="rgba(181,104,90,0.1)"/>
+                <path d="M80 110 C 112 100, 128 78, 122 52 C 118 36, 104 30, 95 42 C 82 60, 88 90, 80 110" fill="rgba(181,104,90,0.1)"/>
+                <!-- Inner petals detail -->
+                <path d="M80 108 C 68 95, 62 78, 68 58" stroke-width="0.8" opacity="0.5"/>
+                <path d="M80 108 C 92 95, 98 78, 92 58" stroke-width="0.8" opacity="0.5"/>
+                <!-- Stamens -->
+                <line x1="80" y1="105" x2="70" y2="68" stroke="#c9a96e" stroke-width="1.2"/>
+                <line x1="80" y1="105" x2="80" y2="65" stroke="#c9a96e" stroke-width="1.2"/>
+                <line x1="80" y1="105" x2="90" y2="68" stroke="#c9a96e" stroke-width="1.2"/>
+                <circle cx="70" cy="66" r="2.5" fill="#c9a96e"/>
+                <circle cx="80" cy="63" r="2.5" fill="#c9a96e"/>
+                <circle cx="90" cy="66" r="2.5" fill="#c9a96e"/>
+                <!-- Stem -->
+                <path d="M80 110 Q 84 140, 76 168" stroke-width="1.5"/>
+                <!-- Tendril -->
+                <path d="M76 168 Q 100 175, 160 160" stroke-width="1.2"/>
+            </g>
+
+            <!-- Brand name -->
+            <text x="105" y="262" font-family="'Cormorant Garamond', Georgia, serif" font-size="72" font-weight="300" fill="#8c4a3c" letter-spacing="10">ZAFRAAN</text>
+
+            <!-- Tagline -->
+            <text x="175" y="294" font-family="'Jost', sans-serif" font-size="14" font-weight="300" fill="#a07060" letter-spacing="4">Fresh, Pure, Ready.</text>
+
+            <!-- Decorative lines -->
+            <line x1="80" y1="310" x2="420" y2="310" stroke="rgba(181,104,90,0.2)" stroke-width="0.5"/>
+            <line x1="80" y1="315" x2="420" y2="315" stroke="rgba(181,104,90,0.1)" stroke-width="0.5"/>
+        </svg>
+    </div>
+</section>
+
+<!-- PILLARS -->
+<section class="pillars">
+    <div class="pillar">
+        <div class="pillar-num">01</div>
+        <div class="pillar-title">100% Natural</div>
+        <div class="pillar-desc">No additives, preservatives, or artificial flavours</div>
+    </div>
+    <div class="pillar">
+        <div class="pillar-num">02</div>
+        <div class="pillar-title">Handcrafted</div>
+        <div class="pillar-desc">Prepared with meticulous care in small batches</div>
+    </div>
+    <div class="pillar">
+        <div class="pillar-num">03</div>
+        <div class="pillar-title">Fresh Daily</div>
+        <div class="pillar-desc">Delivered within 24 hours of preparation</div>
+    </div>
+    <div class="pillar">
+        <div class="pillar-num">04</div>
+        <div class="pillar-title">Premium Grade</div>
+        <div class="pillar-desc">Sourced from the finest trusted suppliers</div>
+    </div>
+</section>
+
+<!-- PRODUCTS -->
+<section class="products-section" id="products">
+    <div class="section-header">
+        <div>
+            <div class="section-label">Our Collection</div>
+            <h2 class="section-title">Premium Product Range</h2>
+        </div>
+    </div>
+
+    <div class="category-tabs" id="categoryTabs"></div>
+    <div class="products-grid" id="productsGrid"></div>
+</section>
+
+<!-- ABOUT -->
+<section class="about" id="about">
+    <div class="about-left">
+        <div class="eyebrow">Our Philosophy</div>
+        <h2>Crafted<br>With <em>Purpose</em></h2>
+        <p>ZAFRAAN was born from a simple belief: quality should never be compromised. Every product is carefully selected, prepared with meticulous attention, and delivered fresh to your kitchen.<br><br>From our family kitchen in Madambakkam to yours — no shortcuts, no additives, just pure, authentic ingredients that transform your cooking.</p>
+    </div>
+    <div class="about-right">
+        <div class="about-stat">
+            <div class="about-stat-num">24+</div>
+            <div class="about-stat-label">Products in Range</div>
+        </div>
+        <div class="about-stat">
+            <div class="about-stat-num">24h</div>
+            <div class="about-stat-label">Fresh Delivery Window</div>
+        </div>
+        <div class="about-stat">
+            <div class="about-stat-num">0%</div>
+            <div class="about-stat-label">Additives & Preservatives</div>
+        </div>
+        <div class="about-stat">
+            <div class="about-stat-num">4</div>
+            <div class="about-stat-label">Premium Collections</div>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer id="contact">
+    <div class="footer-top">
+        <div>
+            <div class="footer-brand">ZAFRAAN</div>
+            <div class="footer-brand-sub">Fresh · Pure · Ready</div>
+            <div class="footer-contact-item">044-28278118</div>
+            <div class="footer-contact-item">@zafraan.foods</div>
+            <div class="footer-contact-item">Madambakkam, Chennai</div>
+        </div>
+        <div>
+            <div class="footer-col-title">Collections</div>
+            <ul class="footer-links">
+                <li><a href="#">Fresh Prep Range</a></li>
+                <li><a href="#">Powder Range</a></li>
+                <li><a href="#">Sauce Range</a></li>
+                <li><a href="#">Makhana Range</a></li>
+                <li><a href="#">Combo Packs</a></li>
+            </ul>
+        </div>
+        <div>
+            <div class="footer-col-title">Company</div>
+            <ul class="footer-links">
+                <li><a href="#">Our Story</a></li>
+                <li><a href="#">Quality Promise</a></li>
+                <li><a href="#">Wholesale</a></li>
+                <li><a href="#">Contact</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <span>© 2024 ZAFRAAN Foods. All rights reserved.</span>
+        <span>Est. 2024 · Chennai · Handcrafted with care</span>
+    </div>
+</footer>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
+    <div class="modal-box">
+        <div class="modal-top" id="modalTop">
+            <button class="modal-close" onclick="closeModal()">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="modal-eyebrow" id="modalCat"></div>
+            <div class="modal-title" id="modalTitle"></div>
+            <div class="modal-sizes" id="modalSizes">
+                <!-- Sizes injected by JS -->
+            </div>
+
+            <div class="modal-qty-row">
+                <span class="modal-price-label">Quantity</span>
+                <div class="modal-qty-ctrl">
+                    <button onclick="updateModalQty(-1)">−</button>
+                    <span id="modalQty">1</span>
+                    <button onclick="updateModalQty(1)">+</button>
+                </div>
+            </div>
+
+            <div class="modal-desc" id="modalDesc"></div>
+
+            <div class="modal-price-row">
+                <span class="modal-price-label">Price</span>
+                <span class="modal-price-val" id="modalPrice">₹0</span>
+            </div>
+
+            <button class="modal-btn" onclick="addToCart()">Add to Shopping Bag</button>
+    
+        </div>
+    </div>
+</div>
+
+<script>
+const categories = ['All', 'Fresh Prep', 'Powder', 'Sauce', 'Makhana', 'Combo'];
+
+const bgColors = {
+    'Fresh Prep': ['#f0f7ed', '#dcebd5'],
+    'Powder':     ['#fdf0e8', '#f5d9c0'],
+    'Sauce':      ['#fdf4e8', '#f5e0bb'],
+    'Makhana':    ['#faf0f0', '#f0d5d0'],
+    'Combo':      ['#f0f0fa', '#d5d0f0'],
+};
+
+const iconColors = {
+    'Fresh Prep': '#5a8a50',
+    'Powder':     '#c06020',
+    'Sauce':      '#c09020',
+    'Makhana':    '#b05050',
+    'Combo':      '#6050b0',
+};
+
+const products = [
+    // Fresh Prep
+    { id:1,  name:'Peeled Garlic',         cat:'Fresh Prep', sizes:'100g / 250g / 500g / 1kg', price:'₹180',  storage:'Refrigerated', desc:'Fresh garlic cloves, peeled and ready to use. No effort, pure flavour.' },
+    { id:2,  name:'Peeled Ginger',         cat:'Fresh Prep', sizes:'100g / 250g / 500g',       price:'₹220',  storage:'Refrigerated', desc:'Fresh ginger root, peeled and ready to slice or grate instantly.' },
+    { id:3,  name:'Chopped Onion',         cat:'Fresh Prep', sizes:'250g / 500g',               price:'₹80',   storage:'Refrigerated', desc:'Freshly cut onions — no tears, no mess, just convenience.' },
+    { id:4,  name:'Ready-to-Cook Veg Pack',cat:'Fresh Prep', sizes:'250g / 500g',               price:'₹120',  storage:'Refrigerated', desc:'Mixed & cut vegetables, prepped and ready for the pan.' },
+    { id:5,  name:'Curry Leaves Pack',     cat:'Fresh Prep', sizes:'50g / 100g',                price:'₹40',   storage:'Fresh',        desc:'Farm-fresh curry leaves, aromatic and full of flavour.' },
+    { id:6,  name:'Coriander Leaves',      cat:'Fresh Prep', sizes:'50g / 100g',                price:'₹40',   storage:'Fresh',        desc:'Crisp, fragrant coriander. The perfect garnish for every dish.' },
+    { id:7,  name:'Mint Leaves Pack',      cat:'Fresh Prep', sizes:'50g / 100g',                price:'₹40',   storage:'Fresh',        desc:'Fresh mint leaves, ideal for chutneys, biryanis, and beverages.' },
+    // Powder
+    { id:8,  name:'Garlic Powder',         cat:'Powder',     sizes:'100g / 250g',               price:'₹249',  storage:'Dry',          desc:'Pure dehydrated garlic — intense, no-filler flavour for every recipe.' },
+    { id:9,  name:'Onion Powder',          cat:'Powder',     sizes:'100g / 250g',               price:'₹249',  storage:'Dry',          desc:'Dehydrated onion, finely ground. Perfect base for spice rubs and gravies.' },
+    { id:10, name:'Ginger Powder',         cat:'Powder',     sizes:'100g / 250g',               price:'₹249',  storage:'Dry',          desc:'100% pure ginger powder. No blends. Just warmth and bite.' },
+    { id:11, name:'Peri Peri Powder',      cat:'Powder',     sizes:'100g / 250g',               price:'₹299',  storage:'Dry',          desc:'Fiery peri peri seasoning blend — for snacks, grills, and bold cooking.' },
+    { id:12, name:'Chilli Flakes',         cat:'Powder',     sizes:'50g / 100g',                price:'₹149',  storage:'Dry',          desc:'Crushed red chilli. A staple for pizza, pasta, and everything in between.' },
+    { id:13, name:'Oregano Seasoning',     cat:'Powder',     sizes:'50g / 100g',                price:'₹149',  storage:'Dry',          desc:'Classic pizza herb. Aromatic, earthy, and freshly packed.' },
+    { id:14, name:'Italian Seasoning',     cat:'Powder',     sizes:'50g / 100g',                price:'₹149',  storage:'Dry',          desc:'A curated herb blend — rosemary, thyme, basil and more.' },
+    // Sauce
+    { id:15, name:'Classic Mayonnaise',    cat:'Sauce',      sizes:'100ml / 200ml / 500ml',     price:'₹120',  storage:'Refrigerated', desc:'Creamy, rich classic mayo. No artificial flavour. Made fresh.' },
+    { id:16, name:'Peri Peri Mayo',        cat:'Sauce',      sizes:'100ml / 200ml / 500ml',     price:'₹140',  storage:'Refrigerated', desc:'Classic mayo meets bold peri peri heat. Perfect for grills & wraps.' },
+    { id:17, name:'Garlic Mayo',           cat:'Sauce',      sizes:'100ml / 200ml / 500ml',     price:'₹140',  storage:'Refrigerated', desc:'Roasted garlic infused mayo — a crowd-pleasing dip and spread.' },
+    { id:18, name:'Mint Mayo',             cat:'Sauce',      sizes:'100ml / 200ml / 500ml',     price:'₹140',  storage:'Refrigerated', desc:'Cool, fresh mint mayo. A refreshing twist for snacks and sandwiches.' },
+    // Makhana
+    { id:19, name:'Plain Makhana',         cat:'Makhana',    sizes:'50g / 100g / 250g',         price:'₹80',   storage:'Dry',          desc:'Light, airy fox nuts. A clean, healthy snack with no seasoning.' },
+    { id:20, name:'Peri Peri Makhana',     cat:'Makhana',    sizes:'50g / 100g / 250g',         price:'₹99',   storage:'Dry',          desc:'Crispy makhana with a fiery peri peri kick. Impossible to stop eating.' },
+    { id:21, name:'Salt & Pepper Makhana', cat:'Makhana',    sizes:'50g / 100g / 250g',         price:'₹90',   storage:'Dry',          desc:'Simple, satisfying classic seasoning on airy roasted lotus seeds.' },
+    { id:22, name:'Mint Makhana',          cat:'Makhana',    sizes:'50g / 100g / 250g',         price:'₹99',   storage:'Dry',          desc:'Cool mint flavoured makhana — light and refreshing snacking.' },
+    // Combo
+    { id:23, name:'Pizza Combo Pack',      cat:'Combo',      sizes:'Set of 3',                  price:'₹349',  storage:'Dry',          desc:'Includes Chilli Flakes, Oregano & Peri Peri Seasoning. Everything your pizza needs.' },
+    { id:24, name:'Burger Combo Pack',     cat:'Combo',      sizes:'Set of 3',                  price:'₹399',  storage:'Refrigerated', desc:'Includes Peri Peri Mayo, Garlic Mayo & Onion Powder. The ultimate burger kit.' },
+];
+
+let activeCategory = 'All';
+
+function renderTabs() {
+    const tabsEl = document.getElementById('categoryTabs');
+    tabsEl.innerHTML = categories.map(c => `
+        <button class="cat-tab ${c === activeCategory ? 'active' : ''}" onclick="setCategory('${c}')">${c}</button>
+    `).join('');
+}
+
+function setCategory(cat) {
+    activeCategory = cat;
+    renderTabs();
+    renderProducts();
+}
+
+function productIcon(cat, color) {
+    const icons = {
+        'Fresh Prep': `<svg width="80" height="80" viewBox="0 0 80 80"><ellipse cx="40" cy="44" rx="20" ry="24" fill="${color}" opacity="0.2"/><ellipse cx="40" cy="44" rx="13" ry="18" fill="${color}" opacity="0.3"/><line x1="40" y1="20" x2="40" y2="10" stroke="${color}" stroke-width="2"/><path d="M40 10 Q 48 14 44 20" fill="${color}" opacity="0.4"/></svg>`,
+        'Powder':     `<svg width="80" height="80" viewBox="0 0 80 80"><rect x="26" y="30" width="28" height="36" rx="3" fill="${color}" opacity="0.2"/><rect x="30" y="26" width="20" height="6" rx="2" fill="${color}" opacity="0.3"/><circle cx="40" cy="48" r="6" fill="${color}" opacity="0.3"/></svg>`,
+        'Sauce':      `<svg width="80" height="80" viewBox="0 0 80 80"><rect x="28" y="28" width="24" height="34" rx="12" fill="${color}" opacity="0.2"/><rect x="32" y="20" width="16" height="10" rx="4" fill="${color}" opacity="0.3"/><path d="M36 62 Q 40 70 44 62" fill="${color}" opacity="0.2"/></svg>`,
+        'Makhana':    `<svg width="80" height="80" viewBox="0 0 80 80"><circle cx="40" cy="42" r="18" fill="${color}" opacity="0.2"/><circle cx="32" cy="36" r="8" fill="${color}" opacity="0.2"/><circle cx="50" cy="38" r="10" fill="${color}" opacity="0.2"/><circle cx="40" cy="52" r="7" fill="${color}" opacity="0.2"/></svg>`,
+        'Combo':      `<svg width="80" height="80" viewBox="0 0 80 80"><rect x="18" y="30" width="16" height="26" rx="3" fill="${color}" opacity="0.25"/><rect x="38" y="26" width="16" height="30" rx="3" fill="${color}" opacity="0.2"/><rect x="58" y="32" width="12" height="24" rx="3" fill="${color}" opacity="0.15"/></svg>`,
+    };
+    return icons[cat] || icons['Powder'];
+}
+
+
+const productImages = {
+  // Fresh Prep (Local Generated)
+  'Peeled Garlic': './zafraan-images/01-peeled-garlic.png',
+  'Peeled Ginger': './zafraan-images/02-peeled-ginger.png',
+  'Chopped Onion': './zafraan-images/03-chopped-onion.png',
+  'Ready-to-Cook Veg Pack': 'https://images.unsplash.com/photo-1540331547168-8b63109225b7?auto=format&fit=crop&w=800&q=80',
+  'Curry Leaves Pack': 'https://images.unsplash.com/photo-1615485245834-4bc63b15f0d3?auto=format&fit=crop&w=800&q=80',
+  'Coriander Leaves': 'https://images.unsplash.com/photo-1588877381644-3c9c3bbac36c?auto=format&fit=crop&w=800&q=80',
+  'Mint Leaves Pack': 'https://images.unsplash.com/photo-1603569283847-aa295f0d016a?auto=format&fit=crop&w=800&q=80',
+  
+  // Powder (Local & Unsplash)
+  'Garlic Powder': 'https://images.unsplash.com/photo-1532336414038-cf19250c5757?auto=format&fit=crop&w=800&q=80',
+  'Onion Powder': 'https://images.unsplash.com/photo-1514986888952-8cd320577b68?auto=format&fit=crop&w=800&q=80',
+  'Ginger Powder': 'https://images.unsplash.com/photo-1615485245434-6c3823467612?auto=format&fit=crop&w=800&q=80',
+  'Peri Peri Powder': './zafraan-images/11-peri-peri-powder.png',
+  'Chilli Flakes': 'https://images.unsplash.com/photo-1599599810694-b5d37304c044?auto=format&fit=crop&w=800&q=80',
+  'Oregano Seasoning': 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?auto=format&fit=crop&w=800&q=80',
+  'Italian Seasoning': 'https://images.unsplash.com/photo-1506368249639-73a05d6f6488?auto=format&fit=crop&w=800&q=80',
+  
+  // Sauce (Local & Unsplash)
+  'Classic Mayonnaise': './zafraan-images/15-mayonnaise.png',
+  'Peri Peri Mayo': 'https://images.unsplash.com/photo-1563379091339-03b21bc4a4f8?auto=format&fit=crop&w=800&q=80',
+  'Garlic Mayo': 'https://images.unsplash.com/photo-1571091718767-18b5b1457add?auto=format&fit=crop&w=800&q=80',
+  'Mint Mayo': 'https://images.unsplash.com/photo-1626128665085-47372a834197?auto=format&fit=crop&w=800&q=80',
+  
+  // Makhana (Local & Unsplash)
+  'Plain Makhana': './zafraan-images/19-plain-makhana.png',
+  'Peri Peri Makhana': 'https://images.unsplash.com/photo-1615484477778-ca3b77940c25?auto=format&fit=crop&w=800&q=80',
+  'Salt & Pepper Makhana': 'https://images.unsplash.com/photo-1615484476839-4d6438743202?auto=format&fit=crop&w=800&q=80',
+  'Mint Makhana': 'https://images.unsplash.com/photo-1599490659213-e2b9527bb087?auto=format&fit=crop&w=800&q=80',
+  
+  // Combo (Local & Unsplash)
+  'Pizza Combo Pack': './zafraan-images/23-pizza-combo.png',
+  'Burger Combo Pack': 'https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=800&q=80'
+};
+
+function renderProducts() {
+    const grid = document.getElementById('productsGrid');
+    const filtered = activeCategory === 'All' ? products : products.filter(p => p.cat === activeCategory);
+    const [bg1, bg2] = bgColors[filtered[0]?.cat] || ['#f5f0ec','#ede5dc'];
+
+    grid.innerHTML = filtered.map(p => {
+        const [b1, b2] = bgColors[p.cat];
+        const ic = iconColors[p.cat];
+        return `
+        <div class="product-card" onclick="openModal(${p.id})">
+            <div class="product-img-wrap" style="background: linear-gradient(135deg, ${b1} 0%, ${b2} 100%);">
+                <div class="product-badge">${p.cat}</div>
+                <img src="${productImages[p.name] || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=800&q=80'}" 
+    alt="${p.name}" 
+    style="width:100%;height:100%;object-fit:cover;">
+            </div>
+            <div class="product-body">
+                <div class="product-cat">${p.cat}</div>
+                <div class="product-name">${p.name}</div>
+                <div class="product-sizes">${p.sizes}</div>
+                <div class="product-footer">
+                    <span class="product-price">${p.price}</span>
+                    <div class="product-arrow">→</div>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function openModal(id) {
+    const p = products.find(x => x.id === id);
+    if (!p) return;
+    const [b1, b2] = bgColors[p.cat];
+    
+    currentProductId = id;
+    currentQty = 1;
+    
+    document.getElementById('modalTop').style.background = `linear-gradient(135deg, ${b1} 0%, ${b2} 100%)`;
+    document.getElementById('modalTop').innerHTML = `
+        <button class="modal-close" onclick="closeModal()">×</button>
+        <img src="${productImages[p.name] || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=800&q=80'}" 
+             alt="${p.name}" 
+             style="width:100%;height:100%;object-fit:cover;">
+    `;
+    
+    document.getElementById('modalCat').textContent = p.cat;
+    document.getElementById('modalTitle').textContent = p.name;
+    document.getElementById('modalDesc').textContent = p.desc + (p.storage !== 'Dry' ? ` Storage: ${p.storage}.` : '');
+    document.getElementById('modalPrice').textContent = p.price;
+    document.getElementById('modalQty').textContent = currentQty;
+    
+    const sizes = p.sizes.split(' / ');
+    document.getElementById('modalSizes').innerHTML = sizes.map((s, i) => `
+        <label class="size-chip-label">
+            <input type="radio" name="size" value="${s}" ${i===0?'checked':''} style="display:none">
+            <span class="size-chip">${s}</span>
+        </label>
+    `).join('');
+    
+    // Add size selection style
+    const style = document.createElement('style');
+    style.innerHTML = `
+        .size-chip-label input:checked + .size-chip {
+            background: var(--rose);
+            color: #fff;
+            border-color: var(--rose);
+        }
+        .size-chip { cursor: pointer; transition: all 0.2s; display: inline-block; }
+    `;
+    document.head.appendChild(style);
+
+    document.getElementById('modal').classList.add('open');
+}
+
+function updateModalQty(delta) {
+    currentQty = Math.max(1, currentQty + delta);
+    document.getElementById('modalQty').textContent = currentQty;
+}
+
+function closeModal() {
+    document.getElementById('modal').classList.remove('open');
+}
+
+let currentProductId = null;
+let currentQty = 1;
+
+// CART LOGIC
+let cart = JSON.parse(localStorage.getItem('zafraan_cart')) || [];
+
+function toggleCart() {
+    document.getElementById('cartDrawer').classList.toggle('open');
+    document.getElementById('cartOverlay').classList.toggle('open');
+    renderCart();
+}
+
+function addToCart() {
+    const p = products.find(x => x.id === currentProductId);
+    const size = document.querySelector('input[name="size"]:checked').value;
+    
+    const existing = cart.find(item => item.id === p.id && item.size === size);
+    if (existing) {
+        existing.qty += currentQty;
+    } else {
+        cart.push({
+            id: p.id,
+            name: p.name,
+            price: parseInt(p.price.replace('₹','')),
+            qty: currentQty,
+            size: size,
+            img: productImages[p.name]
+        });
+    }
+    
+    saveCart();
+    closeModal();
+    toggleCart();
+}
+
+function saveCart() {
+    localStorage.setItem('zafraan_cart', JSON.stringify(cart));
+    updateBadge();
+}
+
+function updateBadge() {
+    const count = cart.reduce((acc, item) => acc + item.qty, 0);
+    const badge = document.getElementById('cartBadge');
+    badge.innerText = count;
+    badge.style.display = count > 0 ? 'flex' : 'none';
+}
+
+function updateCartQty(index, delta) {
+    cart[index].qty += delta;
+    if (cart[index].qty <= 0) {
+        cart.splice(index, 1);
+    }
+    saveCart();
+    renderCart();
+}
+
+function renderCart() {
+    const container = document.getElementById('cartItems');
+    const totalEl = document.getElementById('cartTotal');
+    
+    if (cart.length === 0) {
+        container.innerHTML = '<div style="text-align:center;margin-top:40px;color:var(--text-light)">Your bag is empty</div>';
+        totalEl.innerText = '₹0';
+        return;
+    }
+    
+    let total = 0;
+    container.innerHTML = cart.map((item, index) => {
+        const itemTotal = item.price * item.qty;
+        total += itemTotal;
+        return `
+            <div class="cart-item">
+                <img src="${item.img}" class="cart-item-img">
+                <div class="cart-item-info">
+                    <h4>${item.name}</h4>
+                    <div class="cart-item-size">${item.size}</div>
+                    <div class="cart-item-qty">
+                        <button class="qty-btn" onclick="updateCartQty(${index}, -1)">-</button>
+                        <span>${item.qty}</span>
+                        <button class="qty-btn" onclick="updateCartQty(${index}, 1)">+</button>
+                    </div>
+                </div>
+                <div class="cart-item-price">₹${itemTotal}</div>
+            </div>
+        `;
+    }).join('');
+    
+    totalEl.innerText = '₹' + total;
+}
+
+const whatsappNumber = "917904788173";
+
+function checkoutWhatsApp() {
+    if (cart.length === 0) return alert("Your bag is empty");
+    
+    const message = cart.map((item, i) => 
+        `${i + 1}. ${item.name} (${item.size}) x ${item.qty} - ₹${item.price * item.qty}`
+    ).join('%0A');
+    
+    const total = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
+    const finalMsg = `Hi Zafraan, I would like to place an order:%0A%0A${message}%0A%0ATotal: ₹${total}`;
+    
+    window.open(`https://wa.me/${whatsappNumber}?text=${finalMsg}`, '_blank');
+}
+
+// Initial calls
+updateBadge();
+renderTabs();
+renderProducts();
+</script>
+
+</body>
+</html>
