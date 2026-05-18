@@ -27,6 +27,7 @@
             background: var(--cream);
             color: var(--text-dark);
             font-weight: 300;
+            overflow-x: hidden;
         }
 
         /* ---- NAV ---- */
@@ -130,18 +131,20 @@
         .cart-drawer {
             position: fixed;
             top: 0;
-            right: -420px;
-            width: 420px;
+            right: 0;
+            width: 100vw;
+            max-width: 420px;
             height: 100vh;
             background: #fff;
             z-index: 1000;
             box-shadow: -20px 0 50px rgba(42,30,26,0.1);
-            transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateX(100%);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             flex-direction: column;
         }
 
-        .cart-drawer.open { right: 0; }
+        .cart-drawer.open { transform: translateX(0); }
 
         .cart-overlay {
             position: fixed;
@@ -162,6 +165,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 16px;
         }
 
         .cart-header h2 {
@@ -170,6 +174,7 @@
             font-weight: 500;
             letter-spacing: 2px;
             text-transform: uppercase;
+            min-width: 0;
         }
 
         .cart-close {
@@ -191,9 +196,13 @@
 
         .cart-item {
             display: grid;
-            grid-template-columns: 80px 1fr 60px;
+            grid-template-columns: 80px minmax(0, 1fr) auto;
             gap: 20px;
             align-items: center;
+        }
+
+        .cart-item-info {
+            min-width: 0;
         }
 
         .cart-item-img {
@@ -208,6 +217,7 @@
             font-family: 'Cormorant Garamond', serif;
             font-size: 18px;
             margin-bottom: 4px;
+            overflow-wrap: anywhere;
         }
 
         .cart-item-size {
@@ -242,6 +252,7 @@
             font-size: 18px;
             color: var(--rose);
             text-align: right;
+            white-space: nowrap;
         }
 
         .cart-footer {
@@ -761,16 +772,24 @@
             backdrop-filter: blur(4px);
             align-items: center;
             justify-content: center;
+            padding: 16px;
         }
 
         .modal-overlay.open { display: flex; }
 
         .modal-box {
             background: var(--cream);
-            width: 520px;
+            width: min(520px, calc(100vw - 32px));
+            max-width: calc(100vw - 32px);
             max-height: 90vh;
             overflow-y: auto;
             animation: slideUp 0.3s ease;
+            position: relative;
+        }
+
+        .modal-header {
+            padding: 28px 44px 0;
+            position: relative;
         }
 
         @keyframes slideUp {
@@ -804,6 +823,114 @@
 
         .modal-body {
             padding: 36px 44px 44px;
+        }
+
+        .modal-footer {
+            padding: 0 44px 44px;
+        }
+
+        #upiModalOverlay {
+            z-index: 1300;
+        }
+
+        #upiQrImg {
+            width: min(300px, 100%);
+            height: auto;
+            display: block;
+        }
+
+        .checkout-form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            text-align: left;
+        }
+
+        .checkout-field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .checkout-field label {
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-light);
+        }
+
+        .checkout-field input,
+        .checkout-field textarea {
+            width: 100%;
+            border: 1px solid var(--border);
+            background: #fff;
+            color: var(--text-dark);
+            font-family: 'Jost', sans-serif;
+            font-size: 14px;
+            padding: 13px 14px;
+            outline: none;
+        }
+
+        .checkout-field textarea {
+            min-height: 86px;
+            resize: vertical;
+        }
+
+        .checkout-field input:focus,
+        .checkout-field textarea:focus {
+            border-color: var(--rose);
+        }
+
+        .checkout-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .checkout-mini-btn {
+            border: 1px solid var(--border);
+            background: #fff;
+            color: var(--rose-deep);
+            cursor: pointer;
+            font-family: 'Jost', sans-serif;
+            font-size: 10px;
+            letter-spacing: 1.4px;
+            padding: 12px 10px;
+            text-transform: uppercase;
+        }
+
+        .checkout-mini-btn:hover {
+            border-color: var(--rose);
+        }
+
+        .checkout-note,
+        .checkout-error {
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .checkout-note {
+            color: var(--text-light);
+        }
+
+        .checkout-error {
+            color: var(--rose-deep);
+            display: none;
+        }
+
+        .checkout-summary {
+            background: var(--warm-white);
+            color: var(--text-mid);
+            font-size: 12px;
+            line-height: 1.6;
+            padding: 14px;
+            text-align: left;
+            word-break: break-word;
+        }
+
+        .upi-qr-panel {
+            display: none;
+            text-align: center;
         }
 
         .modal-eyebrow {
@@ -927,6 +1054,84 @@
             .pillars { grid-template-columns: repeat(2, 1fr); }
             .products-section { padding: 60px 24px; }
         }
+
+        @media (max-width: 520px) {
+            .cart-header,
+            .cart-items,
+            .cart-footer {
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+
+            .cart-header h2 {
+                font-size: 18px;
+                letter-spacing: 1px;
+                line-height: 1.1;
+            }
+
+            .cart-item {
+                grid-template-columns: 64px minmax(0, 1fr) auto;
+                gap: 12px;
+            }
+
+            .cart-item-img {
+                width: 64px;
+                height: 64px;
+            }
+
+            .cart-item-info h4 {
+                font-size: 16px;
+                line-height: 1.15;
+            }
+
+            .cart-item-price {
+                font-size: 16px;
+            }
+
+            .cart-item-qty {
+                gap: 8px;
+            }
+
+            .qty-btn {
+                width: 28px;
+                height: 28px;
+            }
+
+            .cart-total-val {
+                font-size: 24px;
+            }
+
+            .cart-footer .btn-main {
+                padding-left: 16px;
+                padding-right: 16px;
+                letter-spacing: 1.8px;
+            }
+
+            .modal-body,
+            .modal-header,
+            .modal-footer {
+                padding-left: 24px;
+                padding-right: 24px;
+            }
+
+            .modal-body {
+                padding-top: 28px;
+                padding-bottom: 28px;
+            }
+
+            .modal-footer {
+                padding-bottom: 28px;
+            }
+
+            .modal-title {
+                font-size: 30px;
+                line-height: 1.05;
+            }
+
+            .checkout-actions {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
@@ -985,7 +1190,9 @@
             <span class="cart-total-label">Subtotal</span>
             <span class="cart-total-val" id="cartTotal">₹0</span>
         </div>
-        <button class="btn-main" style="width:100%" onclick="checkoutWhatsApp()">Checkout via WhatsApp</button>
+        <button class="btn-main" style="width:100%" onclick="checkoutUPI()">
+            Pay via UPI QR
+        </button>
     </div>
 </div>
 
@@ -1198,6 +1405,44 @@
 
             <button class="modal-btn" onclick="addToCart()">Add to Shopping Bag</button>
     
+        </div>
+    </div>
+</div>
+
+<!-- UPI PAYMENT MODAL -->
+<div class="modal-overlay" id="upiModalOverlay" onclick="closeUpiModal()" style="display:none;">
+    <div class="modal-box" style="max-width:430px;" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <div class="modal-title">Checkout</div>
+            <button class="modal-close" onclick="closeUpiModal()">×</button>
+        </div>
+        <div class="modal-body" id="upiModalBody">
+            <div class="checkout-form">
+                <div class="checkout-field">
+                    <label for="checkoutPhone">Mobile Number</label>
+                    <input id="checkoutPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="10 digit mobile number">
+                </div>
+                <div class="checkout-field">
+                    <label for="checkoutAddress">Home Address</label>
+                    <textarea id="checkoutAddress" autocomplete="street-address" placeholder="Type your full delivery address"></textarea>
+                </div>
+                <div class="checkout-actions">
+                    <button class="checkout-mini-btn" type="button" onclick="searchAddressOnMaps()">Search on Google Maps</button>
+                    <button class="checkout-mini-btn" type="button" onclick="useCurrentLocation()">Use Current Location</button>
+                </div>
+                <div class="checkout-note" id="checkoutLocationNote">Add an address or share current location before generating the payment QR.</div>
+                <div class="checkout-error" id="checkoutError"></div>
+                <button class="modal-btn" type="button" onclick="generateUpiQr()">Generate UPI QR</button>
+            </div>
+            <div class="upi-qr-panel" id="upiQrPanel">
+                <p>Scan the QR code to complete payment</p>
+                <img id="upiQrImg" src="" alt="UPI QR Code" style="max-width:100%;margin:0 auto;"/>
+                <div class="checkout-summary" id="checkoutSummary"></div>
+            </div>
+        </div>
+        <div class="modal-footer" style="text-align:center;">
+            <button class="modal-btn" id="sendOrderBtn" onclick="sendOrderOnWhatsApp()" style="display:none;margin-bottom:12px;">Send Order Details</button>
+            <button class="modal-btn" onclick="closeUpiModal()">Close</button>
         </div>
     </div>
 </div>
@@ -1490,6 +1735,11 @@ function renderCart() {
 }
 
 const whatsappNumber = "917904788173";
+let checkoutDetails = {
+    phone: '',
+    address: '',
+    mapLink: ''
+};
 
 function checkoutWhatsApp() {
     if (cart.length === 0) return alert("Your bag is empty");
@@ -1502,6 +1752,137 @@ function checkoutWhatsApp() {
     const finalMsg = `Hi Zafraan, I would like to place an order:%0A%0A${message}%0A%0ATotal: ₹${total}`;
     
     window.open(`https://wa.me/${whatsappNumber}?text=${finalMsg}`, '_blank');
+}
+
+function getCartOrderLines(lineBreak = '\n') {
+  return cart.map((item, i) =>
+    `${i + 1}. ${item.name} (${item.size}) x ${item.qty} - â‚¹${item.price * item.qty}`
+  ).join(lineBreak);
+}
+
+function getCheckoutTotal() {
+  return cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+}
+
+function setCheckoutError(message) {
+  const errorEl = document.getElementById('checkoutError');
+  errorEl.textContent = message;
+  errorEl.style.display = message ? 'block' : 'none';
+}
+
+function searchAddressOnMaps() {
+  const address = document.getElementById('checkoutAddress').value.trim();
+  if (!address) {
+    setCheckoutError('Please type an address before searching on Google Maps.');
+    return;
+  }
+
+  setCheckoutError('');
+  window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`, '_blank');
+}
+
+function useCurrentLocation() {
+  const noteEl = document.getElementById('checkoutLocationNote');
+  setCheckoutError('');
+
+  if (!navigator.geolocation) {
+    setCheckoutError('Location sharing is not supported in this browser.');
+    return;
+  }
+
+  noteEl.textContent = 'Requesting your current location...';
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const lat = position.coords.latitude.toFixed(6);
+      const lng = position.coords.longitude.toFixed(6);
+      checkoutDetails.mapLink = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+      noteEl.innerHTML = `Location added: <a href="${checkoutDetails.mapLink}" target="_blank" rel="noopener">Open in Google Maps</a>`;
+    },
+    () => {
+      noteEl.textContent = 'Add an address or share current location before generating the payment QR.';
+      setCheckoutError('Could not access location. Please allow location permission or type the full address.');
+    },
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+  );
+}
+
+function validateCheckoutDetails() {
+  const phone = document.getElementById('checkoutPhone').value.trim();
+  const address = document.getElementById('checkoutAddress').value.trim();
+  const phoneDigits = phone.replace(/\D/g, '');
+
+  if (phoneDigits.length < 10) {
+    setCheckoutError('Please enter a valid mobile number.');
+    return null;
+  }
+
+  if (!address && !checkoutDetails.mapLink) {
+    setCheckoutError('Please enter your home address or use current location.');
+    return null;
+  }
+
+  checkoutDetails.phone = phone;
+  checkoutDetails.address = address;
+  setCheckoutError('');
+  return checkoutDetails;
+}
+
+// UPI checkout function
+function checkoutUPI() {
+  if (cart.length === 0) return alert("Your bag is empty");
+  checkoutDetails.mapLink = '';
+  document.getElementById('upiQrPanel').style.display = 'none';
+  document.getElementById('sendOrderBtn').style.display = 'none';
+  document.getElementById('upiQrImg').src = '';
+  document.getElementById('checkoutSummary').innerHTML = '';
+  document.getElementById('checkoutLocationNote').textContent = 'Add an address or share current location before generating the payment QR.';
+  setCheckoutError('');
+  document.getElementById('upiModalOverlay').style.display = 'flex';
+}
+
+function generateUpiQr() {
+  const details = validateCheckoutDetails();
+  if (!details) return;
+
+  const total = getCheckoutTotal();
+  const upiId = "YOUR_UPI_ID_HERE"; // <-- replace with your actual UPI ID
+  const transactionNote = `Zafraan Order - ${details.phone}`;
+  const upiPayload = `upi://pay?pa=${encodeURIComponent(upiId)}&tn=${encodeURIComponent(transactionNote)}&am=${total}`;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(upiPayload)}`;
+
+  document.getElementById('upiQrImg').src = qrUrl;
+  document.getElementById('checkoutSummary').innerHTML = `
+    <strong>Order total:</strong> â‚¹${total}<br>
+    <strong>Mobile:</strong> ${details.phone}<br>
+    <strong>Address:</strong> ${details.address || 'Shared current location'}<br>
+    ${details.mapLink ? `<strong>Map:</strong> <a href="${details.mapLink}" target="_blank" rel="noopener">Open location</a><br>` : ''}
+    <span>Please tap "Send Order Details" after payment so Zafraan receives your delivery details.</span>
+  `;
+  document.getElementById('upiQrPanel').style.display = 'block';
+  document.getElementById('sendOrderBtn').style.display = 'block';
+}
+
+function sendOrderOnWhatsApp() {
+  const details = validateCheckoutDetails();
+  if (!details) return;
+
+  const total = getCheckoutTotal();
+  const message = [
+    'Hi Zafraan, I have placed an order:',
+    '',
+    getCartOrderLines('\n'),
+    '',
+    `Total: â‚¹${total}`,
+    `Mobile: ${details.phone}`,
+    `Address: ${details.address || 'Shared current location'}`,
+    details.mapLink ? `Google Maps: ${details.mapLink}` : ''
+  ].filter(Boolean).join('\n');
+
+  window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank');
+}
+
+function closeUpiModal() {
+  document.getElementById('upiModalOverlay').style.display = 'none';
 }
 
 // Initial calls
