@@ -1735,10 +1735,12 @@ function renderCart() {
 }
 
 const whatsappNumber = "917904788173";
+const googleMapsApiKey = "YOUR_GOOGLE_MAPS_API_KEY_HERE"; // Enable Geocoding API and replace this to auto-fill street addresses.
 let checkoutDetails = {
     phone: '',
     address: '',
-    mapLink: ''
+    mapLink: '',
+    coordinates: ''
 };
 
 function checkoutWhatsApp() {
@@ -1781,8 +1783,22 @@ function searchAddressOnMaps() {
   window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`, '_blank');
 }
 
+async function getAddressFromCoordinates(lat, lng) {
+  if (!googleMapsApiKey || googleMapsApiKey === "YOUR_GOOGLE_MAPS_API_KEY_HERE") {
+    return '';
+  }
+
+  const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${encodeURIComponent(googleMapsApiKey)}`;
+  const response = await fetch(geocodeUrl);
+  if (!response.ok) return '';
+
+  const data = await response.json();
+  return data.status === 'OK' && data.results.length ? data.results[0].formatted_address : '';
+}
+
 function useCurrentLocation() {
   const noteEl = document.getElementById('checkoutLocationNote');
+  const addressEl = document.getElementById('checkoutAddress');
   setCheckoutError('');
 
   if (!navigator.geolocation) {
@@ -1792,11 +1808,31 @@ function useCurrentLocation() {
 
   noteEl.textContent = 'Requesting your current location...';
   navigator.geolocation.getCurrentPosition(
-    (position) => {
+    async (position) => {
       const lat = position.coords.latitude.toFixed(6);
       const lng = position.coords.longitude.toFixed(6);
+      const coordinates = `${lat}, ${lng}`;
       checkoutDetails.mapLink = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
-      noteEl.innerHTML = `Location added: <a href="${checkoutDetails.mapLink}" target="_blank" rel="noopener">Open in Google Maps</a>`;
+      checkoutDetails.coordinates = coordinates;
+
+      noteEl.textContent = 'Identifying address from your location...';
+
+      try {
+        const detectedAddress = await getAddressFromCoordinates(lat, lng);
+        if (detectedAddress) {
+          addressEl.value = detectedAddress;
+          checkoutDetails.address = detectedAddress;
+          noteEl.innerHTML = `Address detected. <a href="${checkoutDetails.mapLink}" target="_blank" rel="noopener">Open in Google Maps</a>`;
+        } else {
+          addressEl.value = `Current location: ${coordinates}`;
+          checkoutDetails.address = addressEl.value;
+          noteEl.innerHTML = `Location added. Add flat/house details if needed. <a href="${checkoutDetails.mapLink}" target="_blank" rel="noopener">Open in Google Maps</a>`;
+        }
+      } catch (error) {
+        addressEl.value = `Current location: ${coordinates}`;
+        checkoutDetails.address = addressEl.value;
+        noteEl.innerHTML = `Location added. Add flat/house details if needed. <a href="${checkoutDetails.mapLink}" target="_blank" rel="noopener">Open in Google Maps</a>`;
+      }
     },
     () => {
       noteEl.textContent = 'Add an address or share current location before generating the payment QR.';
@@ -1831,6 +1867,7 @@ function validateCheckoutDetails() {
 function checkoutUPI() {
   if (cart.length === 0) return alert("Your bag is empty");
   checkoutDetails.mapLink = '';
+  checkoutDetails.coordinates = '';
   document.getElementById('upiQrPanel').style.display = 'none';
   document.getElementById('sendOrderBtn').style.display = 'none';
   document.getElementById('upiQrImg').src = '';
