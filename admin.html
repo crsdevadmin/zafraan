@@ -212,30 +212,20 @@
     <script src="./firebase-config.js"></script>
     <script type="module">
         const baseProducts = [
-            { id:1, name:'Peeled Garlic', cat:'Fresh Prep', sizes:'100g / 250g / 500g / 1kg', price:180 },
-            { id:2, name:'Peeled Ginger', cat:'Fresh Prep', sizes:'100g / 250g / 500g', price:220 },
-            { id:3, name:'Chopped Onion', cat:'Fresh Prep', sizes:'250g / 500g', price:80 },
-            { id:4, name:'Ready-to-Cook Veg Pack', cat:'Fresh Prep', sizes:'250g / 500g', price:120 },
-            { id:5, name:'Curry Leaves Pack', cat:'Fresh Prep', sizes:'50g / 100g', price:40 },
-            { id:6, name:'Coriander Leaves', cat:'Fresh Prep', sizes:'50g / 100g', price:40 },
-            { id:7, name:'Mint Leaves Pack', cat:'Fresh Prep', sizes:'50g / 100g', price:40 },
-            { id:8, name:'Garlic Powder', cat:'Powder', sizes:'100g / 250g', price:249 },
-            { id:9, name:'Onion Powder', cat:'Powder', sizes:'100g / 250g', price:249 },
-            { id:10, name:'Ginger Powder', cat:'Powder', sizes:'100g / 250g', price:249 },
-            { id:11, name:'Peri Peri Powder', cat:'Powder', sizes:'100g / 250g', price:299 },
-            { id:12, name:'Chilli Flakes', cat:'Powder', sizes:'50g / 100g', price:149 },
-            { id:13, name:'Oregano Seasoning', cat:'Powder', sizes:'50g / 100g', price:149 },
-            { id:14, name:'Italian Seasoning', cat:'Powder', sizes:'50g / 100g', price:149 },
-            { id:15, name:'Classic Mayonnaise', cat:'Sauce', sizes:'100ml / 200ml / 500ml', price:120 },
-            { id:16, name:'Peri Peri Mayo', cat:'Sauce', sizes:'100ml / 200ml / 500ml', price:140 },
-            { id:17, name:'Garlic Mayo', cat:'Sauce', sizes:'100ml / 200ml / 500ml', price:140 },
-            { id:18, name:'Mint Mayo', cat:'Sauce', sizes:'100ml / 200ml / 500ml', price:140 },
-            { id:19, name:'Plain Makhana', cat:'Makhana', sizes:'50g / 100g / 250g', price:80 },
-            { id:20, name:'Peri Peri Makhana', cat:'Makhana', sizes:'50g / 100g / 250g', price:99 },
-            { id:21, name:'Salt & Pepper Makhana', cat:'Makhana', sizes:'50g / 100g / 250g', price:90 },
-            { id:22, name:'Mint Makhana', cat:'Makhana', sizes:'50g / 100g / 250g', price:99 },
-            { id:23, name:'Pizza Combo Pack', cat:'Combo', sizes:'Set of 3', price:349 },
-            { id:24, name:'Burger Combo Pack', cat:'Combo', sizes:'Set of 3', price:399 }
+            { id:1, name:'Peeled Garlic', cat:'Fresh Prep', sizes:'100g / 250g / 500g / 1kg', price:0 },
+            { id:2, name:'Peeled Small Onion', cat:'Fresh Prep', sizes:'250g / 500g / 1kg', price:0 },
+            { id:3, name:'Peeled Ginger', cat:'Fresh Prep', sizes:'100g / 250g / 500g', price:0 },
+            { id:4, name:'Cut Carrot', cat:'Cut Vegetables', sizes:'250g / 500g / 1kg', price:0 },
+            { id:5, name:'Cut Ladies Finger', cat:'Cut Vegetables', sizes:'250g / 500g / 1kg', price:0 },
+            { id:6, name:'Cut Pumpkin', cat:'Cut Vegetables', sizes:'250g / 500g / 1kg', price:0 },
+            { id:7, name:'Cut Drumstick', cat:'Cut Vegetables', sizes:'250g / 500g / 1kg', price:0 },
+            { id:8, name:'Cut Beans', cat:'Cut Vegetables', sizes:'250g / 500g / 1kg', price:0 },
+            { id:9, name:'Cut Beetroot', cat:'Cut Vegetables', sizes:'250g / 500g / 1kg', price:0 },
+            { id:10, name:'Cut Bitter Gourd', cat:'Cut Vegetables', sizes:'250g / 500g / 1kg', price:0 },
+            { id:11, name:'Beans Poriyal Pack', cat:'Poriyal Packs', sizes:'Pack', price:0 },
+            { id:12, name:'Carrot Poriyal Pack', cat:'Poriyal Packs', sizes:'Pack', price:0 },
+            { id:13, name:'Beans Carrot Combined Pack', cat:'Poriyal Packs', sizes:'Pack', price:0 },
+            { id:14, name:'Sambar Veggies Pack', cat:'Sambar Pack', sizes:'Pack', price:0 }
         ];
 
         const config = window.ZAFRAAN_FIREBASE_CONFIG;
@@ -284,7 +274,7 @@
                         </label>
                         <label>
                             Price
-                            <input type="number" class="price-input" min="1" value="${price}">
+                            <input type="number" class="price-input" min="0" value="${price}">
                         </label>
                         <label>
                             Quantity

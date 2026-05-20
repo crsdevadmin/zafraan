@@ -1351,11 +1351,10 @@
         <div>
             <div class="footer-col-title">Collections</div>
             <ul class="footer-links">
-                <li><a href="#">Fresh Prep Range</a></li>
-                <li><a href="#">Powder Range</a></li>
-                <li><a href="#">Sauce Range</a></li>
-                <li><a href="#">Makhana Range</a></li>
-                <li><a href="#">Combo Packs</a></li>
+                <li><a href="#products">Fresh Prep</a></li>
+                <li><a href="#products">Cut Vegetables</a></li>
+                <li><a href="#products">Poriyal Packs</a></li>
+                <li><a href="#products">Sambar Pack</a></li>
             </ul>
         </div>
         <div>
@@ -1449,54 +1448,37 @@
 
 <script src="./firebase-config.js"></script>
 <script>
-const categories = ['All', 'Fresh Prep', 'Powder', 'Sauce', 'Makhana', 'Combo'];
+const categories = ['All', 'Fresh Prep', 'Cut Vegetables', 'Poriyal Packs', 'Sambar Pack'];
 
 const bgColors = {
     'Fresh Prep': ['#f0f7ed', '#dcebd5'],
-    'Powder':     ['#fdf0e8', '#f5d9c0'],
-    'Sauce':      ['#fdf4e8', '#f5e0bb'],
-    'Makhana':    ['#faf0f0', '#f0d5d0'],
-    'Combo':      ['#f0f0fa', '#d5d0f0'],
+    'Cut Vegetables': ['#fdf0e8', '#f5d9c0'],
+    'Poriyal Packs': ['#fdf4e8', '#f5e0bb'],
+    'Sambar Pack': ['#faf0f0', '#f0d5d0'],
 };
 
 const iconColors = {
     'Fresh Prep': '#5a8a50',
-    'Powder':     '#c06020',
-    'Sauce':      '#c09020',
-    'Makhana':    '#b05050',
-    'Combo':      '#6050b0',
+    'Cut Vegetables': '#c06020',
+    'Poriyal Packs': '#c09020',
+    'Sambar Pack': '#b05050',
 };
 
 const products = [
-    // Fresh Prep
-    { id:1,  name:'Peeled Garlic',         cat:'Fresh Prep', sizes:'100g / 250g / 500g / 1kg', price:'₹180',  storage:'Refrigerated', desc:'Fresh garlic cloves, peeled and ready to use. No effort, pure flavour.' },
-    { id:2,  name:'Peeled Ginger',         cat:'Fresh Prep', sizes:'100g / 250g / 500g',       price:'₹220',  storage:'Refrigerated', desc:'Fresh ginger root, peeled and ready to slice or grate instantly.' },
-    { id:3,  name:'Chopped Onion',         cat:'Fresh Prep', sizes:'250g / 500g',               price:'₹80',   storage:'Refrigerated', desc:'Freshly cut onions — no tears, no mess, just convenience.' },
-    { id:4,  name:'Ready-to-Cook Veg Pack',cat:'Fresh Prep', sizes:'250g / 500g',               price:'₹120',  storage:'Refrigerated', desc:'Mixed & cut vegetables, prepped and ready for the pan.' },
-    { id:5,  name:'Curry Leaves Pack',     cat:'Fresh Prep', sizes:'50g / 100g',                price:'₹40',   storage:'Fresh',        desc:'Farm-fresh curry leaves, aromatic and full of flavour.' },
-    { id:6,  name:'Coriander Leaves',      cat:'Fresh Prep', sizes:'50g / 100g',                price:'₹40',   storage:'Fresh',        desc:'Crisp, fragrant coriander. The perfect garnish for every dish.' },
-    { id:7,  name:'Mint Leaves Pack',      cat:'Fresh Prep', sizes:'50g / 100g',                price:'₹40',   storage:'Fresh',        desc:'Fresh mint leaves, ideal for chutneys, biryanis, and beverages.' },
-    // Powder
-    { id:8,  name:'Garlic Powder',         cat:'Powder',     sizes:'100g / 250g',               price:'₹249',  storage:'Dry',          desc:'Pure dehydrated garlic — intense, no-filler flavour for every recipe.' },
-    { id:9,  name:'Onion Powder',          cat:'Powder',     sizes:'100g / 250g',               price:'₹249',  storage:'Dry',          desc:'Dehydrated onion, finely ground. Perfect base for spice rubs and gravies.' },
-    { id:10, name:'Ginger Powder',         cat:'Powder',     sizes:'100g / 250g',               price:'₹249',  storage:'Dry',          desc:'100% pure ginger powder. No blends. Just warmth and bite.' },
-    { id:11, name:'Peri Peri Powder',      cat:'Powder',     sizes:'100g / 250g',               price:'₹299',  storage:'Dry',          desc:'Fiery peri peri seasoning blend — for snacks, grills, and bold cooking.' },
-    { id:12, name:'Chilli Flakes',         cat:'Powder',     sizes:'50g / 100g',                price:'₹149',  storage:'Dry',          desc:'Crushed red chilli. A staple for pizza, pasta, and everything in between.' },
-    { id:13, name:'Oregano Seasoning',     cat:'Powder',     sizes:'50g / 100g',                price:'₹149',  storage:'Dry',          desc:'Classic pizza herb. Aromatic, earthy, and freshly packed.' },
-    { id:14, name:'Italian Seasoning',     cat:'Powder',     sizes:'50g / 100g',                price:'₹149',  storage:'Dry',          desc:'A curated herb blend — rosemary, thyme, basil and more.' },
-    // Sauce
-    { id:15, name:'Classic Mayonnaise',    cat:'Sauce',      sizes:'100ml / 200ml / 500ml',     price:'₹120',  storage:'Refrigerated', desc:'Creamy, rich classic mayo. No artificial flavour. Made fresh.' },
-    { id:16, name:'Peri Peri Mayo',        cat:'Sauce',      sizes:'100ml / 200ml / 500ml',     price:'₹140',  storage:'Refrigerated', desc:'Classic mayo meets bold peri peri heat. Perfect for grills & wraps.' },
-    { id:17, name:'Garlic Mayo',           cat:'Sauce',      sizes:'100ml / 200ml / 500ml',     price:'₹140',  storage:'Refrigerated', desc:'Roasted garlic infused mayo — a crowd-pleasing dip and spread.' },
-    { id:18, name:'Mint Mayo',             cat:'Sauce',      sizes:'100ml / 200ml / 500ml',     price:'₹140',  storage:'Refrigerated', desc:'Cool, fresh mint mayo. A refreshing twist for snacks and sandwiches.' },
-    // Makhana
-    { id:19, name:'Plain Makhana',         cat:'Makhana',    sizes:'50g / 100g / 250g',         price:'₹80',   storage:'Dry',          desc:'Light, airy fox nuts. A clean, healthy snack with no seasoning.' },
-    { id:20, name:'Peri Peri Makhana',     cat:'Makhana',    sizes:'50g / 100g / 250g',         price:'₹99',   storage:'Dry',          desc:'Crispy makhana with a fiery peri peri kick. Impossible to stop eating.' },
-    { id:21, name:'Salt & Pepper Makhana', cat:'Makhana',    sizes:'50g / 100g / 250g',         price:'₹90',   storage:'Dry',          desc:'Simple, satisfying classic seasoning on airy roasted lotus seeds.' },
-    { id:22, name:'Mint Makhana',          cat:'Makhana',    sizes:'50g / 100g / 250g',         price:'₹99',   storage:'Dry',          desc:'Cool mint flavoured makhana — light and refreshing snacking.' },
-    // Combo
-    { id:23, name:'Pizza Combo Pack',      cat:'Combo',      sizes:'Set of 3',                  price:'₹349',  storage:'Dry',          desc:'Includes Chilli Flakes, Oregano & Peri Peri Seasoning. Everything your pizza needs.' },
-    { id:24, name:'Burger Combo Pack',     cat:'Combo',      sizes:'Set of 3',                  price:'₹399',  storage:'Refrigerated', desc:'Includes Peri Peri Mayo, Garlic Mayo & Onion Powder. The ultimate burger kit.' },
+    { id:1,  name:'Peeled Garlic',              cat:'Fresh Prep',      sizes:'100g / 250g / 500g / 1kg', price:'₹0', storage:'Refrigerated', desc:'Fresh garlic cloves, peeled and ready to cook.' },
+    { id:2,  name:'Peeled Small Onion',         cat:'Fresh Prep',      sizes:'250g / 500g / 1kg',        price:'₹0', storage:'Refrigerated', desc:'Small onions peeled and ready for everyday cooking.' },
+    { id:3,  name:'Peeled Ginger',              cat:'Fresh Prep',      sizes:'100g / 250g / 500g',       price:'₹0', storage:'Refrigerated', desc:'Fresh ginger root, peeled and ready to slice or grate.' },
+    { id:4,  name:'Cut Carrot',                 cat:'Cut Vegetables',  sizes:'250g / 500g / 1kg',        price:'₹0', storage:'Refrigerated', desc:'Carrots washed, cut, and ready for cooking.' },
+    { id:5,  name:'Cut Ladies Finger',          cat:'Cut Vegetables',  sizes:'250g / 500g / 1kg',        price:'₹0', storage:'Refrigerated', desc:'Ladies finger cut fresh for quick frying and curries.' },
+    { id:6,  name:'Cut Pumpkin',                cat:'Cut Vegetables',  sizes:'250g / 500g / 1kg',        price:'₹0', storage:'Refrigerated', desc:'Pumpkin cleaned, cut, and ready for cooking.' },
+    { id:7,  name:'Cut Drumstick',              cat:'Cut Vegetables',  sizes:'250g / 500g / 1kg',        price:'₹0', storage:'Refrigerated', desc:'Drumstick pieces cut fresh for sambar and curries.' },
+    { id:8,  name:'Cut Beans',                  cat:'Cut Vegetables',  sizes:'250g / 500g / 1kg',        price:'₹0', storage:'Refrigerated', desc:'Beans cut evenly and ready for poriyal or curry.' },
+    { id:9,  name:'Cut Beetroot',               cat:'Cut Vegetables',  sizes:'250g / 500g / 1kg',        price:'₹0', storage:'Refrigerated', desc:'Beetroot peeled, cut, and ready to cook.' },
+    { id:10, name:'Cut Bitter Gourd',           cat:'Cut Vegetables',  sizes:'250g / 500g / 1kg',        price:'₹0', storage:'Refrigerated', desc:'Bitter gourd cut fresh for fries and curries.' },
+    { id:11, name:'Beans Poriyal Pack',         cat:'Poriyal Packs',   sizes:'Pack',                     price:'₹0', storage:'Refrigerated', desc:'Beans poriyal pack with grated coconut and other mixtures.' },
+    { id:12, name:'Carrot Poriyal Pack',        cat:'Poriyal Packs',   sizes:'Pack',                     price:'₹0', storage:'Refrigerated', desc:'Carrot poriyal pack with grated coconut and other mixtures.' },
+    { id:13, name:'Beans Carrot Combined Pack', cat:'Poriyal Packs',   sizes:'Pack',                     price:'₹0', storage:'Refrigerated', desc:'Beans and carrot poriyal pack with grated coconut and other mixtures.' },
+    { id:14, name:'Sambar Veggies Pack',        cat:'Sambar Pack',     sizes:'Pack',                     price:'₹0', storage:'Refrigerated', desc:'Mixed vegetables cut and packed for sambar.' },
 ];
 
 let activeCategory = 'All';
@@ -1561,49 +1543,30 @@ function setCategory(cat) {
 function productIcon(cat, color) {
     const icons = {
         'Fresh Prep': `<svg width="80" height="80" viewBox="0 0 80 80"><ellipse cx="40" cy="44" rx="20" ry="24" fill="${color}" opacity="0.2"/><ellipse cx="40" cy="44" rx="13" ry="18" fill="${color}" opacity="0.3"/><line x1="40" y1="20" x2="40" y2="10" stroke="${color}" stroke-width="2"/><path d="M40 10 Q 48 14 44 20" fill="${color}" opacity="0.4"/></svg>`,
-        'Powder':     `<svg width="80" height="80" viewBox="0 0 80 80"><rect x="26" y="30" width="28" height="36" rx="3" fill="${color}" opacity="0.2"/><rect x="30" y="26" width="20" height="6" rx="2" fill="${color}" opacity="0.3"/><circle cx="40" cy="48" r="6" fill="${color}" opacity="0.3"/></svg>`,
-        'Sauce':      `<svg width="80" height="80" viewBox="0 0 80 80"><rect x="28" y="28" width="24" height="34" rx="12" fill="${color}" opacity="0.2"/><rect x="32" y="20" width="16" height="10" rx="4" fill="${color}" opacity="0.3"/><path d="M36 62 Q 40 70 44 62" fill="${color}" opacity="0.2"/></svg>`,
-        'Makhana':    `<svg width="80" height="80" viewBox="0 0 80 80"><circle cx="40" cy="42" r="18" fill="${color}" opacity="0.2"/><circle cx="32" cy="36" r="8" fill="${color}" opacity="0.2"/><circle cx="50" cy="38" r="10" fill="${color}" opacity="0.2"/><circle cx="40" cy="52" r="7" fill="${color}" opacity="0.2"/></svg>`,
-        'Combo':      `<svg width="80" height="80" viewBox="0 0 80 80"><rect x="18" y="30" width="16" height="26" rx="3" fill="${color}" opacity="0.25"/><rect x="38" y="26" width="16" height="30" rx="3" fill="${color}" opacity="0.2"/><rect x="58" y="32" width="12" height="24" rx="3" fill="${color}" opacity="0.15"/></svg>`,
+        'Cut Vegetables': `<svg width="80" height="80" viewBox="0 0 80 80"><rect x="26" y="30" width="28" height="36" rx="3" fill="${color}" opacity="0.2"/><rect x="30" y="26" width="20" height="6" rx="2" fill="${color}" opacity="0.3"/><circle cx="40" cy="48" r="6" fill="${color}" opacity="0.3"/></svg>`,
+        'Poriyal Packs': `<svg width="80" height="80" viewBox="0 0 80 80"><rect x="28" y="28" width="24" height="34" rx="12" fill="${color}" opacity="0.2"/><rect x="32" y="20" width="16" height="10" rx="4" fill="${color}" opacity="0.3"/><path d="M36 62 Q 40 70 44 62" fill="${color}" opacity="0.2"/></svg>`,
+        'Sambar Pack': `<svg width="80" height="80" viewBox="0 0 80 80"><circle cx="40" cy="42" r="18" fill="${color}" opacity="0.2"/><circle cx="32" cy="36" r="8" fill="${color}" opacity="0.2"/><circle cx="50" cy="38" r="10" fill="${color}" opacity="0.2"/><circle cx="40" cy="52" r="7" fill="${color}" opacity="0.2"/></svg>`,
     };
-    return icons[cat] || icons['Powder'];
+    return icons[cat] || icons['Cut Vegetables'];
 }
 
 
 const productImages = {
   // Fresh Prep (Local Generated)
   'Peeled Garlic': './zafraan-images/01-peeled-garlic.png',
+  'Peeled Small Onion': './zafraan-images/03-chopped-onion.png',
   'Peeled Ginger': './zafraan-images/02-peeled-ginger.png',
-  'Chopped Onion': './zafraan-images/03-chopped-onion.png',
-  'Ready-to-Cook Veg Pack': 'https://images.unsplash.com/photo-1540331547168-8b63109225b7?auto=format&fit=crop&w=800&q=80',
-  'Curry Leaves Pack': 'https://images.unsplash.com/photo-1615485245834-4bc63b15f0d3?auto=format&fit=crop&w=800&q=80',
-  'Coriander Leaves': 'https://images.unsplash.com/photo-1588877381644-3c9c3bbac36c?auto=format&fit=crop&w=800&q=80',
-  'Mint Leaves Pack': 'https://images.unsplash.com/photo-1603569283847-aa295f0d016a?auto=format&fit=crop&w=800&q=80',
-  
-  // Powder (Local & Unsplash)
-  'Garlic Powder': 'https://images.unsplash.com/photo-1532336414038-cf19250c5757?auto=format&fit=crop&w=800&q=80',
-  'Onion Powder': 'https://images.unsplash.com/photo-1514986888952-8cd320577b68?auto=format&fit=crop&w=800&q=80',
-  'Ginger Powder': 'https://images.unsplash.com/photo-1615485245434-6c3823467612?auto=format&fit=crop&w=800&q=80',
-  'Peri Peri Powder': './zafraan-images/11-peri-peri-powder.png',
-  'Chilli Flakes': 'https://images.unsplash.com/photo-1599599810694-b5d37304c044?auto=format&fit=crop&w=800&q=80',
-  'Oregano Seasoning': 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?auto=format&fit=crop&w=800&q=80',
-  'Italian Seasoning': 'https://images.unsplash.com/photo-1506368249639-73a05d6f6488?auto=format&fit=crop&w=800&q=80',
-  
-  // Sauce (Local & Unsplash)
-  'Classic Mayonnaise': './zafraan-images/15-mayonnaise.png',
-  'Peri Peri Mayo': 'https://images.unsplash.com/photo-1563379091339-03b21bc4a4f8?auto=format&fit=crop&w=800&q=80',
-  'Garlic Mayo': 'https://images.unsplash.com/photo-1571091718767-18b5b1457add?auto=format&fit=crop&w=800&q=80',
-  'Mint Mayo': 'https://images.unsplash.com/photo-1626128665085-47372a834197?auto=format&fit=crop&w=800&q=80',
-  
-  // Makhana (Local & Unsplash)
-  'Plain Makhana': './zafraan-images/19-plain-makhana.png',
-  'Peri Peri Makhana': 'https://images.unsplash.com/photo-1615484477778-ca3b77940c25?auto=format&fit=crop&w=800&q=80',
-  'Salt & Pepper Makhana': 'https://images.unsplash.com/photo-1615484476839-4d6438743202?auto=format&fit=crop&w=800&q=80',
-  'Mint Makhana': 'https://images.unsplash.com/photo-1599490659213-e2b9527bb087?auto=format&fit=crop&w=800&q=80',
-  
-  // Combo (Local & Unsplash)
-  'Pizza Combo Pack': './zafraan-images/23-pizza-combo.png',
-  'Burger Combo Pack': 'https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=800&q=80'
+  'Cut Carrot': './zafraan-images/04-veg-pack.png',
+  'Cut Ladies Finger': './zafraan-images/04-veg-pack.png',
+  'Cut Pumpkin': './zafraan-images/04-veg-pack.png',
+  'Cut Drumstick': './zafraan-images/04-veg-pack.png',
+  'Cut Beans': './zafraan-images/04-veg-pack.png',
+  'Cut Beetroot': './zafraan-images/04-veg-pack.png',
+  'Cut Bitter Gourd': './zafraan-images/04-veg-pack.png',
+  'Beans Poriyal Pack': './zafraan-images/04-veg-pack.png',
+  'Carrot Poriyal Pack': './zafraan-images/04-veg-pack.png',
+  'Beans Carrot Combined Pack': './zafraan-images/04-veg-pack.png',
+  'Sambar Veggies Pack': './zafraan-images/04-veg-pack.png'
 };
 
 function renderProducts() {
@@ -1772,6 +1735,23 @@ function updateCartQty(index, delta) {
 function renderCart() {
     const container = document.getElementById('cartItems');
     const totalEl = document.getElementById('cartTotal');
+    const syncedCart = cart
+        .map(item => {
+            const product = getCatalogProductById(item.id);
+            if (!product) return null;
+            return {
+                ...item,
+                name: product.name,
+                price: getNumericPrice(product.price),
+                img: productImages[product.name] || item.img
+            };
+        })
+        .filter(Boolean);
+
+    if (syncedCart.length !== cart.length || JSON.stringify(syncedCart) !== JSON.stringify(cart)) {
+        cart = syncedCart;
+        saveCart();
+    }
     
     if (cart.length === 0) {
         container.innerHTML = '<div style="text-align:center;margin-top:40px;color:var(--text-light)">Your bag is empty</div>';
