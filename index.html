@@ -1510,6 +1510,7 @@ function applyProductSetting(product) {
     return {
         ...product,
         price: Number.isFinite(price) && price > 0 ? `₹${price}` : product.price,
+        sizes: typeof setting.sizes === 'string' && setting.sizes.trim() ? setting.sizes.trim() : product.sizes,
         visible: setting.visible === true,
         stockQty: Number.isFinite(stockQty) ? stockQty : null
     };
@@ -1626,7 +1627,10 @@ function openModal(id) {
     document.getElementById('modalPrice').textContent = p.price;
     document.getElementById('modalQty').textContent = currentQty;
     
-    const sizes = p.sizes.split(' / ');
+    const sizes = p.sizes
+        .split(/\/|,/)
+        .map(s => s.trim())
+        .filter(Boolean);
     document.getElementById('modalSizes').innerHTML = sizes.map((s, i) => `
         <label class="size-chip-label">
             <input type="radio" name="size" value="${s}" ${i===0?'checked':''} style="display:none">

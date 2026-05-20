@@ -105,7 +105,7 @@
             background: #fff;
             border: 1px solid var(--border);
             display: grid;
-            grid-template-columns: 1.5fr 110px 130px 130px;
+            grid-template-columns: 1.4fr 110px 130px 1.2fr 130px;
             gap: 16px;
             padding: 16px;
         }
@@ -134,6 +134,14 @@
         }
 
         input[type="number"] {
+            border: 1px solid var(--border);
+            color: var(--text-dark);
+            font: inherit;
+            padding: 10px;
+            width: 100%;
+        }
+
+        input[type="text"] {
             border: 1px solid var(--border);
             color: var(--text-dark);
             font: inherit;
@@ -260,6 +268,7 @@
                 const saved = settings[String(product.id)] || {};
                 const visible = saved.visible === true;
                 const price = Number(saved.price) || product.price;
+                const sizes = typeof saved.sizes === 'string' && saved.sizes.trim() ? saved.sizes.trim() : product.sizes;
                 const stockQty = saved.stockQty ?? 0;
 
                 return `
@@ -275,6 +284,10 @@
                         <label>
                             Price
                             <input type="number" class="price-input" min="0" value="${price}">
+                        </label>
+                        <label>
+                            Gram Options
+                            <input type="text" class="sizes-input" value="${sizes}" placeholder="100g / 250g / 500g">
                         </label>
                         <label>
                             Quantity
@@ -305,6 +318,7 @@
                 const product = baseProducts.find(item => item.id === Number(row.dataset.id));
                 const visible = row.querySelector('.visible-input').checked;
                 const price = Number(row.querySelector('.price-input').value) || product.price;
+                const sizes = row.querySelector('.sizes-input').value.trim() || product.sizes;
                 const stockQty = Number(row.querySelector('.stock-input').value) || 0;
 
                 batch.set(doc(db, 'productCatalog', String(product.id)), {
@@ -312,6 +326,7 @@
                     cat: product.cat,
                     visible,
                     price,
+                    sizes,
                     stockQty,
                     updatedAt: new Date().toISOString(),
                     updatedBy: currentUser.email
