@@ -1494,6 +1494,28 @@ function getNumericPrice(price) {
     return parseInt(String(price).replace(/[^\d]/g, ''), 10) || 0;
 }
 
+function getSizeGrams(size) {
+    const match = String(size).toLowerCase().match(/(\d+(?:\.\d+)?)\s*(kg|g)/);
+    if (!match) return null;
+
+    const amount = Number(match[1]);
+    if (!Number.isFinite(amount)) return null;
+
+    return match[2] === 'kg' ? amount * 1000 : amount;
+}
+
+function getSizePrice(product, size) {
+    const basePrice = getNumericPrice(product.price);
+    const grams = getSizeGrams(size);
+
+    if (!grams || !basePrice) return basePrice;
+    return Math.round((basePrice * grams) / 100);
+}
+
+function formatPrice(amount) {
+    return `₹${amount}`;
+}
+
 function getProductSetting(id) {
     return productSettings[String(id)] || null;
 }
@@ -1509,7 +1531,7 @@ function applyProductSetting(product) {
 
     return {
         ...product,
-        price: Number.isFinite(price) && price > 0 ? `₹${price}` : product.price,
+        price: Number.isFinite(price) && price >= 0 ? `₹${price}` : product.price,
         sizes: typeof setting.sizes === 'string' && setting.sizes.trim() ? setting.sizes.trim() : product.sizes,
         visible: setting.visible === true,
         stockQty: Number.isFinite(stockQty) ? stockQty : null
@@ -1595,7 +1617,7 @@ function renderProducts() {
             <div class="product-body">
                 <div class="product-cat">${p.cat}</div>
                 <div class="product-name">${p.name}</div>
-                <div class="product-sizes">${p.sizes}</div>
+                <div class="product-sizes">${p.sizes}${getSizeGrams(p.sizes) ? ` · base ${p.price}/100g` : ''}</div>
                 <div class="product-footer">
                     <span class="product-price">${p.price}</span>
                     <div class="product-arrow">→</div>
@@ -1624,7 +1646,6 @@ function openModal(id) {
     document.getElementById('modalCat').textContent = p.cat;
     document.getElementById('modalTitle').textContent = p.name;
     document.getElementById('modalDesc').textContent = p.desc + (p.storage !== 'Dry' ? ` Storage: ${p.storage}.` : '');
-    document.getElementById('modalPrice').textContent = p.price;
     document.getElementById('modalQty').textContent = currentQty;
     
     const sizes = p.sizes
@@ -1633,8 +1654,8 @@ function openModal(id) {
         .filter(Boolean);
     document.getElementById('modalSizes').innerHTML = sizes.map((s, i) => `
         <label class="size-chip-label">
-            <input type="radio" name="size" value="${s}" ${i===0?'checked':''} style="display:none">
-            <span class="size-chip">${s}</span>
+            <input type="radio" name="size" value="${s}" ${i===0?'checked':''} onchange="updateModalPrice()" style="display:none">
+            <span class="size-chip">${s} · ${formatPrice(getSizePrice(p, s))}</span>
         </label>
     `).join('');
     
@@ -1651,11 +1672,22 @@ function openModal(id) {
     document.head.appendChild(style);
 
     document.getElementById('modal').classList.add('open');
+    updateModalPrice();
 }
 
 function updateModalQty(delta) {
     currentQty = Math.max(1, currentQty + delta);
     document.getElementById('modalQty').textContent = currentQty;
+    updateModalPrice();
+}
+
+function updateModalPrice() {
+    const p = getCatalogProductById(currentProductId);
+    const selectedSize = document.querySelector('input[name="size"]:checked')?.value;
+    if (!p || !selectedSize) return;
+
+    const unitPrice = getSizePrice(p, selectedSize);
+    document.getElementById('modalPrice').textContent = `${formatPrice(unitPrice * currentQty)} (${formatPrice(unitPrice)} each)`;
 }
 
 function closeModal() {
@@ -1686,14 +1718,16 @@ function addToCart() {
         return alert(`Only ${p.stockQty} available right now`);
     }
     
+    const unitPrice = getSizePrice(p, size);
     const existing = cart.find(item => item.id === p.id && item.size === size);
     if (existing) {
         existing.qty += currentQty;
+        existing.price = unitPrice;
     } else {
         cart.push({
             id: p.id,
             name: p.name,
-            price: getNumericPrice(p.price),
+            price: unitPrice,
             qty: currentQty,
             size: size,
             img: productImages[p.name]
@@ -1746,7 +1780,7 @@ function renderCart() {
             return {
                 ...item,
                 name: product.name,
-                price: getNumericPrice(product.price),
+                price: getSizePrice(product, item.size),
                 img: productImages[product.name] || item.img
             };
         })
