@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZAFRAAN Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --cream: #fdf6f0;
+            --warm-white: #faf4ee;
+            --rose: #b5685a;
+            --rose-deep: #8c4a3c;
+            --text-dark: #2a1e1a;
+            --text-mid: #6b4a40;
+            --text-light: #a07060;
+            --border: rgba(181,104,90,0.18);
+            --green: #4f7f55;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--cream);
+            color: var(--text-dark);
+            font-family: 'Jost', sans-serif;
+            font-weight: 300;
+        }
+
+        header {
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            gap: 20px;
+            justify-content: space-between;
+            padding: 22px 32px;
+        }
+
+        .brand {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 28px;
+            letter-spacing: 4px;
+            color: var(--rose-deep);
+        }
+
+        .top-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .status {
+            color: var(--text-light);
+            font-size: 13px;
+        }
+
+        button {
+            border: 1px solid var(--border);
+            background: #fff;
+            color: var(--rose-deep);
+            cursor: pointer;
+            font-family: 'Jost', sans-serif;
+            font-size: 11px;
+            letter-spacing: 1.6px;
+            padding: 12px 16px;
+            text-transform: uppercase;
+        }
+
+        button.primary {
+            background: var(--rose);
+            border-color: var(--rose);
+            color: #fff;
+        }
+
+        button:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        main {
+            padding: 28px 32px 44px;
+        }
+
+        .toolbar {
+            align-items: center;
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 36px;
+            font-weight: 400;
+        }
+
+        .grid {
+            display: grid;
+            gap: 12px;
+        }
+
+        .product-row {
+            align-items: center;
+            background: #fff;
+            border: 1px solid var(--border);
+            display: grid;
+            grid-template-columns: 1.5fr 110px 130px 130px;
+            gap: 16px;
+            padding: 16px;
+        }
+
+        .product-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 21px;
+            font-weight: 500;
+        }
+
+        .product-meta {
+            color: var(--text-light);
+            font-size: 12px;
+            line-height: 1.5;
+            margin-top: 4px;
+        }
+
+        label {
+            color: var(--text-light);
+            display: flex;
+            flex-direction: column;
+            font-size: 10px;
+            gap: 6px;
+            letter-spacing: 1.4px;
+            text-transform: uppercase;
+        }
+
+        input[type="number"] {
+            border: 1px solid var(--border);
+            color: var(--text-dark);
+            font: inherit;
+            padding: 10px;
+            width: 100%;
+        }
+
+        .ready-toggle {
+            align-items: center;
+            flex-direction: row;
+            gap: 10px;
+        }
+
+        input[type="checkbox"] {
+            accent-color: var(--rose);
+            height: 20px;
+            width: 20px;
+        }
+
+        .pill {
+            color: var(--green);
+            font-size: 11px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .message {
+            color: var(--text-mid);
+            font-size: 13px;
+            min-height: 20px;
+        }
+
+        @media (max-width: 760px) {
+            header,
+            main {
+                padding-left: 18px;
+                padding-right: 18px;
+            }
+
+            header,
+            .toolbar {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .product-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div>
+            <div class="brand">ZAFRAAN</div>
+            <div class="status" id="authStatus">Signed out</div>
+        </div>
+        <div class="top-actions">
+            <button id="loginBtn">Login with Google</button>
+            <button id="logoutBtn" style="display:none;">Logout</button>
+            <a href="./index.html"><button type="button">View Site</button></a>
+        </div>
+    </header>
+
+    <main>
+        <div class="toolbar">
+            <div>
+                <h1>Product Catalog</h1>
+                <div class="message" id="message"></div>
+            </div>
+            <button class="primary" id="saveBtn" disabled>Save Catalog</button>
+        </div>
+        <div class="grid" id="productGrid"></div>
+    </main>
+
+    <script src="./firebase-config.js"></script>
+    <script type="module">
+        const baseProducts = [
+            { id:1, name:'Peeled Garlic', cat:'Fresh Prep', sizes:'100g / 250g / 500g / 1kg', price:180 },
+            { id:2, name:'Peeled Ginger', cat:'Fresh Prep', sizes:'100g / 250g / 500g', price:220 },
+            { id:3, name:'Chopped Onion', cat:'Fresh Prep', sizes:'250g / 500g', price:80 },
+            { id:4, name:'Ready-to-Cook Veg Pack', cat:'Fresh Prep', sizes:'250g / 500g', price:120 },
+            { id:5, name:'Curry Leaves Pack', cat:'Fresh Prep', sizes:'50g / 100g', price:40 },
+            { id:6, name:'Coriander Leaves', cat:'Fresh Prep', sizes:'50g / 100g', price:40 },
+            { id:7, name:'Mint Leaves Pack', cat:'Fresh Prep', sizes:'50g / 100g', price:40 },
+            { id:8, name:'Garlic Powder', cat:'Powder', sizes:'100g / 250g', price:249 },
+            { id:9, name:'Onion Powder', cat:'Powder', sizes:'100g / 250g', price:249 },
+            { id:10, name:'Ginger Powder', cat:'Powder', sizes:'100g / 250g', price:249 },
+            { id:11, name:'Peri Peri Powder', cat:'Powder', sizes:'100g / 250g', price:299 },
+            { id:12, name:'Chilli Flakes', cat:'Powder', sizes:'50g / 100g', price:149 },
+            { id:13, name:'Oregano Seasoning', cat:'Powder', sizes:'50g / 100g', price:149 },
+            { id:14, name:'Italian Seasoning', cat:'Powder', sizes:'50g / 100g', price:149 },
+            { id:15, name:'Classic Mayonnaise', cat:'Sauce', sizes:'100ml / 200ml / 500ml', price:120 },
+            { id:16, name:'Peri Peri Mayo', cat:'Sauce', sizes:'100ml / 200ml / 500ml', price:140 },
+            { id:17, name:'Garlic Mayo', cat:'Sauce', sizes:'100ml / 200ml / 500ml', price:140 },
+            { id:18, name:'Mint Mayo', cat:'Sauce', sizes:'100ml / 200ml / 500ml', price:140 },
+            { id:19, name:'Plain Makhana', cat:'Makhana', sizes:'50g / 100g / 250g', price:80 },
+            { id:20, name:'Peri Peri Makhana', cat:'Makhana', sizes:'50g / 100g / 250g', price:99 },
+            { id:21, name:'Salt & Pepper Makhana', cat:'Makhana', sizes:'50g / 100g / 250g', price:90 },
+            { id:22, name:'Mint Makhana', cat:'Makhana', sizes:'50g / 100g / 250g', price:99 },
+            { id:23, name:'Pizza Combo Pack', cat:'Combo', sizes:'Set of 3', price:349 },
+            { id:24, name:'Burger Combo Pack', cat:'Combo', sizes:'Set of 3', price:399 }
+        ];
+
+        const config = window.ZAFRAAN_FIREBASE_CONFIG;
+        const adminEmails = window.ZAFRAAN_ADMIN_EMAILS || [];
+        const isConfigured = config && config.apiKey && !config.apiKey.startsWith('YOUR_');
+        const loginBtn = document.getElementById('loginBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const authStatus = document.getElementById('authStatus');
+        const message = document.getElementById('message');
+        const productGrid = document.getElementById('productGrid');
+
+        let app;
+        let auth;
+        let db;
+        let currentUser = null;
+        let GoogleAuthProvider;
+        let signInWithPopup;
+        let signOut;
+        let onAuthStateChanged;
+        let collection;
+        let doc;
+        let getDocs;
+        let writeBatch;
+
+        function setMessage(text) {
+            message.textContent = text;
+        }
+
+        function renderProducts(settings = {}) {
+            productGrid.innerHTML = baseProducts.map(product => {
+                const saved = settings[String(product.id)] || {};
+                const visible = saved.visible === true;
+                const price = Number(saved.price) || product.price;
+                const stockQty = saved.stockQty ?? 0;
+
+                return `
+                    <div class="product-row" data-id="${product.id}">
+                        <div>
+                            <div class="product-name">${product.name}</div>
+                            <div class="product-meta">${product.cat} / ${product.sizes}</div>
+                        </div>
+                        <label class="ready-toggle">
+                            <input type="checkbox" class="visible-input" ${visible ? 'checked' : ''}>
+                            <span class="pill">Ready</span>
+                        </label>
+                        <label>
+                            Price
+                            <input type="number" class="price-input" min="1" value="${price}">
+                        </label>
+                        <label>
+                            Quantity
+                            <input type="number" class="stock-input" min="0" value="${stockQty}">
+                        </label>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function loadCatalog() {
+            const snapshot = await getDocs(collection(db, 'productCatalog'));
+            const settings = {};
+            snapshot.forEach(item => {
+                settings[item.id] = item.data();
+            });
+            renderProducts(settings);
+        }
+
+        async function saveCatalog() {
+            if (!currentUser) return;
+
+            saveBtn.disabled = true;
+            setMessage('Saving...');
+
+            const batch = writeBatch(db);
+            document.querySelectorAll('.product-row').forEach(row => {
+                const product = baseProducts.find(item => item.id === Number(row.dataset.id));
+                const visible = row.querySelector('.visible-input').checked;
+                const price = Number(row.querySelector('.price-input').value) || product.price;
+                const stockQty = Number(row.querySelector('.stock-input').value) || 0;
+
+                batch.set(doc(db, 'productCatalog', String(product.id)), {
+                    name: product.name,
+                    cat: product.cat,
+                    visible,
+                    price,
+                    stockQty,
+                    updatedAt: new Date().toISOString(),
+                    updatedBy: currentUser.email
+                });
+            });
+
+            await batch.commit();
+            saveBtn.disabled = false;
+            setMessage('Saved');
+        }
+
+        function isAdmin(user) {
+            return user && adminEmails.includes(user.email);
+        }
+
+        if (!isConfigured) {
+            authStatus.textContent = 'Firebase not configured';
+            setMessage('Update firebase-config.js before using admin.');
+            renderProducts();
+        } else {
+            const firebaseApp = await import('https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js');
+            const firebaseAuth = await import('https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js');
+            const firebaseStore = await import('https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js');
+
+            GoogleAuthProvider = firebaseAuth.GoogleAuthProvider;
+            signInWithPopup = firebaseAuth.signInWithPopup;
+            signOut = firebaseAuth.signOut;
+            onAuthStateChanged = firebaseAuth.onAuthStateChanged;
+            collection = firebaseStore.collection;
+            doc = firebaseStore.doc;
+            getDocs = firebaseStore.getDocs;
+            writeBatch = firebaseStore.writeBatch;
+
+            app = firebaseApp.initializeApp(config);
+            auth = firebaseAuth.getAuth(app);
+            db = firebaseStore.getFirestore(app);
+
+            loginBtn.addEventListener('click', () => signInWithPopup(auth, new GoogleAuthProvider()));
+            logoutBtn.addEventListener('click', () => signOut(auth));
+            saveBtn.addEventListener('click', saveCatalog);
+
+            onAuthStateChanged(auth, async user => {
+                currentUser = user;
+                loginBtn.style.display = user ? 'none' : 'inline-block';
+                logoutBtn.style.display = user ? 'inline-block' : 'none';
+
+                if (!user) {
+                    authStatus.textContent = 'Signed out';
+                    saveBtn.disabled = true;
+                    renderProducts();
+                    return;
+                }
+
+                authStatus.textContent = user.email;
+                if (!isAdmin(user)) {
+                    saveBtn.disabled = true;
+                    setMessage('This account is not an admin.');
+                    renderProducts();
+                    return;
+                }
+
+                saveBtn.disabled = false;
+                setMessage('Loading...');
+                await loadCatalog();
+                setMessage('');
+            });
+        }
+    </script>
+</body>
+</html>

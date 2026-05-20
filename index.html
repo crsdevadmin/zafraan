@@ -1447,6 +1447,7 @@
     </div>
 </div>
 
+<script src="./firebase-config.js"></script>
 <script>
 const categories = ['All', 'Fresh Prep', 'Powder', 'Sauce', 'Makhana', 'Combo'];
 
@@ -1499,10 +1500,54 @@ const products = [
 ];
 
 let activeCategory = 'All';
+let productSettings = {};
+let adminCatalogLoaded = false;
+
+function isFirebaseConfigured() {
+    const config = window.ZAFRAAN_FIREBASE_CONFIG;
+    return Boolean(config && config.apiKey && !config.apiKey.startsWith('YOUR_'));
+}
+
+function getNumericPrice(price) {
+    return parseInt(String(price).replace(/[^\d]/g, ''), 10) || 0;
+}
+
+function getProductSetting(id) {
+    return productSettings[String(id)] || null;
+}
+
+function applyProductSetting(product) {
+    const setting = getProductSetting(product.id);
+    if (!setting) return { ...product };
+
+    const price = Number(setting.price);
+    const stockQty = setting.stockQty === '' || setting.stockQty === null || setting.stockQty === undefined
+        ? null
+        : Number(setting.stockQty);
+
+    return {
+        ...product,
+        price: Number.isFinite(price) && price > 0 ? `₹${price}` : product.price,
+        visible: setting.visible === true,
+        stockQty: Number.isFinite(stockQty) ? stockQty : null
+    };
+}
+
+function getCatalogProducts() {
+    const withSettings = products.map(applyProductSetting);
+    if (!adminCatalogLoaded) return withSettings;
+    return withSettings.filter(p => p.visible === true && (p.stockQty === null || p.stockQty > 0));
+}
+
+function getCatalogProductById(id) {
+    return getCatalogProducts().find(p => p.id === id);
+}
 
 function renderTabs() {
     const tabsEl = document.getElementById('categoryTabs');
-    tabsEl.innerHTML = categories.map(c => `
+    const availableCategories = ['All', ...new Set(getCatalogProducts().map(p => p.cat))];
+    if (!availableCategories.includes(activeCategory)) activeCategory = 'All';
+    tabsEl.innerHTML = availableCategories.map(c => `
         <button class="cat-tab ${c === activeCategory ? 'active' : ''}" onclick="setCategory('${c}')">${c}</button>
     `).join('');
 }
@@ -1563,8 +1608,14 @@ const productImages = {
 
 function renderProducts() {
     const grid = document.getElementById('productsGrid');
-    const filtered = activeCategory === 'All' ? products : products.filter(p => p.cat === activeCategory);
+    const catalogProducts = getCatalogProducts();
+    const filtered = activeCategory === 'All' ? catalogProducts : catalogProducts.filter(p => p.cat === activeCategory);
     const [bg1, bg2] = bgColors[filtered[0]?.cat] || ['#f5f0ec','#ede5dc'];
+
+    if (!filtered.length) {
+        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-light)">No products are available right now. Please check back soon.</div>';
+        return;
+    }
 
     grid.innerHTML = filtered.map(p => {
         const [b1, b2] = bgColors[p.cat];
@@ -1591,7 +1642,7 @@ function renderProducts() {
 }
 
 function openModal(id) {
-    const p = products.find(x => x.id === id);
+    const p = getCatalogProductById(id);
     if (!p) return;
     const [b1, b2] = bgColors[p.cat];
     
@@ -1657,8 +1708,16 @@ function toggleCart() {
 }
 
 function addToCart() {
-    const p = products.find(x => x.id === currentProductId);
+    const p = getCatalogProductById(currentProductId);
+    if (!p) return alert("This product is not available right now");
     const size = document.querySelector('input[name="size"]:checked').value;
+    const cartQty = cart
+        .filter(item => item.id === p.id)
+        .reduce((sum, item) => sum + item.qty, 0);
+
+    if (p.stockQty !== null && cartQty + currentQty > p.stockQty) {
+        return alert(`Only ${p.stockQty} available right now`);
+    }
     
     const existing = cart.find(item => item.id === p.id && item.size === size);
     if (existing) {
@@ -1667,7 +1726,7 @@ function addToCart() {
         cart.push({
             id: p.id,
             name: p.name,
-            price: parseInt(p.price.replace('₹','')),
+            price: getNumericPrice(p.price),
             qty: currentQty,
             size: size,
             img: productImages[p.name]
@@ -1692,6 +1751,16 @@ function updateBadge() {
 }
 
 function updateCartQty(index, delta) {
+    const product = getCatalogProductById(cart[index].id);
+    if (delta > 0 && product?.stockQty !== null) {
+        const currentProductQty = cart
+            .filter(item => item.id === cart[index].id)
+            .reduce((sum, item) => sum + item.qty, 0);
+        if (currentProductQty >= product.stockQty) {
+            return alert(`Only ${product.stockQty} available right now`);
+        }
+    }
+
     cart[index].qty += delta;
     if (cart[index].qty <= 0) {
         cart.splice(index, 1);
@@ -1922,10 +1991,37 @@ function closeUpiModal() {
   document.getElementById('upiModalOverlay').style.display = 'none';
 }
 
+async function loadAdminCatalog() {
+  if (!isFirebaseConfigured()) {
+    renderTabs();
+    renderProducts();
+    return;
+  }
+
+  try {
+    const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js');
+    const { getFirestore, collection, getDocs } = await import('https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js');
+    const app = initializeApp(window.ZAFRAAN_FIREBASE_CONFIG);
+    const db = getFirestore(app);
+    const snapshot = await getDocs(collection(db, 'productCatalog'));
+    productSettings = {};
+    snapshot.forEach(doc => {
+        productSettings[doc.id] = doc.data();
+    });
+    adminCatalogLoaded = true;
+  } catch (error) {
+    console.warn('Admin catalog could not be loaded. Showing built-in products.', error);
+    adminCatalogLoaded = false;
+  }
+
+  renderTabs();
+  renderProducts();
+}
+
 // Initial calls
 updateBadge();
 renderTabs();
-renderProducts();
+loadAdminCatalog();
 </script>
 
 </body>
