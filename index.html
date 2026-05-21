@@ -436,13 +436,16 @@
 
         /* ---- PILLARS ---- */
         .pillars {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            display: flex;
+            justify-content: center;
+            gap: 0;
             border-bottom: 1px solid var(--border);
+            border-top: 1px solid var(--border);
+            background: var(--warm-white);
         }
 
         .pillar {
-            padding: 50px 40px;
+            padding: 18px 30px;
             border-right: 1px solid var(--border);
             transition: background 0.3s;
         }
@@ -451,26 +454,21 @@
         .pillar:hover { background: var(--warm-white); }
 
         .pillar-num {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 38px;
-            color: var(--rose-pale);
-            margin-bottom: 16px;
-            font-weight: 300;
+            display: none;
         }
 
         .pillar-title {
-            font-size: 11px;
-            letter-spacing: 2px;
+            font-size: 10px;
+            letter-spacing: 1.7px;
             text-transform: uppercase;
             color: var(--rose);
-            margin-bottom: 10px;
             font-weight: 500;
         }
 
         .pillar-desc {
-            font-size: 13px;
+            display: none;
+            font-size: 12px;
             color: var(--text-light);
-            line-height: 1.7;
         }
 
         /* ---- PRODUCTS SECTION ---- */
@@ -881,28 +879,6 @@
             border-color: var(--rose);
         }
 
-        .checkout-actions {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        .checkout-mini-btn {
-            border: 1px solid var(--border);
-            background: #fff;
-            color: var(--rose-deep);
-            cursor: pointer;
-            font-family: 'Jost', sans-serif;
-            font-size: 10px;
-            letter-spacing: 1.4px;
-            padding: 12px 10px;
-            text-transform: uppercase;
-        }
-
-        .checkout-mini-btn:hover {
-            border-color: var(--rose);
-        }
-
         .checkout-note,
         .checkout-error {
             font-size: 12px;
@@ -1051,7 +1027,7 @@
             .footer-top { grid-template-columns: 1fr; gap: 40px; }
             nav { padding: 16px 24px; }
             .nav-links { display: none; }
-            .pillars { grid-template-columns: repeat(2, 1fr); }
+            .pillars { flex-wrap: wrap; }
             .products-section { padding: 60px 24px; }
         }
 
@@ -1128,8 +1104,15 @@
                 line-height: 1.05;
             }
 
-            .checkout-actions {
-                grid-template-columns: 1fr;
+            .pillar {
+                flex: 1 1 50%;
+                padding: 12px 10px;
+                text-align: center;
+            }
+
+            .pillar-title {
+                font-size: 9px;
+                letter-spacing: 1.2px;
             }
         }
     </style>
@@ -1419,17 +1402,13 @@
             <div class="checkout-form">
                 <div class="checkout-field">
                     <label for="checkoutPhone">Mobile Number</label>
-                    <input id="checkoutPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="10 digit mobile number">
+                    <input id="checkoutPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="10 digit mobile number" oninput="prefillSavedAddress()">
                 </div>
                 <div class="checkout-field">
                     <label for="checkoutAddress">Home Address</label>
                     <textarea id="checkoutAddress" autocomplete="street-address" placeholder="Type your full delivery address"></textarea>
                 </div>
-                <div class="checkout-actions">
-                    <button class="checkout-mini-btn" type="button" onclick="searchAddressOnMaps()">Search on Google Maps</button>
-                    <button class="checkout-mini-btn" type="button" onclick="useCurrentLocation()">Use Current Location</button>
-                </div>
-                <div class="checkout-note" id="checkoutLocationNote">Add an address or share current location before generating the payment QR.</div>
+                <div class="checkout-note" id="checkoutLocationNote">Type your address once. This device will remember it for the next order.</div>
                 <div class="checkout-error" id="checkoutError"></div>
                 <button class="modal-btn" type="button" onclick="generateUpiQr()">Generate UPI QR</button>
             </div>
@@ -1859,74 +1838,35 @@ function setCheckoutError(message) {
   errorEl.style.display = message ? 'block' : 'none';
 }
 
-function searchAddressOnMaps() {
-  const address = document.getElementById('checkoutAddress').value.trim();
-  if (!address) {
-    setCheckoutError('Please type an address before searching on Google Maps.');
-    return;
-  }
-
-  setCheckoutError('');
-  window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`, '_blank');
+function getSavedCustomerAddress(phoneDigits) {
+  const saved = JSON.parse(localStorage.getItem('zafraan_customer_addresses') || '{}');
+  return saved[phoneDigits] || '';
 }
 
-async function getAddressFromCoordinates(lat, lng) {
-  if (!googleMapsApiKey || googleMapsApiKey === "YOUR_GOOGLE_MAPS_API_KEY_HERE") {
-    return '';
-  }
-
-  const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${encodeURIComponent(googleMapsApiKey)}`;
-  const response = await fetch(geocodeUrl);
-  if (!response.ok) return '';
-
-  const data = await response.json();
-  return data.status === 'OK' && data.results.length ? data.results[0].formatted_address : '';
+function saveCustomerAddress(phoneDigits, address) {
+  const saved = JSON.parse(localStorage.getItem('zafraan_customer_addresses') || '{}');
+  saved[phoneDigits] = address;
+  localStorage.setItem('zafraan_customer_addresses', JSON.stringify(saved));
 }
 
-function useCurrentLocation() {
+function prefillSavedAddress() {
   const noteEl = document.getElementById('checkoutLocationNote');
   const addressEl = document.getElementById('checkoutAddress');
-  setCheckoutError('');
-
-  if (!navigator.geolocation) {
-    setCheckoutError('Location sharing is not supported in this browser.');
+  const phoneDigits = document.getElementById('checkoutPhone').value.replace(/\D/g, '');
+  if (phoneDigits.length < 10) {
+    noteEl.textContent = 'Type your address once. This device will remember it for the next order.';
     return;
   }
 
-  noteEl.textContent = 'Requesting your current location...';
-  navigator.geolocation.getCurrentPosition(
-    async (position) => {
-      const lat = position.coords.latitude.toFixed(6);
-      const lng = position.coords.longitude.toFixed(6);
-      const coordinates = `${lat}, ${lng}`;
-      checkoutDetails.mapLink = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
-      checkoutDetails.coordinates = coordinates;
-
-      noteEl.textContent = 'Identifying address from your location...';
-
-      try {
-        const detectedAddress = await getAddressFromCoordinates(lat, lng);
-        if (detectedAddress) {
-          addressEl.value = detectedAddress;
-          checkoutDetails.address = detectedAddress;
-          noteEl.innerHTML = `Address detected. <a href="${checkoutDetails.mapLink}" target="_blank" rel="noopener">Open in Google Maps</a>`;
-        } else {
-          addressEl.value = `Current location: ${coordinates}`;
-          checkoutDetails.address = addressEl.value;
-          noteEl.innerHTML = `Location added. Add flat/house details if needed. <a href="${checkoutDetails.mapLink}" target="_blank" rel="noopener">Open in Google Maps</a>`;
-        }
-      } catch (error) {
-        addressEl.value = `Current location: ${coordinates}`;
-        checkoutDetails.address = addressEl.value;
-        noteEl.innerHTML = `Location added. Add flat/house details if needed. <a href="${checkoutDetails.mapLink}" target="_blank" rel="noopener">Open in Google Maps</a>`;
-      }
-    },
-    () => {
-      noteEl.textContent = 'Add an address or share current location before generating the payment QR.';
-      setCheckoutError('Could not access location. Please allow location permission or type the full address.');
-    },
-    { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
-  );
+  const savedAddress = getSavedCustomerAddress(phoneDigits);
+  if (savedAddress && !addressEl.value.trim()) {
+    addressEl.value = savedAddress;
+    noteEl.textContent = 'Saved address filled for this mobile number.';
+  } else if (savedAddress) {
+    noteEl.textContent = 'Saved address found for this mobile number.';
+  } else {
+    noteEl.textContent = 'No saved address found. Please type the delivery address.';
+  }
 }
 
 function validateCheckoutDetails() {
@@ -1939,13 +1879,14 @@ function validateCheckoutDetails() {
     return null;
   }
 
-  if (!address && !checkoutDetails.mapLink) {
-    setCheckoutError('Please enter your home address or use current location.');
+  if (!address) {
+    setCheckoutError('Please enter your home address.');
     return null;
   }
 
   checkoutDetails.phone = phone;
   checkoutDetails.address = address;
+  saveCustomerAddress(phoneDigits, address);
   setCheckoutError('');
   return checkoutDetails;
 }
@@ -1959,7 +1900,7 @@ function checkoutUPI() {
   document.getElementById('sendOrderBtn').style.display = 'none';
   document.getElementById('upiQrImg').src = '';
   document.getElementById('checkoutSummary').innerHTML = '';
-  document.getElementById('checkoutLocationNote').textContent = 'Add an address or share current location before generating the payment QR.';
+  document.getElementById('checkoutLocationNote').textContent = 'Type your address once. This device will remember it for the next order.';
   setCheckoutError('');
   document.getElementById('upiModalOverlay').style.display = 'flex';
 }
@@ -1969,6 +1910,14 @@ function generateUpiQr() {
   if (!details) return;
 
   const total = getCheckoutTotal();
+  if (total <= 0) {
+    setCheckoutError('Please check product pricing before generating the payment QR.');
+    return;
+  }
+  if (total > 5000 && !confirm(`Payment total is ₹${total}. Continue?`)) {
+    return;
+  }
+
   const upiId = "YOUR_UPI_ID_HERE"; // <-- replace with your actual UPI ID
   const transactionNote = `Zafraan Order - ${details.phone}`;
   const upiPayload = `upi://pay?pa=${encodeURIComponent(upiId)}&tn=${encodeURIComponent(transactionNote)}&am=${total}`;
@@ -1978,7 +1927,7 @@ function generateUpiQr() {
   document.getElementById('checkoutSummary').innerHTML = `
     <strong>Order total:</strong> â‚¹${total}<br>
     <strong>Mobile:</strong> ${details.phone}<br>
-    <strong>Address:</strong> ${details.address || 'Shared current location'}<br>
+    <strong>Address:</strong> ${details.address}<br>
     ${details.mapLink ? `<strong>Map:</strong> <a href="${details.mapLink}" target="_blank" rel="noopener">Open location</a><br>` : ''}
     <span>Please tap "Send Order Details" after payment so Zafraan receives your delivery details.</span>
   `;
@@ -1998,8 +1947,7 @@ function sendOrderOnWhatsApp() {
     '',
     `Total: â‚¹${total}`,
     `Mobile: ${details.phone}`,
-    `Address: ${details.address || 'Shared current location'}`,
-    details.mapLink ? `Google Maps: ${details.mapLink}` : ''
+    `Address: ${details.address}`
   ].filter(Boolean).join('\n');
 
   window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank');
