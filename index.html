@@ -984,20 +984,6 @@
             padding: 0 44px 44px;
         }
 
-        #upiModalOverlay {
-            z-index: 1300;
-        }
-
-        #upiQrImg {
-            width: 240px;
-            height: 240px;
-            display: block;
-            margin: 20px auto;
-            border: 8px solid #fff;
-            border-radius: 8px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-        }
-
         .checkout-form {
             display: flex;
             flex-direction: column;
@@ -1070,17 +1056,6 @@
             word-break: break-word;
             border-radius: 8px;
             margin-top: 15px;
-        }
-
-        .upi-qr-panel {
-            display: none;
-            text-align: center;
-        }
-
-        .upi-qr-panel p {
-            font-size: 14px;
-            color: var(--neon-green);
-            font-weight: 500;
         }
 
         .modal-eyebrow {
@@ -1283,198 +1258,76 @@
             box-shadow: 0 0 8px var(--neon-green-glow);
         }
 
-        /* ---- CRED VIRTUAL BLACK CARD ---- */
-        .virtual-card {
-            position: relative;
-            width: 100%;
-            height: 190px;
-            background: linear-gradient(135deg, #181818 0%, #080808 100%);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 24px;
-            overflow: hidden;
+        /* ---- PAYMENT INFO BOX ---- */
+        .payment-info-box {
             display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            box-shadow: inset 0 0 20px rgba(255,255,255,0.05), 0 10px 35px rgba(0,0,0,0.8);
-            margin-bottom: 24px;
-        }
-
-        .virtual-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(0,230,118,0.05) 0%, transparent 60%);
-            pointer-events: none;
-        }
-
-        .card-row-top {
-            display: flex;
-            justify-content: space-between;
             align-items: flex-start;
-            z-index: 1;
+            gap: 14px;
+            background: rgba(0, 230, 118, 0.05);
+            border: 1px solid rgba(0, 230, 118, 0.2);
+            border-radius: 10px;
+            padding: 16px;
+            margin-top: 4px;
         }
 
-        .card-brand {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 20px;
-            font-weight: 700;
-            letter-spacing: 3px;
-            color: #fff;
-            text-shadow: 0 0 5px rgba(255,255,255,0.3);
+        .payment-info-icon {
+            font-size: 22px;
+            line-height: 1;
+            flex-shrink: 0;
         }
 
-        .card-chip {
-            width: 36px;
-            height: 28px;
-            background: linear-gradient(135deg, #d4af37 0%, #aa8010 100%);
-            border-radius: 4px;
-            position: relative;
-        }
-
-        .card-chip::after {
-            content: '';
-            position: absolute;
-            top: 4px;
-            left: 4px;
-            right: 4px;
-            bottom: 4px;
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-
-        .card-number {
-            font-size: 18px;
-            letter-spacing: 3px;
-            color: #fff;
-            font-family: monospace;
-            margin: 15px 0;
-            z-index: 1;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-        }
-
-        .card-details {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            z-index: 1;
-        }
-
-        .card-holder {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .card-holder-label {
-            font-size: 8px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            color: var(--text-secondary);
-        }
-
-        .card-holder-name {
-            font-size: 12px;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #fff;
-        }
-
-        .card-valid {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 2px;
-        }
-
-        .card-valid-label {
-            font-size: 8px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            color: var(--text-secondary);
-        }
-
-        .card-valid-date {
-            font-size: 12px;
-            color: var(--neon-green);
-            font-weight: 600;
-        }
-
-        /* ---- SLIDE TO PAY SLIDER ---- */
-        .slide-pay-container {
-            position: relative;
-            width: 100%;
-            height: 60px;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 30px;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 20px 0;
-            user-select: none;
-        }
-
-        .slide-pay-text {
+        .payment-info-title {
             font-size: 11px;
             font-weight: 600;
-            letter-spacing: 2px;
-            color: var(--text-secondary);
+            letter-spacing: 1.5px;
             text-transform: uppercase;
-            pointer-events: none;
-            z-index: 2;
+            color: var(--neon-green);
+            margin-bottom: 6px;
         }
 
-        .slide-pay-handle {
-            position: absolute;
-            left: 3px;
-            top: 3px;
-            width: 54px;
-            height: 54px;
-            background: var(--neon-green);
-            border-radius: 27px;
-            cursor: grab;
+        .payment-info-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        .payment-info-desc strong {
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .order-summary-box {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 14px 16px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        .order-summary-box .summary-row {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #000;
-            font-weight: 700;
-            font-size: 16px;
-            box-shadow: 0 0 15px var(--neon-green-glow);
-            z-index: 3;
-            user-select: none;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 3px 0;
+            border-bottom: 1px dashed rgba(255,255,255,0.04);
         }
 
-        .slide-pay-handle:active {
-            cursor: grabbing;
+        .order-summary-box .summary-row:last-child { border-bottom: none; }
+
+        .order-summary-box .summary-total {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            font-weight: 600;
+            color: #fff;
+            font-size: 15px;
         }
 
-        .slide-pay-bg {
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 0;
-            background: rgba(0, 230, 118, 0.15);
-            border-radius: 30px 0 0 30px;
-            z-index: 1;
-            pointer-events: none;
-        }
-
-        /* Confetti Canvas */
-        #confettiCanvas {
-            position: fixed;
-            inset: 0;
-            width: 100vw;
-            height: 100vh;
-            pointer-events: none;
-            z-index: 2000;
-            display: none;
-        }
+        .order-summary-box .summary-total span { color: var(--neon-green); }
 
         /* ---- Responsive ---- */
         @media (max-width: 900px) {
@@ -1845,70 +1698,45 @@
     </div>
 </div>
 
-<!-- UPI PAYMENT MODAL -->
+<!-- CHECKOUT MODAL -->
 <div class="modal-overlay" id="upiModalOverlay" onclick="closeUpiModal()" style="display:none;">
     <div class="modal-box" style="max-width:430px;" onclick="event.stopPropagation()">
         <div class="modal-header">
-            <div class="modal-title">CRED PAY CHECKOUT</div>
+            <div class="modal-eyebrow">Zafraan</div>
+            <div class="modal-title" style="font-size:22px;">Place Your Order</div>
             <button class="modal-close" onclick="closeUpiModal()">×</button>
         </div>
-        <div class="modal-body" id="upiModalBody">
+        <div class="modal-body">
+            <div id="checkoutOrderSummary" class="order-summary-box" style="margin-bottom:20px;"></div>
             <div class="checkout-form">
-                <!-- Virtual Card inside the checkout form/drawer -->
-                <div class="virtual-card">
-                    <div class="card-row-top">
-                        <div class="card-brand">ZAFRAAN CLUB</div>
-                        <div class="card-chip"></div>
-                    </div>
-                    <div class="card-number" id="cardPhoneDisplay">XXXX XXXX XX</div>
-                    <div class="card-details">
-                        <div class="card-holder">
-                            <span class="card-holder-label">Club Member</span>
-                            <span class="card-holder-name" id="cardNameDisplay">GUEST USER</span>
-                        </div>
-                        <div class="card-valid">
-                            <span class="card-valid-label">VALID THRU</span>
-                            <span class="card-valid-date">12/29</span>
-                        </div>
-                    </div>
-                </div>
-
                 <div class="checkout-field">
                     <label for="checkoutName">Full Name</label>
-                    <input id="checkoutName" type="text" autocomplete="name" placeholder="Enter your full name" oninput="updateCardDetails()">
+                    <input id="checkoutName" type="text" autocomplete="name" placeholder="Enter your full name">
                 </div>
                 <div class="checkout-field">
                     <label for="checkoutPhone">Mobile Number</label>
-                    <input id="checkoutPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="10 digit mobile number" oninput="updateCardDetails(); prefillSavedAddress();">
+                    <input id="checkoutPhone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="10-digit mobile number" oninput="prefillSavedAddress()">
                 </div>
                 <div class="checkout-field">
-                    <label for="checkoutAddress">Home Address</label>
-                    <textarea id="checkoutAddress" autocomplete="street-address" placeholder="Type your full delivery address"></textarea>
+                    <label for="checkoutAddress">Delivery Address</label>
+                    <textarea id="checkoutAddress" autocomplete="street-address" placeholder="House no., street, area, city"></textarea>
                 </div>
-                <div class="checkout-note" id="checkoutLocationNote">Type your address once. This device will remember it for the next order.</div>
+                <div class="checkout-note" id="checkoutLocationNote">Your address will be saved for next time.</div>
+
+                <div class="payment-info-box">
+                    <div class="payment-info-icon">💳</div>
+                    <div>
+                        <div class="payment-info-title">Payment Options</div>
+                        <div class="payment-info-desc">We currently accept <strong>Cash on Delivery</strong> or <strong>GPay</strong> to 9176048173</div>
+                    </div>
+                </div>
+
                 <div class="checkout-error" id="checkoutError"></div>
-                
-                <!-- Interactive Slide to Pay Slider -->
-                <div class="slide-pay-container" id="slidePayContainer">
-                    <div class="slide-pay-bg" id="slidePayBg"></div>
-                    <div class="slide-pay-text" id="slidePayText">Slide to Pay</div>
-                    <div class="slide-pay-handle" id="slidePayHandle">→</div>
-                </div>
+                <button class="modal-btn" onclick="placeOrder()">Send Order on WhatsApp</button>
             </div>
-            <div class="upi-qr-panel" id="upiQrPanel" style="display:none; text-align:center;">
-                <p style="margin-bottom:12px;">Scan the QR code to complete payment</p>
-                <img id="upiQrImg" src="" alt="UPI QR Code" style="max-width:240px;margin:20px auto; display:block;"/>
-                <div class="checkout-summary" id="checkoutSummary" style="margin-top:16px; text-align:left;"></div>
-            </div>
-        </div>
-        <div class="modal-footer" style="text-align:center;">
-            <button class="modal-btn" id="sendOrderBtn" onclick="sendOrderOnWhatsApp()" style="display:none;margin-bottom:12px;">Send Order Details</button>
-            <button class="modal-btn" onclick="closeUpiModal()">Close</button>
         </div>
     </div>
 </div>
-
-<canvas id="confettiCanvas"></canvas>
 
 <script src="./firebase-config.js"></script>
 <script>
@@ -2022,7 +1850,7 @@ function applyProductSetting(product) {
     if (!setting) return { ...product };
 
     const price = Number(setting.price);
-    const stockQty = setting.stockQty === '' || setting.stockQty === null || setting.stockQty === undefined
+    const stockQty = setting.stockQty === '' || setting.stockQty === null || setting.stockQty === undefined || setting.stockQty === 0
         ? null
         : Number(setting.stockQty);
 
@@ -2038,7 +1866,7 @@ function applyProductSetting(product) {
 function getCatalogProducts() {
     const withSettings = products.map(applyProductSetting);
     if (!adminCatalogLoaded) return withSettings;
-    return withSettings.filter(p => p.visible === true && (p.stockQty === null || p.stockQty > 0));
+    return withSettings.filter(p => p.visible === true);
 }
 
 function getCatalogProductById(id) {
@@ -2319,11 +2147,6 @@ function renderCart() {
 }
 
 const whatsappNumber = "917904788173";
-let checkoutDetails = {
-    phone: '',
-    address: '',
-    name: ''
-};
 
 function setCheckoutError(message) {
   const errorEl = document.getElementById('checkoutError');
@@ -2365,191 +2188,52 @@ function prefillSavedAddress() {
 function prefillSavedDetails() {
     const phone = localStorage.getItem('zafraan_customer_phone') || '';
     const name = localStorage.getItem('zafraan_customer_name') || '';
-    if (phone) {
-        document.getElementById('checkoutPhone').value = phone;
-    }
-    if (name) {
-        document.getElementById('checkoutName').value = name;
-    }
-    updateCardDetails();
+    if (phone) document.getElementById('checkoutPhone').value = phone;
+    if (name) document.getElementById('checkoutName').value = name;
     prefillSavedAddress();
 }
 
-function updateCardDetails() {
-    const nameVal = document.getElementById('checkoutName').value.trim();
-    const phoneVal = document.getElementById('checkoutPhone').value.trim();
-    
-    document.getElementById('cardNameDisplay').innerText = nameVal ? nameVal.toUpperCase() : 'GUEST USER';
-    
-    const digits = phoneVal.replace(/\D/g, '');
-    if (digits.length === 0) {
-        document.getElementById('cardPhoneDisplay').innerText = 'XXXX XXXX XX';
-    } else {
-        let formatted = '';
-        for (let i = 0; i < digits.length && i < 10; i++) {
-            if (i === 4 || i === 7) formatted += ' ';
-            formatted += digits[i];
-        }
-        for (let i = digits.length; i < 10; i++) {
-            if (i === 4 || i === 7) formatted += ' ';
-            formatted += 'X';
-        }
-        document.getElementById('cardPhoneDisplay').innerText = formatted;
-    }
-}
-
 function checkoutUPI() {
-  if (cart.length === 0) return alert("Your bag is empty");
-  
-  document.getElementById('upiQrPanel').style.display = 'none';
-  document.getElementById('sendOrderBtn').style.display = 'none';
-  document.getElementById('upiQrImg').src = '';
-  document.getElementById('checkoutSummary').innerHTML = '';
-  setCheckoutError('');
-  
-  prefillSavedDetails();
-  resetSlidePay();
-  
-  document.getElementById('upiModalOverlay').style.display = 'flex';
+    if (cart.length === 0) return alert('Your bag is empty');
+
+    const summaryEl = document.getElementById('checkoutOrderSummary');
+    const totalCash = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+    summaryEl.innerHTML = cart.map(item => `
+        <div class="summary-row">
+            <span>${item.name} <span style="color:var(--text-secondary);font-size:12px;">(${item.size}) ×${item.qty}</span></span>
+            <span>₹${item.price * item.qty}</span>
+        </div>
+    `).join('') + `<div class="summary-total"><span>Total</span><span>₹${totalCash}</span></div>`;
+
+    setCheckoutError('');
+    prefillSavedDetails();
+    document.getElementById('upiModalOverlay').style.display = 'flex';
 }
 
 function closeUpiModal() {
-  document.getElementById('upiModalOverlay').style.display = 'none';
+    document.getElementById('upiModalOverlay').style.display = 'none';
 }
 
-// DRAG SLIDE TO PAY physics
-let isDragging = false;
-let startX = 0;
-let dragLimit = 0;
-let currentDragX = 0;
-
-const sliderContainer = document.getElementById('slidePayContainer');
-const sliderHandle = document.getElementById('slidePayHandle');
-const sliderBg = document.getElementById('slidePayBg');
-const sliderText = document.getElementById('slidePayText');
-
-function initSlidePay() {
-    if (!sliderHandle) return;
-    
-    // Mouse Events
-    sliderHandle.addEventListener('mousedown', startDrag);
-    window.addEventListener('mousemove', drag);
-    window.addEventListener('mouseup', endDrag);
-    
-    // Touch Events
-    sliderHandle.addEventListener('touchstart', startDrag, { passive: true });
-    window.addEventListener('touchmove', drag, { passive: false });
-    window.addEventListener('touchend', endDrag);
-}
-
-function startDrag(e) {
+function placeOrder() {
     const name = document.getElementById('checkoutName').value.trim();
     const phone = document.getElementById('checkoutPhone').value.trim();
     const address = document.getElementById('checkoutAddress').value.trim();
     const phoneDigits = phone.replace(/\D/g, '');
-    
-    if (!name) {
-        setCheckoutError('Please enter your full name.');
-        return;
-    }
-    if (phoneDigits.length < 10) {
-        setCheckoutError('Please enter a valid mobile number.');
-        return;
-    }
-    if (!address) {
-        setCheckoutError('Please enter your home address.');
-        return;
-    }
+
+    if (!name) { setCheckoutError('Please enter your full name.'); return; }
+    if (phoneDigits.length < 10) { setCheckoutError('Please enter a valid 10-digit mobile number.'); return; }
+    if (!address) { setCheckoutError('Please enter your delivery address.'); return; }
     setCheckoutError('');
-    
-    isDragging = true;
-    startX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
-    dragLimit = sliderContainer.offsetWidth - sliderHandle.offsetWidth - 6;
-    sliderHandle.style.transition = 'none';
-    sliderBg.style.transition = 'none';
-}
 
-function drag(e) {
-    if (!isDragging) return;
-    
-    if (e.type === 'touchmove') e.preventDefault();
-    
-    const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
-    let deltaX = clientX - startX;
-    if (deltaX < 0) deltaX = 0;
-    if (deltaX > dragLimit) deltaX = dragLimit;
-    
-    currentDragX = deltaX;
-    sliderHandle.style.left = (deltaX + 3) + 'px';
-    sliderBg.style.width = (deltaX + 27) + 'px';
-    
-    const pct = deltaX / dragLimit;
-    sliderText.style.opacity = 1 - pct;
-}
-
-function endDrag() {
-    if (!isDragging) return;
-    isDragging = false;
-    
-    if (currentDragX >= dragLimit * 0.9) {
-        sliderHandle.style.transition = 'left 0.2s ease';
-        sliderBg.style.transition = 'width 0.2s ease';
-        sliderHandle.style.left = (dragLimit + 3) + 'px';
-        sliderBg.style.width = '100%';
-        sliderText.style.opacity = 0;
-        sliderText.textContent = 'PAYMENT UNLOCKED';
-        sliderHandle.style.background = '#00e676';
-        sliderHandle.textContent = '✓';
-        sliderHandle.style.pointerEvents = 'none';
-        
-        triggerPaymentSuccess();
-    } else {
-        sliderHandle.style.transition = 'left 0.3s ease';
-        sliderBg.style.transition = 'width 0.3s ease';
-        sliderHandle.style.left = '3px';
-        sliderBg.style.width = '0px';
-        sliderText.style.opacity = 1;
-        currentDragX = 0;
-    }
-}
-
-function resetSlidePay() {
-    if (!sliderHandle) return;
-    sliderHandle.style.pointerEvents = 'auto';
-    sliderHandle.style.transition = 'none';
-    sliderBg.style.transition = 'none';
-    sliderHandle.style.left = '3px';
-    sliderBg.style.width = '0px';
-    sliderText.style.opacity = 1;
-    sliderText.textContent = 'Slide to Pay';
-    sliderHandle.style.background = 'var(--neon-green)';
-    sliderHandle.textContent = '→';
-    currentDragX = 0;
-}
-
-function triggerPaymentSuccess() {
-    const name = document.getElementById('checkoutName').value.trim();
-    const phone = document.getElementById('checkoutPhone').value.trim();
-    const address = document.getElementById('checkoutAddress').value.trim();
-    const phoneDigits = phone.replace(/\D/g, '');
-    
     localStorage.setItem('zafraan_customer_phone', phone);
     localStorage.setItem('zafraan_customer_name', name);
     saveCustomerAddress(phoneDigits, address);
-    
+
     const totalCash = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-    
-    const upiId = "917904788173@ybl";
-    const transactionNote = `Zafraan Order - ${phone}`;
-    const upiPayload = `upi://pay?pa=${encodeURIComponent(upiId)}&tn=${encodeURIComponent(transactionNote)}&am=${totalCash}`;
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(upiPayload)}`;
-    
-    document.getElementById('upiQrImg').src = qrUrl;
-    
-    // Save order to Firestore so admin can track it
+
     const orderId = 'ZAF-' + Date.now();
-    const orderData = {
-        orderId: orderId,
+    saveOrderToFirestore({
+        orderId,
         customerName: name,
         customerPhone: phone,
         deliveryAddress: address,
@@ -2557,145 +2241,32 @@ function triggerPaymentSuccess() {
         totalPrice: totalCash,
         status: 'Pending Payment',
         createdAt: new Date().toISOString()
-    };
-    saveOrderToFirestore(orderData);
-    
-    const summaryEl = document.getElementById('checkoutSummary');
-    summaryEl.innerHTML = '';
-
-    const rows = [
-        ['Order ID', orderId],
-        ['Customer', name],
-        ['Mobile', phone],
-        ['Address', address],
-        ['Total Price', `₹${totalCash}`]
-    ];
-    rows.forEach(([label, value]) => {
-        const line = document.createElement('div');
-        const strong = document.createElement('strong');
-        strong.textContent = label + ': ';
-        line.appendChild(strong);
-        line.appendChild(document.createTextNode(value));
-        summaryEl.appendChild(line);
     });
 
-    const note = document.createElement('div');
-    note.style.marginTop = '10px';
-    note.style.color = 'var(--neon-green)';
-    note.textContent = '✓ Please scan the QR code to pay, then click "Send Order Details" below to notify us on WhatsApp.';
-    summaryEl.appendChild(note);
-    document.getElementById('upiQrPanel').style.display = 'block';
-    document.getElementById('sendOrderBtn').style.display = 'block';
-    
-    startConfetti();
-}
+    const cartLines = cart.map((item, i) =>
+        `${i + 1}. ${item.name} (${item.size}) x${item.qty} — ₹${item.price * item.qty}`
+    ).join('\n');
 
-function sendOrderOnWhatsApp() {
-  const name = document.getElementById('checkoutName').value.trim();
-  const phone = document.getElementById('checkoutPhone').value.trim();
-  const address = document.getElementById('checkoutAddress').value.trim();
-  
-  const totalCash = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+    const message = [
+        'Hi Zafraan! I would like to place an order:',
+        '',
+        cartLines,
+        '',
+        `Total: ₹${totalCash}`,
+        '',
+        `Name: ${name}`,
+        `Mobile: ${phone}`,
+        `Address: ${address}`,
+        '',
+        'Payment: Cash on Delivery / GPay'
+    ].join('\n');
 
-  const cartLines = cart.map((item, i) => {
-    return `${i + 1}. ${item.name} (${item.size}) x ${item.qty} - ₹${item.price * item.qty}`;
-  }).join('\n');
+    window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank');
 
-  const message = [
-    `Hi Zafraan, I have placed an order:`,
-    ``,
-    cartLines,
-    ``,
-    `Total: ₹${totalCash}`,
-    ``,
-    `Customer Name: ${name}`,
-    `Mobile: ${phone}`,
-    `Address: ${address}`,
-    `Payment: QR scanned – please verify`
-  ].join('\n');
-
-  window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank');
-  
-  cart = [];
-  saveCart();
-  closeUpiModal();
-  toggleCart();
-}
-
-// Confetti Particle System
-const confettiCanvas = document.getElementById('confettiCanvas');
-let ctx = null;
-let particles = [];
-let confettiAnimationId = null;
-
-if (confettiCanvas) {
-    ctx = confettiCanvas.getContext('2d');
-}
-
-function resizeConfetti() {
-    if (confettiCanvas) {
-        confettiCanvas.width = window.innerWidth;
-        confettiCanvas.height = window.innerHeight;
-    }
-}
-
-class ConfettiParticle {
-    constructor() {
-        this.x = Math.random() * (confettiCanvas ? confettiCanvas.width : 500);
-        this.y = -20;
-        this.size = Math.random() * 8 + 6;
-        this.speedX = Math.random() * 4 - 2;
-        this.speedY = Math.random() * 5 + 5;
-        const colors = ['#00e676', '#00b0ff', '#ff4081', '#d4af37', '#ffffff'];
-        this.color = colors[Math.floor(Math.random() * colors.length)];
-        this.rotation = Math.random() * 360;
-        this.rotationSpeed = Math.random() * 4 - 2;
-    }
-    update() {
-        this.x += this.speedX;
-        this.y += this.speedY;
-        this.rotation += this.rotationSpeed;
-    }
-    draw() {
-        if (!ctx) return;
-        ctx.save();
-        ctx.translate(this.x, this.y);
-        ctx.rotate(this.rotation * Math.PI / 180);
-        ctx.fillStyle = this.color;
-        ctx.fillRect(-this.size/2, -this.size/2, this.size, this.size);
-        ctx.restore();
-    }
-}
-
-function startConfetti() {
-    if (!confettiCanvas) return;
-    confettiCanvas.style.display = 'block';
-    resizeConfetti();
-    window.addEventListener('resize', resizeConfetti);
-    particles = [];
-    for (let i = 0; i < 150; i++) {
-        setTimeout(() => {
-            particles.push(new ConfettiParticle());
-        }, Math.random() * 800);
-    }
-    
-    function animate() {
-        ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
-        let alive = false;
-        particles.forEach((p) => {
-            p.update();
-            p.draw();
-            if (p.y < confettiCanvas.height) alive = true;
-        });
-        
-        if (alive) {
-            confettiAnimationId = requestAnimationFrame(animate);
-        } else {
-            confettiCanvas.style.display = 'none';
-            cancelAnimationFrame(confettiAnimationId);
-        }
-    }
-    animate();
+    cart = [];
+    saveCart();
+    closeUpiModal();
+    toggleCart();
 }
 
 let firestoreDb = null;
@@ -2723,7 +2294,7 @@ async function loadAdminCatalog() {
     });
     adminCatalogLoaded = true;
   } catch (error) {
-    console.warn('Admin catalog could not be loaded. Showing built-in products.', error);
+    console.error('Admin catalog could not be loaded:', error.code || error.message, error);
     adminCatalogLoaded = false;
   }
 
@@ -2748,7 +2319,6 @@ async function saveOrderToFirestore(orderData) {
 updateBadge();
 renderTabs();
 loadAdminCatalog();
-initSlidePay();
 </script>
 
 </body>
