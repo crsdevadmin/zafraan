@@ -4,30 +4,65 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ZAFRAAN — Fresh, Pure, Ready.</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --cream: #fdf6f0;
-            --warm-white: #faf4ee;
-            --rose: #b5685a;
-            --rose-light: #d4927f;
-            --rose-deep: #8c4a3c;
-            --rose-pale: #f0ddd6;
-            --text-dark: #2a1e1a;
-            --text-mid: #6b4a40;
-            --text-light: #a07060;
-            --border: rgba(181,104,90,0.15);
-            --gold: #c9a96e;
+            --bg-primary: #050505;
+            --bg-secondary: #0c0c0c;
+            --bg-card: #121212;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-focus: #00e676;
+            --neon-green: #00e676;
+            --neon-green-glow: rgba(0, 230, 118, 0.4);
+            --neon-blue: #00b0ff;
+            --neon-pink: #ff4081;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --text-muted: #555555;
+            --gold: #d4af37;
+            --rose: #00e676; /* Overwrite rose to align with green */
+            --rose-deep: #009650;
+            --warm-white: #121212;
+            --cream: #050505;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Jost', sans-serif;
-            background: var(--cream);
-            color: var(--text-dark);
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
             font-weight: 300;
             overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Ambient grid background */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.012) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.012) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #222;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--neon-green);
         }
 
         /* ---- NAV ---- */
@@ -35,8 +70,9 @@
             position: sticky;
             top: 0;
             z-index: 100;
-            background: var(--cream);
-            border-bottom: 1px solid var(--border);
+            background: rgba(5, 5, 5, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
             padding: 18px 60px;
             display: flex;
             align-items: center;
@@ -52,29 +88,31 @@
         .nav-logo-mark {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
         }
 
         .nav-flower {
-            width: 32px;
-            height: 32px;
+            width: 34px;
+            height: 34px;
+            filter: drop-shadow(0 0 6px var(--neon-green-glow));
         }
 
         .nav-brand {
             font-family: 'Cormorant Garamond', serif;
-            font-weight: 500;
+            font-weight: 600;
             font-size: 26px;
             letter-spacing: 5px;
-            color: var(--rose-deep);
+            color: #fff;
         }
 
         .nav-tagline {
             font-size: 10px;
             letter-spacing: 3px;
-            color: var(--text-light);
+            color: var(--neon-green);
             text-transform: uppercase;
-            margin-left: 42px;
+            margin-left: 46px;
             margin-top: 2px;
+            font-weight: 500;
         }
 
         .nav-links {
@@ -85,14 +123,18 @@
 
         .nav-links a {
             text-decoration: none;
-            font-size: 11px;
+            font-size: 12px;
             letter-spacing: 2px;
             text-transform: uppercase;
-            color: var(--text-mid);
-            transition: color 0.3s;
+            color: var(--text-secondary);
+            font-weight: 400;
+            transition: color 0.3s, text-shadow 0.3s;
         }
 
-        .nav-links a:hover { color: var(--rose); }
+        .nav-links a:hover { 
+            color: var(--neon-green); 
+            text-shadow: 0 0 8px var(--neon-green-glow);
+        }
 
         .nav-actions {
             display: flex;
@@ -100,31 +142,39 @@
             gap: 24px;
         }
 
+
+
         .cart-toggle {
             position: relative;
             background: none;
             border: none;
             cursor: pointer;
-            color: var(--text-dark);
+            color: #fff;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: color 0.3s;
+        }
+
+        .cart-toggle:hover {
+            color: var(--neon-green);
         }
 
         .cart-badge {
             position: absolute;
             top: -8px;
             right: -8px;
-            background: var(--rose);
-            color: #fff;
-            font-size: 9px;
-            font-weight: 600;
-            width: 16px;
-            height: 16px;
+            background: var(--neon-green);
+            color: #000;
+            font-size: 10px;
+            font-weight: 700;
+            width: 18px;
+            height: 18px;
             border-radius: 50%;
             display: none;
             align-items: center;
             justify-content: center;
+            box-shadow: 0 0 8px var(--neon-green-glow);
         }
 
         /* ---- CART DRAWER ---- */
@@ -133,13 +183,14 @@
             top: 0;
             right: 0;
             width: 100vw;
-            max-width: 420px;
+            max-width: 440px;
             height: 100vh;
-            background: #fff;
+            background: var(--bg-secondary);
+            border-left: 1px solid var(--border-color);
             z-index: 1000;
-            box-shadow: -20px 0 50px rgba(42,30,26,0.1);
+            box-shadow: -20px 0 50px rgba(0,0,0,0.8);
             transform: translateX(100%);
-            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             display: flex;
             flex-direction: column;
         }
@@ -149,8 +200,8 @@
         .cart-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(42,30,26,0.4);
-            backdrop-filter: blur(4px);
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
             z-index: 999;
             opacity: 0;
             pointer-events: none;
@@ -161,7 +212,7 @@
 
         .cart-header {
             padding: 30px;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -171,19 +222,22 @@
         .cart-header h2 {
             font-family: 'Cormorant Garamond', serif;
             font-size: 24px;
-            font-weight: 500;
+            font-weight: 600;
             letter-spacing: 2px;
             text-transform: uppercase;
-            min-width: 0;
+            color: #fff;
         }
 
         .cart-close {
             background: none;
             border: none;
-            font-size: 24px;
+            font-size: 28px;
             cursor: pointer;
-            color: var(--text-mid);
+            color: var(--text-secondary);
+            transition: color 0.2s;
         }
+
+        .cart-close:hover { color: #fff; }
 
         .cart-items {
             flex: 1;
@@ -199,6 +253,8 @@
             grid-template-columns: 80px minmax(0, 1fr) auto;
             gap: 20px;
             align-items: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
         }
 
         .cart-item-info {
@@ -208,14 +264,17 @@
         .cart-item-img {
             width: 80px;
             height: 80px;
-            background: var(--warm-white);
-            border-radius: 4px;
+            background: #1a1a1a;
+            border-radius: 8px;
             object-fit: cover;
+            border: 1px solid var(--border-color);
         }
 
         .cart-item-info h4 {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 18px;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 500;
+            font-size: 16px;
+            color: #fff;
             margin-bottom: 4px;
             overflow-wrap: anywhere;
         }
@@ -223,7 +282,7 @@
         .cart-item-size {
             font-size: 10px;
             letter-spacing: 1px;
-            color: var(--text-light);
+            color: var(--text-secondary);
             text-transform: uppercase;
             margin-bottom: 8px;
         }
@@ -236,114 +295,142 @@
         }
 
         .qty-btn {
-            width: 24px;
-            height: 24px;
-            border: 1px solid var(--border);
-            background: none;
+            width: 26px;
+            height: 26px;
+            border: 1px solid var(--border-color);
+            background: rgba(255,255,255,0.02);
+            color: #fff;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 14px;
+            transition: all 0.2s;
+            border-radius: 4px;
+        }
+
+        .qty-btn:hover {
+            border-color: var(--neon-green);
+            color: var(--neon-green);
         }
 
         .cart-item-price {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 18px;
-            color: var(--rose);
+            font-family: 'Outfit', sans-serif;
+            font-size: 16px;
+            color: var(--neon-green);
             text-align: right;
             white-space: nowrap;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px;
+        }
+
+        .cart-item-coins {
+            font-size: 11px;
+            color: var(--gold);
         }
 
         .cart-footer {
             padding: 30px;
-            background: var(--warm-white);
-            border-top: 1px solid var(--border);
+            background: #090909;
+            border-top: 1px solid var(--border-color);
         }
 
         .cart-total-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 24px;
+            align-items: center;
+            margin-bottom: 12px;
         }
 
         .cart-total-label {
             font-size: 12px;
             letter-spacing: 2px;
             text-transform: uppercase;
-            color: var(--text-mid);
+            color: var(--text-secondary);
         }
 
         .cart-total-val {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 28px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 24px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .cart-coins-val {
+            font-size: 14px;
+            color: var(--gold);
             font-weight: 500;
-            color: var(--rose-deep);
         }
 
         /* ---- HERO ---- */
         .hero {
             min-height: 88vh;
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1.2fr 0.8fr;
             align-items: center;
             padding: 80px 60px;
             gap: 60px;
             position: relative;
             overflow: hidden;
+            border-bottom: 1px solid var(--border-color);
         }
 
         .hero::before {
             content: '';
             position: absolute;
-            top: -100px;
-            right: -100px;
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(circle, rgba(181,104,90,0.07) 0%, transparent 70%);
+            top: -150px;
+            right: -150px;
+            width: 700px;
+            height: 700px;
+            background: radial-gradient(circle, rgba(0, 230, 118, 0.08) 0%, transparent 70%);
             pointer-events: none;
         }
 
         .hero-text { z-index: 1; }
 
         .hero-eyebrow {
-            font-size: 11px;
+            font-size: 12px;
             letter-spacing: 4px;
             text-transform: uppercase;
-            color: var(--rose);
+            color: var(--neon-green);
             margin-bottom: 28px;
             display: flex;
             align-items: center;
             gap: 14px;
+            font-weight: 500;
         }
 
         .hero-eyebrow::before {
             content: '';
             width: 40px;
             height: 1px;
-            background: var(--rose);
+            background: var(--neon-green);
         }
 
         .hero h1 {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 76px;
-            font-weight: 300;
-            line-height: 1.05;
-            color: var(--text-dark);
+            font-family: 'Outfit', sans-serif;
+            font-size: 72px;
+            font-weight: 700;
+            line-height: 1.1;
+            color: #fff;
             margin-bottom: 30px;
-            letter-spacing: -1px;
+            letter-spacing: -2px;
         }
 
         .hero h1 em {
-            font-style: italic;
-            color: var(--rose);
+            font-style: normal;
+            background: linear-gradient(90deg, #00e676 0%, #00b0ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .hero-sub {
-            font-size: 14px;
-            color: var(--text-mid);
-            line-height: 1.9;
-            max-width: 400px;
+            font-size: 16px;
+            color: var(--text-secondary);
+            line-height: 1.8;
+            max-width: 480px;
             margin-bottom: 50px;
             letter-spacing: 0.3px;
         }
@@ -355,38 +442,50 @@
         }
 
         .btn-main {
-            background: var(--rose);
-            color: #fff;
+            background: var(--neon-green);
+            color: #000;
             border: none;
             padding: 16px 44px;
-            font-family: 'Jost', sans-serif;
+            font-family: 'Outfit', sans-serif;
             font-size: 11px;
+            font-weight: 600;
             letter-spacing: 2.5px;
             text-transform: uppercase;
             cursor: pointer;
-            transition: all 0.3s;
-            font-weight: 400;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 4px 4px 0px #fff;
         }
 
-        .btn-main:hover { background: var(--rose-deep); }
+        .btn-main:hover {
+            transform: translate(-3px, -3px);
+            box-shadow: 7px 7px 0px #fff, 0 0 20px var(--neon-green-glow);
+        }
+
+        .btn-main:active {
+            transform: translate(1px, 1px);
+            box-shadow: 2px 2px 0px #fff;
+        }
 
         .btn-ghost {
             font-size: 11px;
             letter-spacing: 2px;
-            color: var(--text-mid);
+            color: #fff;
             text-transform: uppercase;
             cursor: pointer;
-            border: none;
-            background: none;
+            border: 1px solid var(--border-color);
+            background: rgba(255,255,255,0.02);
+            padding: 15px 36px;
             display: flex;
             align-items: center;
             gap: 10px;
-            font-family: 'Jost', sans-serif;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 500;
+            transition: all 0.3s;
         }
 
-        .btn-ghost::after {
-            content: '→';
-            font-size: 16px;
+        .btn-ghost:hover {
+            border-color: #fff;
+            background: rgba(255,255,255,0.05);
         }
 
         /* Hero Visual */
@@ -399,12 +498,14 @@
 
         .hero-logo-large {
             width: 100%;
-            max-width: 480px;
+            max-width: 440px;
+            filter: drop-shadow(0 0 15px rgba(0, 230, 118, 0.15));
         }
 
         /* ---- MARQUEE ---- */
         .marquee-bar {
-            background: var(--rose);
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
             padding: 14px 0;
             overflow: hidden;
             white-space: nowrap;
@@ -412,7 +513,7 @@
 
         .marquee-inner {
             display: inline-flex;
-            animation: marquee 20s linear infinite;
+            animation: marquee 25s linear infinite;
             gap: 0;
         }
 
@@ -420,13 +521,14 @@
             font-size: 11px;
             letter-spacing: 3px;
             text-transform: uppercase;
-            color: rgba(255,255,255,0.9);
+            color: rgba(255,255,255,0.6);
             padding: 0 40px;
+            font-weight: 500;
         }
 
         .marquee-dot {
-            color: rgba(255,255,255,0.4);
-            padding: 0;
+            color: var(--neon-green);
+            text-shadow: 0 0 4px var(--neon-green-glow);
         }
 
         @keyframes marquee {
@@ -436,39 +538,42 @@
 
         /* ---- PILLARS ---- */
         .pillars {
-            display: flex;
-            justify-content: center;
-            gap: 0;
-            border-bottom: 1px solid var(--border);
-            border-top: 1px solid var(--border);
-            background: var(--warm-white);
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            border-bottom: 1px solid var(--border-color);
+            background: var(--bg-secondary);
         }
 
         .pillar {
-            padding: 18px 30px;
-            border-right: 1px solid var(--border);
+            padding: 24px 30px;
+            border-right: 1px solid var(--border-color);
             transition: background 0.3s;
+            text-align: center;
         }
 
         .pillar:last-child { border-right: none; }
-        .pillar:hover { background: var(--warm-white); }
+        .pillar:hover { background: rgba(255,255,255,0.02); }
 
         .pillar-num {
-            display: none;
+            font-size: 11px;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-bottom: 8px;
         }
 
         .pillar-title {
-            font-size: 10px;
+            font-size: 11px;
             letter-spacing: 1.7px;
             text-transform: uppercase;
-            color: var(--rose);
-            font-weight: 500;
+            color: #fff;
+            font-weight: 600;
+            margin-bottom: 6px;
         }
 
         .pillar-desc {
-            display: none;
             font-size: 12px;
-            color: var(--text-light);
+            color: var(--text-secondary);
         }
 
         /* ---- PRODUCTS SECTION ---- */
@@ -480,31 +585,32 @@
             display: flex;
             align-items: flex-end;
             justify-content: space-between;
-            margin-bottom: 70px;
-            border-bottom: 1px solid var(--border);
+            margin-bottom: 50px;
+            border-bottom: 1px solid var(--border-color);
             padding-bottom: 30px;
         }
 
         .section-label {
-            font-size: 10px;
+            font-size: 12px;
             letter-spacing: 3px;
             text-transform: uppercase;
-            color: var(--rose);
+            color: var(--neon-green);
             margin-bottom: 12px;
+            font-weight: 500;
         }
 
         .section-title {
             font-family: 'Cormorant Garamond', serif;
             font-size: 48px;
-            font-weight: 300;
-            color: var(--text-dark);
+            font-weight: 400;
+            color: #fff;
             letter-spacing: -0.5px;
         }
 
         /* Category tabs */
         .category-tabs {
             display: flex;
-            gap: 8px;
+            gap: 12px;
             margin-bottom: 50px;
             flex-wrap: wrap;
         }
@@ -512,154 +618,188 @@
         .cat-tab {
             padding: 10px 24px;
             font-size: 11px;
+            font-weight: 500;
             letter-spacing: 1.5px;
             text-transform: uppercase;
-            border: 1px solid var(--border);
-            background: none;
+            border: 1px solid var(--border-color);
+            background: rgba(255,255,255,0.02);
             cursor: pointer;
-            font-family: 'Jost', sans-serif;
-            color: var(--text-light);
-            transition: all 0.25s;
+            font-family: 'Outfit', sans-serif;
+            color: var(--text-secondary);
+            transition: all 0.3s;
+            border-radius: 0px;
         }
 
         .cat-tab.active, .cat-tab:hover {
-            background: var(--rose);
-            border-color: var(--rose);
-            color: #fff;
+            background: transparent;
+            border-color: var(--neon-green);
+            color: var(--neon-green);
+            box-shadow: 0 0 10px var(--neon-green-glow);
         }
 
         /* Product Grid */
         .products-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-            gap: 2px;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 30px;
         }
 
         .product-card {
-            background: #fff;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
             cursor: pointer;
-            transition: all 0.35s ease;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             position: relative;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
-        .product-card:hover { transform: translateY(-6px); box-shadow: 0 20px 50px rgba(140,74,60,0.12); z-index: 2; }
+        .product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(0, 230, 118, 0.1);
+            border-color: var(--neon-green);
+        }
 
         .product-img-wrap {
-            height: 220px;
+            height: 240px;
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
             overflow: hidden;
+            border-bottom: 1px solid var(--border-color);
+            background: #111;
         }
 
         .product-badge {
             position: absolute;
             top: 16px;
             right: 16px;
-            background: var(--rose);
-            color: #fff;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid var(--border-color);
+            color: var(--neon-green);
             font-size: 9px;
             letter-spacing: 1.5px;
             padding: 5px 10px;
             text-transform: uppercase;
+            font-weight: 500;
+            z-index: 2;
         }
 
         .product-body {
-            padding: 20px 24px 24px;
-            border-top: 1px solid var(--border);
+            padding: 24px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
         }
 
         .product-cat {
             font-size: 9px;
             letter-spacing: 2px;
-            color: var(--rose);
+            color: var(--text-secondary);
             text-transform: uppercase;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
+            font-weight: 500;
         }
 
         .product-name {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 20px;
-            font-weight: 500;
-            color: var(--text-dark);
+            font-family: 'Outfit', sans-serif;
+            font-size: 18px;
+            font-weight: 600;
+            color: #fff;
             margin-bottom: 6px;
         }
 
         .product-sizes {
-            font-size: 11px;
-            color: var(--text-light);
-            margin-bottom: 14px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 18px;
             line-height: 1.6;
         }
 
         .product-footer {
+            margin-top: auto;
             display: flex;
-            align-items: center;
+            align-items: flex-end;
             justify-content: space-between;
         }
 
-        .product-price {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 22px;
-            color: var(--rose-deep);
-            font-weight: 500;
+        .product-price-block {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
         }
 
+        .product-price {
+            font-family: 'Outfit', sans-serif;
+            font-size: 18px;
+            color: #fff;
+            font-weight: 600;
+        }
+
+
+
         .product-arrow {
-            width: 32px;
-            height: 32px;
-            border: 1px solid var(--border);
+            width: 36px;
+            height: 36px;
+            border: 1px solid var(--border-color);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--rose);
-            font-size: 14px;
-            transition: all 0.25s;
+            color: #fff;
+            font-size: 16px;
+            transition: all 0.3s;
+            border-radius: 4px;
         }
 
         .product-card:hover .product-arrow {
-            background: var(--rose);
-            color: #fff;
-            border-color: var(--rose);
+            background: var(--neon-green);
+            color: #000;
+            border-color: var(--neon-green);
+            box-shadow: 0 0 10px var(--neon-green-glow);
         }
 
         /* ---- ABOUT ---- */
         .about {
-            background: var(--text-dark);
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
             padding: 120px 60px;
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1.1fr 0.9fr;
             gap: 100px;
             align-items: center;
         }
 
         .about-left .eyebrow {
-            font-size: 10px;
+            font-size: 12px;
             letter-spacing: 3px;
             text-transform: uppercase;
-            color: var(--rose-light);
+            color: var(--neon-green);
             margin-bottom: 24px;
+            font-weight: 500;
         }
 
         .about-left h2 {
             font-family: 'Cormorant Garamond', serif;
             font-size: 56px;
-            font-weight: 300;
-            color: var(--cream);
+            font-weight: 400;
+            color: #fff;
             line-height: 1.1;
             margin-bottom: 32px;
         }
 
         .about-left h2 em {
             font-style: italic;
-            color: var(--rose-light);
+            background: linear-gradient(90deg, #00e676 0%, #00b0ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .about-left p {
-            font-size: 14px;
-            color: rgba(253,246,240,0.6);
+            font-size: 15px;
+            color: var(--text-secondary);
             line-height: 1.9;
         }
 
@@ -670,30 +810,30 @@
         }
 
         .about-stat {
-            border-left: 2px solid var(--rose);
+            border-left: 2px solid var(--neon-green);
             padding-left: 24px;
         }
 
         .about-stat-num {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 44px;
-            font-weight: 300;
-            color: var(--cream);
+            font-family: 'Outfit', sans-serif;
+            font-size: 40px;
+            font-weight: 700;
+            color: #fff;
             line-height: 1;
-            margin-bottom: 4px;
+            margin-bottom: 6px;
         }
 
         .about-stat-label {
             font-size: 11px;
             letter-spacing: 2px;
-            color: rgba(253,246,240,0.5);
+            color: var(--text-secondary);
             text-transform: uppercase;
         }
 
         /* ---- FOOTER ---- */
         footer {
-            background: var(--rose-deep);
-            padding: 60px 60px 40px;
+            background: #020202;
+            padding: 80px 60px 40px;
         }
 
         .footer-top {
@@ -701,7 +841,7 @@
             grid-template-columns: 2fr 1fr 1fr;
             gap: 60px;
             padding-bottom: 50px;
-            border-bottom: 1px solid rgba(255,255,255,0.15);
+            border-bottom: 1px solid var(--border-color);
         }
 
         .footer-brand {
@@ -710,41 +850,44 @@
             letter-spacing: 4px;
             color: #fff;
             margin-bottom: 16px;
+            font-weight: 600;
         }
 
         .footer-brand-sub {
             font-size: 11px;
-            color: rgba(255,255,255,0.6);
+            color: var(--neon-green);
             letter-spacing: 2px;
             text-transform: uppercase;
             margin-bottom: 24px;
+            font-weight: 500;
         }
 
         .footer-contact-item {
             font-size: 13px;
-            color: rgba(255,255,255,0.7);
+            color: var(--text-secondary);
             margin-bottom: 8px;
         }
 
         .footer-col-title {
-            font-size: 10px;
+            font-size: 11px;
             letter-spacing: 2.5px;
             text-transform: uppercase;
-            color: rgba(255,255,255,0.5);
+            color: var(--text-muted);
             margin-bottom: 20px;
+            font-weight: 600;
         }
 
         .footer-links {
             list-style: none;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
         }
 
         .footer-links a {
             text-decoration: none;
             font-size: 13px;
-            color: rgba(255,255,255,0.7);
+            color: var(--text-secondary);
             transition: color 0.2s;
         }
 
@@ -756,7 +899,7 @@
             justify-content: space-between;
             align-items: center;
             font-size: 11px;
-            color: rgba(255,255,255,0.4);
+            color: var(--text-muted);
             letter-spacing: 0.5px;
         }
 
@@ -765,9 +908,9 @@
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(42,30,26,0.7);
-            z-index: 500;
-            backdrop-filter: blur(4px);
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 1200;
+            backdrop-filter: blur(12px);
             align-items: center;
             justify-content: center;
             padding: 16px;
@@ -776,18 +919,22 @@
         .modal-overlay.open { display: flex; }
 
         .modal-box {
-            background: var(--cream);
-            width: min(520px, calc(100vw - 32px));
+            background: var(--bg-secondary);
+            width: min(540px, calc(100vw - 32px));
             max-width: calc(100vw - 32px);
             max-height: 90vh;
             overflow-y: auto;
-            animation: slideUp 0.3s ease;
+            animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             position: relative;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
         }
 
         .modal-header {
             padding: 28px 44px 0;
             position: relative;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 20px;
         }
 
         @keyframes slideUp {
@@ -796,11 +943,13 @@
         }
 
         .modal-top {
-            height: 260px;
+            height: 280px;
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
+            background: #111;
+            border-bottom: 1px solid var(--border-color);
         }
 
         .modal-close {
@@ -809,14 +958,22 @@
             right: 20px;
             width: 36px;
             height: 36px;
-            border: 1px solid var(--border);
-            background: #fff;
+            border: 1px solid var(--border-color);
+            background: rgba(0,0,0,0.8);
+            border-radius: 50%;
             cursor: pointer;
-            font-size: 18px;
+            font-size: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--text-mid);
+            color: #fff;
+            transition: all 0.2s;
+            z-index: 10;
+        }
+
+        .modal-close:hover {
+            border-color: #fff;
+            background: #000;
         }
 
         .modal-body {
@@ -832,9 +989,13 @@
         }
 
         #upiQrImg {
-            width: min(300px, 100%);
-            height: auto;
+            width: 240px;
+            height: 240px;
             display: block;
+            margin: 20px auto;
+            border: 8px solid #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
         }
 
         .checkout-form {
@@ -854,19 +1015,21 @@
             font-size: 10px;
             letter-spacing: 2px;
             text-transform: uppercase;
-            color: var(--text-light);
+            color: var(--text-secondary);
+            font-weight: 500;
         }
 
         .checkout-field input,
         .checkout-field textarea {
             width: 100%;
-            border: 1px solid var(--border);
-            background: #fff;
-            color: var(--text-dark);
-            font-family: 'Jost', sans-serif;
+            border: 1px solid var(--border-color);
+            background: rgba(255,255,255,0.02);
+            color: #fff;
+            font-family: 'Outfit', sans-serif;
             font-size: 14px;
             padding: 13px 14px;
             outline: none;
+            transition: all 0.3s;
         }
 
         .checkout-field textarea {
@@ -876,7 +1039,9 @@
 
         .checkout-field input:focus,
         .checkout-field textarea:focus {
-            border-color: var(--rose);
+            border-color: var(--neon-green);
+            box-shadow: 0 0 10px var(--neon-green-glow);
+            background: rgba(255,255,255,0.04);
         }
 
         .checkout-note,
@@ -886,22 +1051,25 @@
         }
 
         .checkout-note {
-            color: var(--text-light);
+            color: var(--text-secondary);
         }
 
         .checkout-error {
-            color: var(--rose-deep);
+            color: var(--neon-pink);
             display: none;
         }
 
         .checkout-summary {
-            background: var(--warm-white);
-            color: var(--text-mid);
-            font-size: 12px;
-            line-height: 1.6;
-            padding: 14px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            font-size: 13px;
+            line-height: 1.7;
+            padding: 16px;
             text-align: left;
             word-break: break-word;
+            border-radius: 8px;
+            margin-top: 15px;
         }
 
         .upi-qr-panel {
@@ -909,19 +1077,26 @@
             text-align: center;
         }
 
+        .upi-qr-panel p {
+            font-size: 14px;
+            color: var(--neon-green);
+            font-weight: 500;
+        }
+
         .modal-eyebrow {
-            font-size: 10px;
+            font-size: 11px;
             letter-spacing: 2px;
-            color: var(--rose);
+            color: var(--neon-green);
             text-transform: uppercase;
             margin-bottom: 10px;
+            font-weight: 500;
         }
 
         .modal-title {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 36px;
-            font-weight: 400;
-            color: var(--text-dark);
+            font-family: 'Outfit', sans-serif;
+            font-size: 32px;
+            font-weight: 600;
+            color: #fff;
             margin-bottom: 20px;
         }
 
@@ -934,15 +1109,27 @@
 
         .size-chip {
             padding: 8px 16px;
-            border: 1px solid var(--border);
+            border: 1px solid var(--border-color);
             font-size: 12px;
-            color: var(--text-mid);
+            color: var(--text-secondary);
             letter-spacing: 0.5px;
+            background: rgba(255,255,255,0.02);
+            transition: all 0.2s;
+            cursor: pointer;
+            display: inline-block;
+            border-radius: 20px;
+        }
+
+        .size-chip-label input:checked + .size-chip {
+            background: var(--neon-green);
+            color: #000;
+            border-color: var(--neon-green);
+            box-shadow: 0 0 10px var(--neon-green-glow);
         }
 
         .modal-desc {
-            font-size: 13px;
-            color: var(--text-light);
+            font-size: 14px;
+            color: var(--text-secondary);
             line-height: 1.8;
             margin-bottom: 32px;
         }
@@ -952,30 +1139,38 @@
             align-items: center;
             justify-content: space-between;
             margin-bottom: 28px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
         }
 
         .modal-price-label {
             font-size: 11px;
             letter-spacing: 1px;
-            color: var(--text-light);
+            color: var(--text-secondary);
             text-transform: uppercase;
         }
 
         .modal-price-val {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 32px;
-            color: var(--rose-deep);
-            font-weight: 500;
+            font-family: 'Outfit', sans-serif;
+            font-size: 28px;
+            color: #fff;
+            font-weight: 600;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
         }
+
+
 
         .modal-qty-row {
             display: flex;
             align-items: center;
-            gap: 20px;
-            margin-bottom: 32px;
+            justify-content: space-between;
+            margin-bottom: 24px;
             padding: 16px;
-            background: var(--warm-white);
-            border-radius: 4px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
         }
 
         .modal-qty-ctrl {
@@ -987,47 +1182,311 @@
         .modal-qty-ctrl button {
             width: 32px;
             height: 32px;
-            border: 1px solid var(--border);
-            background: #fff;
+            border: 1px solid var(--border-color);
+            background: rgba(255,255,255,0.04);
+            color: #fff;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 18px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .modal-qty-ctrl button:hover {
+            border-color: #fff;
         }
 
         #modalQty {
-            font-weight: 500;
+            font-weight: 600;
             font-size: 16px;
             width: 20px;
             text-align: center;
+            color: #fff;
         }
 
         .modal-btn {
             width: 100%;
-            background: var(--rose-deep);
-            color: #fff;
+            background: var(--neon-green);
+            color: #000;
             border: none;
             padding: 18px;
-            font-family: 'Jost', sans-serif;
-            font-size: 11px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
             letter-spacing: 2.5px;
             text-transform: uppercase;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: all 0.3s;
+            box-shadow: 4px 4px 0px #fff;
         }
 
-        .modal-btn:hover { background: var(--rose); }
+        .modal-btn:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px #fff, 0 0 15px var(--neon-green-glow);
+        }
+
+        .modal-btn:active {
+            transform: translate(1px, 1px);
+            box-shadow: 2px 2px 0px #fff;
+        }
+
+
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #222;
+            transition: .4s;
+            border-radius: 34px;
+            border: 1px solid var(--border-color);
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: #aaa;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: rgba(0, 230, 118, 0.2);
+            border-color: var(--neon-green);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(24px);
+            background-color: var(--neon-green);
+            box-shadow: 0 0 8px var(--neon-green-glow);
+        }
+
+        /* ---- CRED VIRTUAL BLACK CARD ---- */
+        .virtual-card {
+            position: relative;
+            width: 100%;
+            height: 190px;
+            background: linear-gradient(135deg, #181818 0%, #080808 100%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 24px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: inset 0 0 20px rgba(255,255,255,0.05), 0 10px 35px rgba(0,0,0,0.8);
+            margin-bottom: 24px;
+        }
+
+        .virtual-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0,230,118,0.05) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .card-row-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            z-index: 1;
+        }
+
+        .card-brand {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            color: #fff;
+            text-shadow: 0 0 5px rgba(255,255,255,0.3);
+        }
+
+        .card-chip {
+            width: 36px;
+            height: 28px;
+            background: linear-gradient(135deg, #d4af37 0%, #aa8010 100%);
+            border-radius: 4px;
+            position: relative;
+        }
+
+        .card-chip::after {
+            content: '';
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            right: 4px;
+            bottom: 4px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .card-number {
+            font-size: 18px;
+            letter-spacing: 3px;
+            color: #fff;
+            font-family: monospace;
+            margin: 15px 0;
+            z-index: 1;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .card-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            z-index: 1;
+        }
+
+        .card-holder {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .card-holder-label {
+            font-size: 8px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+        }
+
+        .card-holder-name {
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #fff;
+        }
+
+        .card-valid {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 2px;
+        }
+
+        .card-valid-label {
+            font-size: 8px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+        }
+
+        .card-valid-date {
+            font-size: 12px;
+            color: var(--neon-green);
+            font-weight: 600;
+        }
+
+        /* ---- SLIDE TO PAY SLIDER ---- */
+        .slide-pay-container {
+            position: relative;
+            width: 100%;
+            height: 60px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 30px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 0;
+            user-select: none;
+        }
+
+        .slide-pay-text {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .slide-pay-handle {
+            position: absolute;
+            left: 3px;
+            top: 3px;
+            width: 54px;
+            height: 54px;
+            background: var(--neon-green);
+            border-radius: 27px;
+            cursor: grab;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000;
+            font-weight: 700;
+            font-size: 16px;
+            box-shadow: 0 0 15px var(--neon-green-glow);
+            z-index: 3;
+            user-select: none;
+        }
+
+        .slide-pay-handle:active {
+            cursor: grabbing;
+        }
+
+        .slide-pay-bg {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 0;
+            background: rgba(0, 230, 118, 0.15);
+            border-radius: 30px 0 0 30px;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* Confetti Canvas */
+        #confettiCanvas {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 2000;
+            display: none;
+        }
 
         /* ---- Responsive ---- */
         @media (max-width: 900px) {
             .hero { grid-template-columns: 1fr; padding: 60px 24px; gap: 40px; }
-            .hero h1 { font-size: 52px; }
+            .hero h1 { font-size: 50px; }
             .about { grid-template-columns: 1fr; padding: 80px 24px; gap: 50px; }
             .footer-top { grid-template-columns: 1fr; gap: 40px; }
             nav { padding: 16px 24px; }
             .nav-links { display: none; }
-            .pillars { flex-wrap: wrap; }
+            .pillars { grid-template-columns: repeat(2, 1fr); }
+            .pillar { border-bottom: 1px solid var(--border-color); }
+            .pillar:nth-child(even) { border-right: none; }
             .products-section { padding: 60px 24px; }
         }
 
@@ -1056,12 +1515,12 @@
             }
 
             .cart-item-info h4 {
-                font-size: 16px;
+                font-size: 14px;
                 line-height: 1.15;
             }
 
             .cart-item-price {
-                font-size: 16px;
+                font-size: 14px;
             }
 
             .cart-item-qty {
@@ -1074,7 +1533,7 @@
             }
 
             .cart-total-val {
-                font-size: 24px;
+                font-size: 20px;
             }
 
             .cart-footer .btn-main {
@@ -1100,20 +1559,13 @@
             }
 
             .modal-title {
-                font-size: 30px;
+                font-size: 26px;
                 line-height: 1.05;
             }
 
-            .pillar {
-                flex: 1 1 50%;
-                padding: 12px 10px;
-                text-align: center;
-            }
-
-            .pillar-title {
-                font-size: 9px;
-                letter-spacing: 1.2px;
-            }
+            .pillars { grid-template-columns: 1fr; }
+            .pillar { border-right: none; border-bottom: 1px solid var(--border-color); }
+            .pillar:last-child { border-bottom: none; }
         }
     </style>
 </head>
@@ -1125,18 +1577,18 @@
         <div class="nav-logo-mark">
             <svg class="nav-flower" viewBox="0 0 80 90" xmlns="http://www.w3.org/2000/svg">
                 <!-- Saffron flower SVG matching logo -->
-                <g fill="none" stroke="#8c4a3c" stroke-width="1.2">
+                <g fill="none" stroke="var(--neon-green)" stroke-width="1.2">
                     <!-- petals -->
-                    <path d="M40 45 C 32 38, 28 28, 34 18 C 38 12, 42 12, 46 18 C 52 28, 48 38, 40 45" stroke-width="1" fill="rgba(181,104,90,0.08)"/>
-                    <path d="M40 45 C 26 42, 18 34, 20 22 C 22 16, 28 14, 32 20 C 38 30, 36 40, 40 45" stroke-width="1" fill="rgba(181,104,90,0.08)"/>
-                    <path d="M40 45 C 52 42, 60 34, 58 22 C 56 16, 50 14, 48 20 C 42 30, 42 40, 40 45" stroke-width="1" fill="rgba(181,104,90,0.08)"/>
+                    <path d="M40 45 C 32 38, 28 28, 34 18 C 38 12, 42 12, 46 18 C 52 28, 48 38, 40 45" stroke-width="1" fill="rgba(0, 230, 118, 0.05)"/>
+                    <path d="M40 45 C 26 42, 18 34, 20 22 C 22 16, 28 14, 32 20 C 38 30, 36 40, 40 45" stroke-width="1" fill="rgba(0, 230, 118, 0.05)"/>
+                    <path d="M40 45 C 52 42, 60 34, 58 22 C 56 16, 50 14, 48 20 C 42 30, 42 40, 40 45" stroke-width="1" fill="rgba(0, 230, 118, 0.05)"/>
                     <!-- stamens -->
-                    <line x1="40" y1="44" x2="36" y2="28" stroke="#c9a96e" stroke-width="0.8"/>
-                    <line x1="40" y1="44" x2="40" y2="26" stroke="#c9a96e" stroke-width="0.8"/>
-                    <line x1="40" y1="44" x2="44" y2="28" stroke="#c9a96e" stroke-width="0.8"/>
-                    <circle cx="36" cy="27" r="1.5" fill="#c9a96e"/>
-                    <circle cx="40" cy="25" r="1.5" fill="#c9a96e"/>
-                    <circle cx="44" cy="27" r="1.5" fill="#c9a96e"/>
+                    <line x1="40" y1="44" x2="36" y2="28" stroke="var(--gold)" stroke-width="0.8"/>
+                    <line x1="40" y1="44" x2="40" y2="26" stroke="var(--gold)" stroke-width="0.8"/>
+                    <line x1="40" y1="44" x2="44" y2="28" stroke="var(--gold)" stroke-width="0.8"/>
+                    <circle cx="36" cy="27" r="1.5" fill="var(--gold)"/>
+                    <circle cx="40" cy="25" r="1.5" fill="var(--gold)"/>
+                    <circle cx="44" cy="27" r="1.5" fill="var(--gold)"/>
                     <!-- stem -->
                     <path d="M40 45 Q 42 60, 38 78" stroke-width="1"/>
                 </g>
@@ -1151,6 +1603,7 @@
         <li><a href="#contact">Contact</a></li>
     </ul>
     <div class="nav-actions">
+
         <button class="cart-toggle" onclick="toggleCart()">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
             <span class="cart-badge" id="cartBadge">0</span>
@@ -1174,7 +1627,7 @@
             <span class="cart-total-val" id="cartTotal">₹0</span>
         </div>
         <button class="btn-main" style="width:100%" onclick="checkoutUPI()">
-            Pay via UPI QR
+            Proceed to Checkout
         </button>
     </div>
 </div>
@@ -1207,7 +1660,7 @@
         <p class="hero-sub">Handcrafted in Chennai. No additives. No compromises. Just pure, fresh, premium ingredients that transform your kitchen.</p>
         <div class="hero-cta">
             <button class="btn-main" onclick="document.getElementById('products').scrollIntoView({behavior:'smooth'})">Explore Collection</button>
-            <button class="btn-ghost">Our Story</button>
+            <button class="btn-ghost" onclick="document.getElementById('about').scrollIntoView({behavior:'smooth'})">Our Story</button>
         </div>
     </div>
     <div class="hero-visual">
@@ -1219,25 +1672,25 @@
                 </style>
             </defs>
             <!-- Background circle -->
-            <circle cx="250" cy="160" r="140" fill="rgba(181,104,90,0.04)" stroke="rgba(181,104,90,0.08)" stroke-width="1"/>
-            <circle cx="250" cy="160" r="110" fill="none" stroke="rgba(181,104,90,0.05)" stroke-width="1"/>
+            <circle cx="250" cy="160" r="140" fill="rgba(0, 230, 118, 0.02)" stroke="rgba(0, 230, 118, 0.06)" stroke-width="1"/>
+            <circle cx="250" cy="160" r="110" fill="none" stroke="rgba(0, 230, 118, 0.04)" stroke-width="1"/>
 
             <!-- Saffron flower - large -->
-            <g transform="translate(170, 40)" fill="none" stroke="#8c4a3c" stroke-width="1.5">
+            <g transform="translate(170, 40)" fill="none" stroke="var(--neon-green)" stroke-width="1.5">
                 <!-- petals -->
-                <path d="M80 110 C 60 90, 50 65, 65 42 C 72 28, 88 28, 95 42 C 110 65, 100 90, 80 110" fill="rgba(181,104,90,0.1)"/>
-                <path d="M80 110 C 48 100, 32 78, 38 52 C 42 36, 56 30, 65 42 C 78 60, 72 90, 80 110" fill="rgba(181,104,90,0.1)"/>
-                <path d="M80 110 C 112 100, 128 78, 122 52 C 118 36, 104 30, 95 42 C 82 60, 88 90, 80 110" fill="rgba(181,104,90,0.1)"/>
+                <path d="M80 110 C 60 90, 50 65, 65 42 C 72 28, 88 28, 95 42 C 110 65, 100 90, 80 110" fill="rgba(0, 230, 118, 0.04)"/>
+                <path d="M80 110 C 48 100, 32 78, 38 52 C 42 36, 56 30, 65 42 C 78 60, 72 90, 80 110" fill="rgba(0, 230, 118, 0.04)"/>
+                <path d="M80 110 C 112 100, 128 78, 122 52 C 118 36, 104 30, 95 42 C 82 60, 88 90, 80 110" fill="rgba(0, 230, 118, 0.04)"/>
                 <!-- Inner petals detail -->
                 <path d="M80 108 C 68 95, 62 78, 68 58" stroke-width="0.8" opacity="0.5"/>
                 <path d="M80 108 C 92 95, 98 78, 92 58" stroke-width="0.8" opacity="0.5"/>
                 <!-- Stamens -->
-                <line x1="80" y1="105" x2="70" y2="68" stroke="#c9a96e" stroke-width="1.2"/>
-                <line x1="80" y1="105" x2="80" y2="65" stroke="#c9a96e" stroke-width="1.2"/>
-                <line x1="80" y1="105" x2="90" y2="68" stroke="#c9a96e" stroke-width="1.2"/>
-                <circle cx="70" cy="66" r="2.5" fill="#c9a96e"/>
-                <circle cx="80" cy="63" r="2.5" fill="#c9a96e"/>
-                <circle cx="90" cy="66" r="2.5" fill="#c9a96e"/>
+                <line x1="80" y1="105" x2="70" y2="68" stroke="var(--gold)" stroke-width="1.2"/>
+                <line x1="80" y1="105" x2="80" y2="65" stroke="var(--gold)" stroke-width="1.2"/>
+                <line x1="80" y1="105" x2="90" y2="68" stroke="var(--gold)" stroke-width="1.2"/>
+                <circle cx="70" cy="66" r="2.5" fill="var(--gold)"/>
+                <circle cx="80" cy="63" r="2.5" fill="var(--gold)"/>
+                <circle cx="90" cy="66" r="2.5" fill="var(--gold)"/>
                 <!-- Stem -->
                 <path d="M80 110 Q 84 140, 76 168" stroke-width="1.5"/>
                 <!-- Tendril -->
@@ -1245,14 +1698,14 @@
             </g>
 
             <!-- Brand name -->
-            <text x="105" y="262" font-family="'Cormorant Garamond', Georgia, serif" font-size="72" font-weight="300" fill="#8c4a3c" letter-spacing="10">ZAFRAAN</text>
+            <text x="105" y="262" font-family="'Cormorant Garamond', Georgia, serif" font-size="72" font-weight="300" fill="#fff" letter-spacing="10">ZAFRAAN</text>
 
             <!-- Tagline -->
-            <text x="175" y="294" font-family="'Jost', sans-serif" font-size="14" font-weight="300" fill="#a07060" letter-spacing="4">Fresh, Pure, Ready.</text>
+            <text x="175" y="294" font-family="'Outfit', sans-serif" font-size="14" font-weight="300" fill="var(--neon-green)" letter-spacing="4">Fresh, Pure, Ready.</text>
 
             <!-- Decorative lines -->
-            <line x1="80" y1="310" x2="420" y2="310" stroke="rgba(181,104,90,0.2)" stroke-width="0.5"/>
-            <line x1="80" y1="315" x2="420" y2="315" stroke="rgba(181,104,90,0.1)" stroke-width="0.5"/>
+            <line x1="80" y1="310" x2="420" y2="310" stroke="rgba(255, 255, 255, 0.08)" stroke-width="0.5"/>
+            <line x1="80" y1="315" x2="420" y2="315" stroke="rgba(255, 255, 255, 0.04)" stroke-width="0.5"/>
         </svg>
     </div>
 </section>
@@ -1303,7 +1756,7 @@
     </div>
     <div class="about-right">
         <div class="about-stat">
-            <div class="about-stat-num">24+</div>
+            <div class="about-stat-num">30</div>
             <div class="about-stat-label">Products in Range</div>
         </div>
         <div class="about-stat">
@@ -1315,7 +1768,7 @@
             <div class="about-stat-label">Additives & Preservatives</div>
         </div>
         <div class="about-stat">
-            <div class="about-stat-num">4</div>
+            <div class="about-stat-num">6</div>
             <div class="about-stat-label">Premium Collections</div>
         </div>
     </div>
@@ -1336,8 +1789,8 @@
             <ul class="footer-links">
                 <li><a href="#products">Fresh Prep</a></li>
                 <li><a href="#products">Cut Vegetables</a></li>
-                <li><a href="#products">Poriyal Packs</a></li>
-                <li><a href="#products">Sambar Pack</a></li>
+                <li><a href="#products">Spices & Seasonings</a></li>
+                <li><a href="#products">Gourmet Mayonnaise</a></li>
             </ul>
         </div>
         <div>
@@ -1378,15 +1831,16 @@
                 </div>
             </div>
 
+
+
             <div class="modal-desc" id="modalDesc"></div>
 
             <div class="modal-price-row">
-                <span class="modal-price-label">Price</span>
+                <span class="modal-price-label">Total Price</span>
                 <span class="modal-price-val" id="modalPrice">₹0</span>
             </div>
 
             <button class="modal-btn" onclick="addToCart()">Add to Shopping Bag</button>
-    
         </div>
     </div>
 </div>
@@ -1395,14 +1849,37 @@
 <div class="modal-overlay" id="upiModalOverlay" onclick="closeUpiModal()" style="display:none;">
     <div class="modal-box" style="max-width:430px;" onclick="event.stopPropagation()">
         <div class="modal-header">
-            <div class="modal-title">Checkout</div>
+            <div class="modal-title">CRED PAY CHECKOUT</div>
             <button class="modal-close" onclick="closeUpiModal()">×</button>
         </div>
         <div class="modal-body" id="upiModalBody">
             <div class="checkout-form">
+                <!-- Virtual Card inside the checkout form/drawer -->
+                <div class="virtual-card">
+                    <div class="card-row-top">
+                        <div class="card-brand">ZAFRAAN CLUB</div>
+                        <div class="card-chip"></div>
+                    </div>
+                    <div class="card-number" id="cardPhoneDisplay">XXXX XXXX XX</div>
+                    <div class="card-details">
+                        <div class="card-holder">
+                            <span class="card-holder-label">Club Member</span>
+                            <span class="card-holder-name" id="cardNameDisplay">GUEST USER</span>
+                        </div>
+                        <div class="card-valid">
+                            <span class="card-valid-label">VALID THRU</span>
+                            <span class="card-valid-date">12/29</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="checkout-field">
+                    <label for="checkoutName">Full Name</label>
+                    <input id="checkoutName" type="text" autocomplete="name" placeholder="Enter your full name" oninput="updateCardDetails()">
+                </div>
                 <div class="checkout-field">
                     <label for="checkoutPhone">Mobile Number</label>
-                    <input id="checkoutPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="10 digit mobile number" oninput="prefillSavedAddress()">
+                    <input id="checkoutPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="10 digit mobile number" oninput="updateCardDetails(); prefillSavedAddress();">
                 </div>
                 <div class="checkout-field">
                     <label for="checkoutAddress">Home Address</label>
@@ -1410,12 +1887,18 @@
                 </div>
                 <div class="checkout-note" id="checkoutLocationNote">Type your address once. This device will remember it for the next order.</div>
                 <div class="checkout-error" id="checkoutError"></div>
-                <button class="modal-btn" type="button" onclick="generateUpiQr()">Generate UPI QR</button>
+                
+                <!-- Interactive Slide to Pay Slider -->
+                <div class="slide-pay-container" id="slidePayContainer">
+                    <div class="slide-pay-bg" id="slidePayBg"></div>
+                    <div class="slide-pay-text" id="slidePayText">Slide to Pay</div>
+                    <div class="slide-pay-handle" id="slidePayHandle">→</div>
+                </div>
             </div>
-            <div class="upi-qr-panel" id="upiQrPanel">
-                <p>Scan the QR code to complete payment</p>
-                <img id="upiQrImg" src="" alt="UPI QR Code" style="max-width:100%;margin:0 auto;"/>
-                <div class="checkout-summary" id="checkoutSummary"></div>
+            <div class="upi-qr-panel" id="upiQrPanel" style="display:none; text-align:center;">
+                <p style="margin-bottom:12px;">Scan the QR code to complete payment</p>
+                <img id="upiQrImg" src="" alt="UPI QR Code" style="max-width:240px;margin:20px auto; display:block;"/>
+                <div class="checkout-summary" id="checkoutSummary" style="margin-top:16px; text-align:left;"></div>
             </div>
         </div>
         <div class="modal-footer" style="text-align:center;">
@@ -1425,44 +1908,79 @@
     </div>
 </div>
 
+<canvas id="confettiCanvas"></canvas>
+
 <script src="./firebase-config.js"></script>
 <script>
-const categories = ['All', 'Fresh Prep', 'Cut Vegetables', 'Poriyal Packs', 'Sambar Pack'];
+const categories = ['All', 'Fresh Prep', 'Cut Vegetables', 'Spices & Seasonings', 'Gourmet Mayonnaise', 'Roasted Makhana', 'Premium Combos'];
 
 const bgColors = {
-    'Fresh Prep': ['#f0f7ed', '#dcebd5'],
-    'Cut Vegetables': ['#fdf0e8', '#f5d9c0'],
-    'Poriyal Packs': ['#fdf4e8', '#f5e0bb'],
-    'Sambar Pack': ['#faf0f0', '#f0d5d0'],
+    'Fresh Prep': ['#121212', '#181818'],
+    'Cut Vegetables': ['#121212', '#181818'],
+    'Spices & Seasonings': ['#121212', '#181818'],
+    'Gourmet Mayonnaise': ['#121212', '#181818'],
+    'Roasted Makhana': ['#121212', '#181818'],
+    'Premium Combos': ['#121212', '#181818']
 };
 
 const iconColors = {
-    'Fresh Prep': '#5a8a50',
-    'Cut Vegetables': '#c06020',
-    'Poriyal Packs': '#c09020',
-    'Sambar Pack': '#b05050',
+    'Fresh Prep': '#00e676',
+    'Cut Vegetables': '#00e676',
+    'Spices & Seasonings': '#00e676',
+    'Gourmet Mayonnaise': '#00e676',
+    'Roasted Makhana': '#00e676',
+    'Premium Combos': '#00e676'
 };
 
 const products = [
-    { id:1,  name:'Peeled Garlic',              cat:'Fresh Prep',      sizes:'100g / 250g / 500g / 1kg', price:'₹0', storage:'Refrigerated', desc:'Fresh garlic cloves, peeled and ready to cook.' },
-    { id:2,  name:'Peeled Small Onion',         cat:'Fresh Prep',      sizes:'250g / 500g / 1kg',        price:'₹0', storage:'Refrigerated', desc:'Small onions peeled and ready for everyday cooking.' },
-    { id:3,  name:'Peeled Ginger',              cat:'Fresh Prep',      sizes:'100g / 250g / 500g',       price:'₹0', storage:'Refrigerated', desc:'Fresh ginger root, peeled and ready to slice or grate.' },
-    { id:4,  name:'Cut Carrot',                 cat:'Cut Vegetables',  sizes:'250g / 500g / 1kg',        price:'₹0', storage:'Refrigerated', desc:'Carrots washed, cut, and ready for cooking.' },
-    { id:5,  name:'Cut Ladies Finger',          cat:'Cut Vegetables',  sizes:'250g / 500g / 1kg',        price:'₹0', storage:'Refrigerated', desc:'Ladies finger cut fresh for quick frying and curries.' },
-    { id:6,  name:'Cut Pumpkin',                cat:'Cut Vegetables',  sizes:'250g / 500g / 1kg',        price:'₹0', storage:'Refrigerated', desc:'Pumpkin cleaned, cut, and ready for cooking.' },
-    { id:7,  name:'Cut Drumstick',              cat:'Cut Vegetables',  sizes:'250g / 500g / 1kg',        price:'₹0', storage:'Refrigerated', desc:'Drumstick pieces cut fresh for sambar and curries.' },
-    { id:8,  name:'Cut Beans',                  cat:'Cut Vegetables',  sizes:'250g / 500g / 1kg',        price:'₹0', storage:'Refrigerated', desc:'Beans cut evenly and ready for poriyal or curry.' },
-    { id:9,  name:'Cut Beetroot',               cat:'Cut Vegetables',  sizes:'250g / 500g / 1kg',        price:'₹0', storage:'Refrigerated', desc:'Beetroot peeled, cut, and ready to cook.' },
-    { id:10, name:'Cut Bitter Gourd',           cat:'Cut Vegetables',  sizes:'250g / 500g / 1kg',        price:'₹0', storage:'Refrigerated', desc:'Bitter gourd cut fresh for fries and curries.' },
-    { id:11, name:'Beans Poriyal Pack',         cat:'Poriyal Packs',   sizes:'Pack',                     price:'₹0', storage:'Refrigerated', desc:'Beans poriyal pack with grated coconut and other mixtures.' },
-    { id:12, name:'Carrot Poriyal Pack',        cat:'Poriyal Packs',   sizes:'Pack',                     price:'₹0', storage:'Refrigerated', desc:'Carrot poriyal pack with grated coconut and other mixtures.' },
-    { id:13, name:'Beans Carrot Combined Pack', cat:'Poriyal Packs',   sizes:'Pack',                     price:'₹0', storage:'Refrigerated', desc:'Beans and carrot poriyal pack with grated coconut and other mixtures.' },
-    { id:14, name:'Sambar Veggies Pack',        cat:'Sambar Pack',     sizes:'Pack',                     price:'₹0', storage:'Refrigerated', desc:'Mixed vegetables cut and packed for sambar.' },
+    // Category: Fresh Prep
+    { id: 1,  name: 'Peeled Garlic',              cat: 'Fresh Prep',          sizes: '100g / 250g / 500g / 1kg', price: '₹40', storage: 'Refrigerated', desc: 'Fresh garlic cloves, peeled and ready to cook.' },
+    { id: 2,  name: 'Peeled Small Onion',         cat: 'Fresh Prep',          sizes: '250g / 500g / 1kg',        price: '₹35', storage: 'Refrigerated', desc: 'Small onions peeled and ready for everyday cooking.' },
+    { id: 3,  name: 'Peeled Ginger',              cat: 'Fresh Prep',          sizes: '100g / 250g / 500g',       price: '₹50', storage: 'Refrigerated', desc: 'Fresh ginger root, peeled and ready to slice or grate.' },
+    { id: 4,  name: 'Chopped Onion',              cat: 'Fresh Prep',          sizes: '250g / 500g / 1kg',        price: '₹30', storage: 'Refrigerated', desc: 'Finely chopped red onions, packed fresh daily.' },
+    { id: 5,  name: 'Curry Leaves',               cat: 'Fresh Prep',          sizes: '50g / 100g',               price: '₹25', storage: 'Refrigerated', desc: 'Fresh, aromatic organic curry leaves, sorted and washed.' },
+    { id: 6,  name: 'Coriander Leaves',           cat: 'Fresh Prep',          sizes: '50g / 100g',               price: '₹30', storage: 'Refrigerated', desc: 'Fresh coriander leaves, washed and prepared.' },
+    { id: 7,  name: 'Mint Leaves',                cat: 'Fresh Prep',          sizes: '50g / 100g',               price: '₹35', storage: 'Refrigerated', desc: 'Fresh organic mint leaves, sorted and cleaned.' },
+
+    // Category: Cut Vegetables
+    { id: 8,  name: 'Cut Carrot',                 cat: 'Cut Vegetables',      sizes: '250g / 500g / 1kg',        price: '₹35', storage: 'Refrigerated', desc: 'Sweet orange carrots, washed, peeled, and diced.' },
+    { id: 9,  name: 'Cut Ladies Finger',          cat: 'Cut Vegetables',      sizes: '250g / 500g / 1kg',        price: '₹30', storage: 'Refrigerated', desc: 'Ladies finger cut fresh for quick frying and curries.' },
+    { id: 10, name: 'Cut Pumpkin',                cat: 'Cut Vegetables',      sizes: '250g / 500g / 1kg',        price: '₹25', storage: 'Refrigerated', desc: 'Pumpkin cleaned, diced, and ready for cooking.' },
+    { id: 11, name: 'Cut Drumstick',              cat: 'Cut Vegetables',      sizes: '250g / 500g / 1kg',        price: '₹45', storage: 'Refrigerated', desc: 'Drumstick pieces cut fresh for sambar and curries.' },
+    { id: 12, name: 'Cut Beans',                  cat: 'Cut Vegetables',      sizes: '250g / 500g / 1kg',        price: '₹40', storage: 'Refrigerated', desc: 'Beans cut evenly and ready for poriyal or stir-fry.' },
+    { id: 13, name: 'Sambar Veggies Pack',        cat: 'Cut Vegetables',      sizes: 'Pack',                     price: '₹60', storage: 'Refrigerated', desc: 'Mixed vegetables cut and packed specifically for sambar.' },
+
+    // Category: Spices & Seasonings
+    { id: 14, name: 'Garlic Powder',              cat: 'Spices & Seasonings', sizes: '50g / 100g',               price: '₹120', storage: 'Dry', desc: 'Pure dehydrated garlic powder for instant seasoning.' },
+    { id: 15, name: 'Onion Powder',               cat: 'Spices & Seasonings', sizes: '50g / 100g',               price: '₹100', storage: 'Dry', desc: 'Fine quality dehydrated onion powder to add sweet onion flavor.' },
+    { id: 16, name: 'Ginger Powder',              cat: 'Spices & Seasonings', sizes: '50g / 100g',               price: '₹140', storage: 'Dry', desc: 'Premium dry ginger powder for cooking, baking, and tea.' },
+    { id: 17, name: 'Peri Peri Powder',           cat: 'Spices & Seasonings', sizes: '50g / 100g',               price: '₹160', storage: 'Dry', desc: 'Spicy and tangy African bird\'s eye chilli seasoning.' },
+    { id: 18, name: 'Chilli Flakes',              cat: 'Spices & Seasonings', sizes: '50g / 100g',               price: '₹90',  storage: 'Dry', desc: 'Crushed red pepper flakes, perfect for pizzas and pastas.' },
+    { id: 19, name: 'Oregano',                    cat: 'Spices & Seasonings', sizes: '25g / 50g',                price: '₹200', storage: 'Dry', desc: 'Aromatic dried oregano leaves, essential for Mediterranean dishes.' },
+    { id: 20, name: 'Italian Seasoning',          cat: 'Spices & Seasonings', sizes: '50g / 100g',               price: '₹150', storage: 'Dry', desc: 'Balanced blend of herbs including oregano, basil, thyme, and rosemary.' },
+
+    // Category: Gourmet Mayonnaise
+    { id: 21, name: 'Plain Mayonnaise',           cat: 'Gourmet Mayonnaise',  sizes: '100g / 250g',              price: '₹80',  storage: 'Refrigerated', desc: 'Classic rich, creamy, and smooth mayonnaise.' },
+    { id: 22, name: 'Peri Peri Mayonnaise',       cat: 'Gourmet Mayonnaise',  sizes: '100g / 250g',              price: '₹90',  storage: 'Refrigerated', desc: 'Spicy peri peri infused mayo for an extra kick.' },
+    { id: 23, name: 'Garlic Mayonnaise',          cat: 'Gourmet Mayonnaise',  sizes: '100g / 250g',              price: '₹95',  storage: 'Refrigerated', desc: 'Creamy mayonnaise loaded with rich roasted garlic flavor.' },
+    { id: 24, name: 'Mint Mayonnaise',            cat: 'Gourmet Mayonnaise',  sizes: '100g / 250g',              price: '₹95',  storage: 'Refrigerated', desc: 'Refreshing herb mayo with a fresh minty flavor.' },
+
+    // Category: Roasted Makhana
+    { id: 25, name: 'Plain Makhana',              cat: 'Roasted Makhana',     sizes: '50g / 100g',               price: '₹180', storage: 'Dry', desc: 'Lightly roasted crispy lotus seeds, perfect for healthy snacking.' },
+    { id: 26, name: 'Peri Peri Makhana',          cat: 'Roasted Makhana',     sizes: '50g / 100g',               price: '₹200', storage: 'Dry', desc: 'Crispy roasted makhana coated with fiery peri peri spice.' },
+    { id: 27, name: 'Salt & Pepper Makhana',      cat: 'Roasted Makhana',     sizes: '50g / 100g',               price: '₹190', storage: 'Dry', desc: 'Classic roasted lotus seeds seasoned with sea salt and black pepper.' },
+    { id: 28, name: 'Mint Makhana',               cat: 'Roasted Makhana',     sizes: '50g / 100g',               price: '₹200', storage: 'Dry', desc: 'Refreshing mint flavored crispy roasted lotus seeds.' },
+
+    // Category: Premium Combos
+    { id: 29, name: 'Pizza Combo',                cat: 'Premium Combos',      sizes: 'Pack',                     price: '₹299', storage: 'Refrigerated', desc: 'A curated bundle of oregano, chilli flakes, pizza sauces, and veggies.' },
+    { id: 30, name: 'Burger Combo',               cat: 'Premium Combos',      sizes: 'Pack',                     price: '₹249', storage: 'Refrigerated', desc: 'A combo pack of mayo, cut veggies, seasonings, and buns.' }
 ];
 
 let activeCategory = 'All';
 let productSettings = {};
 let adminCatalogLoaded = false;
+
+
 
 function isFirebaseConfigured() {
     const config = window.ZAFRAAN_FIREBASE_CONFIG;
@@ -1542,63 +2060,69 @@ function setCategory(cat) {
     renderProducts();
 }
 
-function productIcon(cat, color) {
-    const icons = {
-        'Fresh Prep': `<svg width="80" height="80" viewBox="0 0 80 80"><ellipse cx="40" cy="44" rx="20" ry="24" fill="${color}" opacity="0.2"/><ellipse cx="40" cy="44" rx="13" ry="18" fill="${color}" opacity="0.3"/><line x1="40" y1="20" x2="40" y2="10" stroke="${color}" stroke-width="2"/><path d="M40 10 Q 48 14 44 20" fill="${color}" opacity="0.4"/></svg>`,
-        'Cut Vegetables': `<svg width="80" height="80" viewBox="0 0 80 80"><rect x="26" y="30" width="28" height="36" rx="3" fill="${color}" opacity="0.2"/><rect x="30" y="26" width="20" height="6" rx="2" fill="${color}" opacity="0.3"/><circle cx="40" cy="48" r="6" fill="${color}" opacity="0.3"/></svg>`,
-        'Poriyal Packs': `<svg width="80" height="80" viewBox="0 0 80 80"><rect x="28" y="28" width="24" height="34" rx="12" fill="${color}" opacity="0.2"/><rect x="32" y="20" width="16" height="10" rx="4" fill="${color}" opacity="0.3"/><path d="M36 62 Q 40 70 44 62" fill="${color}" opacity="0.2"/></svg>`,
-        'Sambar Pack': `<svg width="80" height="80" viewBox="0 0 80 80"><circle cx="40" cy="42" r="18" fill="${color}" opacity="0.2"/><circle cx="32" cy="36" r="8" fill="${color}" opacity="0.2"/><circle cx="50" cy="38" r="10" fill="${color}" opacity="0.2"/><circle cx="40" cy="52" r="7" fill="${color}" opacity="0.2"/></svg>`,
-    };
-    return icons[cat] || icons['Cut Vegetables'];
-}
-
-
 const productImages = {
-  // Fresh Prep (Local Generated)
   'Peeled Garlic': './zafraan-images/01-peeled-garlic.png',
   'Peeled Small Onion': './zafraan-images/02-peeled-small-onion.png',
   'Peeled Ginger': './zafraan-images/02-peeled-ginger.png',
+  'Chopped Onion': './zafraan-images/03-chopped-onion.png',
+  'Curry Leaves': './zafraan-images/05-curry-leaves.png',
+  'Coriander Leaves': './zafraan-images/06-coriander-leaves.png',
+  'Mint Leaves': './zafraan-images/07-mint-leaves.png',
   'Cut Carrot': './zafraan-images/04-cut-carrot.png',
   'Cut Ladies Finger': './zafraan-images/05-cut-ladies-finger.png',
   'Cut Pumpkin': './zafraan-images/06-cut-pumpkin.png',
   'Cut Drumstick': './zafraan-images/07-cut-drumstick.png',
   'Cut Beans': './zafraan-images/08-cut-beans.png',
-  'Cut Beetroot': './zafraan-images/09-cut-beetroot.png',
-  'Cut Bitter Gourd': './zafraan-images/10-cut-bitter-gourd.png',
-  'Beans Poriyal Pack': './zafraan-images/11-beans-poriyal-pack.png',
-  'Carrot Poriyal Pack': './zafraan-images/12-carrot-poriyal-pack.png',
-  'Beans Carrot Combined Pack': './zafraan-images/13-beans-carrot-combined-pack.png',
-  'Sambar Veggies Pack': './zafraan-images/14-sambar-veggies-pack.png'
+  'Sambar Veggies Pack': './zafraan-images/04-veg-pack.png',
+  'Garlic Powder': './zafraan-images/08-garlic-powder.png',
+  'Onion Powder': './zafraan-images/09-onion-powder.png',
+  'Ginger Powder': './zafraan-images/10-ginger-powder.png',
+  'Peri Peri Powder': './zafraan-images/11-peri-peri-powder.png',
+  'Chilli Flakes': './zafraan-images/12-chilli-flakes.png',
+  'Oregano': './zafraan-images/13-oregano.png',
+  'Italian Seasoning': './zafraan-images/14-italian-seasoning.png',
+  'Plain Mayonnaise': './zafraan-images/15-mayonnaise.png',
+  'Peri Peri Mayonnaise': './zafraan-images/16-peri-mayo.png',
+  'Garlic Mayonnaise': './zafraan-images/17-garlic-mayo.png',
+  'Mint Mayonnaise': './zafraan-images/18-mint-mayo.png',
+  'Plain Makhana': './zafraan-images/19-plain-makhana.png',
+  'Peri Peri Makhana': './zafraan-images/20-peri-makhana.png',
+  'Salt & Pepper Makhana': './zafraan-images/21-salt-pepper-makhana.png',
+  'Mint Makhana': './zafraan-images/22-mint-makhana.png',
+  'Pizza Combo': './zafraan-images/23-pizza-combo.png',
+  'Burger Combo': './zafraan-images/24-burger-combo.png'
 };
 
 function renderProducts() {
     const grid = document.getElementById('productsGrid');
     const catalogProducts = getCatalogProducts();
     const filtered = activeCategory === 'All' ? catalogProducts : catalogProducts.filter(p => p.cat === activeCategory);
-    const [bg1, bg2] = bgColors[filtered[0]?.cat] || ['#f5f0ec','#ede5dc'];
 
     if (!filtered.length) {
-        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-light)">No products are available right now. Please check back soon.</div>';
+        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-secondary)">No products are available right now. Please check back soon.</div>';
         return;
     }
 
     grid.innerHTML = filtered.map(p => {
-        const [b1, b2] = bgColors[p.cat];
-        const ic = iconColors[p.cat];
+        const priceDisplay = getSizeGrams(p.sizes) ? `${p.price}/100g` : p.price;
+        const isSizeBased = getSizeGrams(p.sizes);
+
         return `
         <div class="product-card" onclick="openModal(${p.id})">
-            <div class="product-img-wrap" style="background: linear-gradient(135deg, ${b1} 0%, ${b2} 100%);">
+            <div class="product-img-wrap">
                 <div class="product-badge">${p.cat}</div>
                 <img src="${productImages[p.name] || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=800&q=80'}" 
-    alt="${p.name}" 
-    style="width:100%;height:100%;object-fit:cover;">
+                    alt="${p.name}" 
+                    style="width:100%;height:100%;object-fit:cover;">
             </div>
             <div class="product-body">
                 <div class="product-cat">${p.cat}</div>
                 <div class="product-name">${p.name}</div>
-                <div class="product-sizes">${p.sizes}${getSizeGrams(p.sizes) ? ` · base ${p.price}/100g` : ''}</div>
+                <div class="product-sizes">${p.sizes}${isSizeBased ? ` · base ${p.price}/100g` : ''}</div>
                 <div class="product-footer">
-                    <span class="product-price">${p.price}</span>
+                    <div class="product-price-block">
+                        <span class="product-price">${priceDisplay}</span>
+                    </div>
                     <div class="product-arrow">→</div>
                 </div>
             </div>
@@ -1606,15 +2130,17 @@ function renderProducts() {
     }).join('');
 }
 
+let currentProductId = null;
+let currentQty = 1;
+
 function openModal(id) {
     const p = getCatalogProductById(id);
     if (!p) return;
-    const [b1, b2] = bgColors[p.cat];
     
     currentProductId = id;
     currentQty = 1;
     
-    document.getElementById('modalTop').style.background = `linear-gradient(135deg, ${b1} 0%, ${b2} 100%)`;
+    document.getElementById('modalTop').style.background = `linear-gradient(135deg, #121212 0%, #1e1e1e 100%)`;
     document.getElementById('modalTop').innerHTML = `
         <button class="modal-close" onclick="closeModal()">×</button>
         <img src="${productImages[p.name] || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=800&q=80'}" 
@@ -1634,22 +2160,10 @@ function openModal(id) {
     document.getElementById('modalSizes').innerHTML = sizes.map((s, i) => `
         <label class="size-chip-label">
             <input type="radio" name="size" value="${s}" ${i===0?'checked':''} onchange="updateModalPrice()" style="display:none">
-            <span class="size-chip">${s} · ${formatPrice(getSizePrice(p, s))}</span>
+            <span class="size-chip" style="border-radius:20px; padding:6px 14px;">${s} · ${formatPrice(getSizePrice(p, s))}</span>
         </label>
     `).join('');
     
-    // Add size selection style
-    const style = document.createElement('style');
-    style.innerHTML = `
-        .size-chip-label input:checked + .size-chip {
-            background: var(--rose);
-            color: #fff;
-            border-color: var(--rose);
-        }
-        .size-chip { cursor: pointer; transition: all 0.2s; display: inline-block; }
-    `;
-    document.head.appendChild(style);
-
     document.getElementById('modal').classList.add('open');
     updateModalPrice();
 }
@@ -1666,15 +2180,14 @@ function updateModalPrice() {
     if (!p || !selectedSize) return;
 
     const unitPrice = getSizePrice(p, selectedSize);
-    document.getElementById('modalPrice').textContent = `${formatPrice(unitPrice * currentQty)} (${formatPrice(unitPrice)} each)`;
+    const totalPrice = unitPrice * currentQty;
+
+    document.getElementById('modalPrice').innerHTML = `<span>₹${totalPrice}</span>`;
 }
 
 function closeModal() {
     document.getElementById('modal').classList.remove('open');
 }
-
-let currentProductId = null;
-let currentQty = 1;
 
 // CART LOGIC
 let cart = JSON.parse(localStorage.getItem('zafraan_cart')) || [];
@@ -1698,10 +2211,10 @@ function addToCart() {
     }
     
     const unitPrice = getSizePrice(p, size);
+
     const existing = cart.find(item => item.id === p.id && item.size === size);
     if (existing) {
         existing.qty += currentQty;
-        existing.price = unitPrice;
     } else {
         cart.push({
             id: p.id,
@@ -1756,10 +2269,13 @@ function renderCart() {
         .map(item => {
             const product = getCatalogProductById(item.id);
             if (!product) return null;
+            
+            const unitPrice = getSizePrice(product, item.size);
+            
             return {
                 ...item,
                 name: product.name,
-                price: getSizePrice(product, item.size),
+                price: unitPrice,
                 img: productImages[product.name] || item.img
             };
         })
@@ -1771,15 +2287,17 @@ function renderCart() {
     }
     
     if (cart.length === 0) {
-        container.innerHTML = '<div style="text-align:center;margin-top:40px;color:var(--text-light)">Your bag is empty</div>';
-        totalEl.innerText = '₹0';
+        container.innerHTML = '<div style="text-align:center;margin-top:40px;color:var(--text-secondary)">Your bag is empty</div>';
+        totalEl.innerHTML = '₹0';
         return;
     }
     
-    let total = 0;
+    let totalCash = 0;
+
     container.innerHTML = cart.map((item, index) => {
         const itemTotal = item.price * item.qty;
-        total += itemTotal;
+        totalCash += itemTotal;
+
         return `
             <div class="cart-item">
                 <img src="${item.img}" class="cart-item-img">
@@ -1797,40 +2315,15 @@ function renderCart() {
         `;
     }).join('');
     
-    totalEl.innerText = '₹' + total;
+    totalEl.innerHTML = `₹${totalCash}`;
 }
 
 const whatsappNumber = "917904788173";
-const googleMapsApiKey = "YOUR_GOOGLE_MAPS_API_KEY_HERE"; // Enable Geocoding API and replace this to auto-fill street addresses.
 let checkoutDetails = {
     phone: '',
     address: '',
-    mapLink: '',
-    coordinates: ''
+    name: ''
 };
-
-function checkoutWhatsApp() {
-    if (cart.length === 0) return alert("Your bag is empty");
-    
-    const message = cart.map((item, i) => 
-        `${i + 1}. ${item.name} (${item.size}) x ${item.qty} - ₹${item.price * item.qty}`
-    ).join('%0A');
-    
-    const total = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
-    const finalMsg = `Hi Zafraan, I would like to place an order:%0A%0A${message}%0A%0ATotal: ₹${total}`;
-    
-    window.open(`https://wa.me/${whatsappNumber}?text=${finalMsg}`, '_blank');
-}
-
-function getCartOrderLines(lineBreak = '\n') {
-  return cart.map((item, i) =>
-    `${i + 1}. ${item.name} (${item.size}) x ${item.qty} - â‚¹${item.price * item.qty}`
-  ).join(lineBreak);
-}
-
-function getCheckoutTotal() {
-  return cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-}
 
 function setCheckoutError(message) {
   const errorEl = document.getElementById('checkoutError');
@@ -1869,93 +2362,345 @@ function prefillSavedAddress() {
   }
 }
 
-function validateCheckoutDetails() {
-  const phone = document.getElementById('checkoutPhone').value.trim();
-  const address = document.getElementById('checkoutAddress').value.trim();
-  const phoneDigits = phone.replace(/\D/g, '');
-
-  if (phoneDigits.length < 10) {
-    setCheckoutError('Please enter a valid mobile number.');
-    return null;
-  }
-
-  if (!address) {
-    setCheckoutError('Please enter your home address.');
-    return null;
-  }
-
-  checkoutDetails.phone = phone;
-  checkoutDetails.address = address;
-  saveCustomerAddress(phoneDigits, address);
-  setCheckoutError('');
-  return checkoutDetails;
+function prefillSavedDetails() {
+    const phone = localStorage.getItem('zafraan_customer_phone') || '';
+    const name = localStorage.getItem('zafraan_customer_name') || '';
+    if (phone) {
+        document.getElementById('checkoutPhone').value = phone;
+    }
+    if (name) {
+        document.getElementById('checkoutName').value = name;
+    }
+    updateCardDetails();
+    prefillSavedAddress();
 }
 
-// UPI checkout function
+function updateCardDetails() {
+    const nameVal = document.getElementById('checkoutName').value.trim();
+    const phoneVal = document.getElementById('checkoutPhone').value.trim();
+    
+    document.getElementById('cardNameDisplay').innerText = nameVal ? nameVal.toUpperCase() : 'GUEST USER';
+    
+    const digits = phoneVal.replace(/\D/g, '');
+    if (digits.length === 0) {
+        document.getElementById('cardPhoneDisplay').innerText = 'XXXX XXXX XX';
+    } else {
+        let formatted = '';
+        for (let i = 0; i < digits.length && i < 10; i++) {
+            if (i === 4 || i === 7) formatted += ' ';
+            formatted += digits[i];
+        }
+        for (let i = digits.length; i < 10; i++) {
+            if (i === 4 || i === 7) formatted += ' ';
+            formatted += 'X';
+        }
+        document.getElementById('cardPhoneDisplay').innerText = formatted;
+    }
+}
+
 function checkoutUPI() {
   if (cart.length === 0) return alert("Your bag is empty");
-  checkoutDetails.mapLink = '';
-  checkoutDetails.coordinates = '';
+  
   document.getElementById('upiQrPanel').style.display = 'none';
   document.getElementById('sendOrderBtn').style.display = 'none';
   document.getElementById('upiQrImg').src = '';
   document.getElementById('checkoutSummary').innerHTML = '';
-  document.getElementById('checkoutLocationNote').textContent = 'Type your address once. This device will remember it for the next order.';
   setCheckoutError('');
+  
+  prefillSavedDetails();
+  resetSlidePay();
+  
   document.getElementById('upiModalOverlay').style.display = 'flex';
-}
-
-function generateUpiQr() {
-  const details = validateCheckoutDetails();
-  if (!details) return;
-
-  const total = getCheckoutTotal();
-  if (total <= 0) {
-    setCheckoutError('Please check product pricing before generating the payment QR.');
-    return;
-  }
-  if (total > 5000 && !confirm(`Payment total is ₹${total}. Continue?`)) {
-    return;
-  }
-
-  const upiId = "YOUR_UPI_ID_HERE"; // <-- replace with your actual UPI ID
-  const transactionNote = `Zafraan Order - ${details.phone}`;
-  const upiPayload = `upi://pay?pa=${encodeURIComponent(upiId)}&tn=${encodeURIComponent(transactionNote)}&am=${total}`;
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(upiPayload)}`;
-
-  document.getElementById('upiQrImg').src = qrUrl;
-  document.getElementById('checkoutSummary').innerHTML = `
-    <strong>Order total:</strong> â‚¹${total}<br>
-    <strong>Mobile:</strong> ${details.phone}<br>
-    <strong>Address:</strong> ${details.address}<br>
-    ${details.mapLink ? `<strong>Map:</strong> <a href="${details.mapLink}" target="_blank" rel="noopener">Open location</a><br>` : ''}
-    <span>Please tap "Send Order Details" after payment so Zafraan receives your delivery details.</span>
-  `;
-  document.getElementById('upiQrPanel').style.display = 'block';
-  document.getElementById('sendOrderBtn').style.display = 'block';
-}
-
-function sendOrderOnWhatsApp() {
-  const details = validateCheckoutDetails();
-  if (!details) return;
-
-  const total = getCheckoutTotal();
-  const message = [
-    'Hi Zafraan, I have placed an order:',
-    '',
-    getCartOrderLines('\n'),
-    '',
-    `Total: â‚¹${total}`,
-    `Mobile: ${details.phone}`,
-    `Address: ${details.address}`
-  ].filter(Boolean).join('\n');
-
-  window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank');
 }
 
 function closeUpiModal() {
   document.getElementById('upiModalOverlay').style.display = 'none';
 }
+
+// DRAG SLIDE TO PAY physics
+let isDragging = false;
+let startX = 0;
+let dragLimit = 0;
+let currentDragX = 0;
+
+const sliderContainer = document.getElementById('slidePayContainer');
+const sliderHandle = document.getElementById('slidePayHandle');
+const sliderBg = document.getElementById('slidePayBg');
+const sliderText = document.getElementById('slidePayText');
+
+function initSlidePay() {
+    if (!sliderHandle) return;
+    
+    // Mouse Events
+    sliderHandle.addEventListener('mousedown', startDrag);
+    window.addEventListener('mousemove', drag);
+    window.addEventListener('mouseup', endDrag);
+    
+    // Touch Events
+    sliderHandle.addEventListener('touchstart', startDrag, { passive: true });
+    window.addEventListener('touchmove', drag, { passive: false });
+    window.addEventListener('touchend', endDrag);
+}
+
+function startDrag(e) {
+    const name = document.getElementById('checkoutName').value.trim();
+    const phone = document.getElementById('checkoutPhone').value.trim();
+    const address = document.getElementById('checkoutAddress').value.trim();
+    const phoneDigits = phone.replace(/\D/g, '');
+    
+    if (!name) {
+        setCheckoutError('Please enter your full name.');
+        return;
+    }
+    if (phoneDigits.length < 10) {
+        setCheckoutError('Please enter a valid mobile number.');
+        return;
+    }
+    if (!address) {
+        setCheckoutError('Please enter your home address.');
+        return;
+    }
+    setCheckoutError('');
+    
+    isDragging = true;
+    startX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+    dragLimit = sliderContainer.offsetWidth - sliderHandle.offsetWidth - 6;
+    sliderHandle.style.transition = 'none';
+    sliderBg.style.transition = 'none';
+}
+
+function drag(e) {
+    if (!isDragging) return;
+    
+    if (e.type === 'touchmove') e.preventDefault();
+    
+    const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+    let deltaX = clientX - startX;
+    if (deltaX < 0) deltaX = 0;
+    if (deltaX > dragLimit) deltaX = dragLimit;
+    
+    currentDragX = deltaX;
+    sliderHandle.style.left = (deltaX + 3) + 'px';
+    sliderBg.style.width = (deltaX + 27) + 'px';
+    
+    const pct = deltaX / dragLimit;
+    sliderText.style.opacity = 1 - pct;
+}
+
+function endDrag() {
+    if (!isDragging) return;
+    isDragging = false;
+    
+    if (currentDragX >= dragLimit * 0.9) {
+        sliderHandle.style.transition = 'left 0.2s ease';
+        sliderBg.style.transition = 'width 0.2s ease';
+        sliderHandle.style.left = (dragLimit + 3) + 'px';
+        sliderBg.style.width = '100%';
+        sliderText.style.opacity = 0;
+        sliderText.textContent = 'PAYMENT UNLOCKED';
+        sliderHandle.style.background = '#00e676';
+        sliderHandle.textContent = '✓';
+        sliderHandle.style.pointerEvents = 'none';
+        
+        triggerPaymentSuccess();
+    } else {
+        sliderHandle.style.transition = 'left 0.3s ease';
+        sliderBg.style.transition = 'width 0.3s ease';
+        sliderHandle.style.left = '3px';
+        sliderBg.style.width = '0px';
+        sliderText.style.opacity = 1;
+        currentDragX = 0;
+    }
+}
+
+function resetSlidePay() {
+    if (!sliderHandle) return;
+    sliderHandle.style.pointerEvents = 'auto';
+    sliderHandle.style.transition = 'none';
+    sliderBg.style.transition = 'none';
+    sliderHandle.style.left = '3px';
+    sliderBg.style.width = '0px';
+    sliderText.style.opacity = 1;
+    sliderText.textContent = 'Slide to Pay';
+    sliderHandle.style.background = 'var(--neon-green)';
+    sliderHandle.textContent = '→';
+    currentDragX = 0;
+}
+
+function triggerPaymentSuccess() {
+    const name = document.getElementById('checkoutName').value.trim();
+    const phone = document.getElementById('checkoutPhone').value.trim();
+    const address = document.getElementById('checkoutAddress').value.trim();
+    const phoneDigits = phone.replace(/\D/g, '');
+    
+    localStorage.setItem('zafraan_customer_phone', phone);
+    localStorage.setItem('zafraan_customer_name', name);
+    saveCustomerAddress(phoneDigits, address);
+    
+    const totalCash = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+    
+    const upiId = "917904788173@ybl";
+    const transactionNote = `Zafraan Order - ${phone}`;
+    const upiPayload = `upi://pay?pa=${encodeURIComponent(upiId)}&tn=${encodeURIComponent(transactionNote)}&am=${totalCash}`;
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(upiPayload)}`;
+    
+    document.getElementById('upiQrImg').src = qrUrl;
+    
+    // Save order to Firestore so admin can track it
+    const orderId = 'ZAF-' + Date.now();
+    const orderData = {
+        orderId: orderId,
+        customerName: name,
+        customerPhone: phone,
+        deliveryAddress: address,
+        items: cart.map(item => ({ name: item.name, size: item.size, qty: item.qty, price: item.price })),
+        totalPrice: totalCash,
+        status: 'Pending Payment',
+        createdAt: new Date().toISOString()
+    };
+    saveOrderToFirestore(orderData);
+    
+    const summaryEl = document.getElementById('checkoutSummary');
+    summaryEl.innerHTML = '';
+
+    const rows = [
+        ['Order ID', orderId],
+        ['Customer', name],
+        ['Mobile', phone],
+        ['Address', address],
+        ['Total Price', `₹${totalCash}`]
+    ];
+    rows.forEach(([label, value]) => {
+        const line = document.createElement('div');
+        const strong = document.createElement('strong');
+        strong.textContent = label + ': ';
+        line.appendChild(strong);
+        line.appendChild(document.createTextNode(value));
+        summaryEl.appendChild(line);
+    });
+
+    const note = document.createElement('div');
+    note.style.marginTop = '10px';
+    note.style.color = 'var(--neon-green)';
+    note.textContent = '✓ Please scan the QR code to pay, then click "Send Order Details" below to notify us on WhatsApp.';
+    summaryEl.appendChild(note);
+    document.getElementById('upiQrPanel').style.display = 'block';
+    document.getElementById('sendOrderBtn').style.display = 'block';
+    
+    startConfetti();
+}
+
+function sendOrderOnWhatsApp() {
+  const name = document.getElementById('checkoutName').value.trim();
+  const phone = document.getElementById('checkoutPhone').value.trim();
+  const address = document.getElementById('checkoutAddress').value.trim();
+  
+  const totalCash = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+
+  const cartLines = cart.map((item, i) => {
+    return `${i + 1}. ${item.name} (${item.size}) x ${item.qty} - ₹${item.price * item.qty}`;
+  }).join('\n');
+
+  const message = [
+    `Hi Zafraan, I have placed an order:`,
+    ``,
+    cartLines,
+    ``,
+    `Total: ₹${totalCash}`,
+    ``,
+    `Customer Name: ${name}`,
+    `Mobile: ${phone}`,
+    `Address: ${address}`,
+    `Payment: QR scanned – please verify`
+  ].join('\n');
+
+  window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank');
+  
+  cart = [];
+  saveCart();
+  closeUpiModal();
+  toggleCart();
+}
+
+// Confetti Particle System
+const confettiCanvas = document.getElementById('confettiCanvas');
+let ctx = null;
+let particles = [];
+let confettiAnimationId = null;
+
+if (confettiCanvas) {
+    ctx = confettiCanvas.getContext('2d');
+}
+
+function resizeConfetti() {
+    if (confettiCanvas) {
+        confettiCanvas.width = window.innerWidth;
+        confettiCanvas.height = window.innerHeight;
+    }
+}
+
+class ConfettiParticle {
+    constructor() {
+        this.x = Math.random() * (confettiCanvas ? confettiCanvas.width : 500);
+        this.y = -20;
+        this.size = Math.random() * 8 + 6;
+        this.speedX = Math.random() * 4 - 2;
+        this.speedY = Math.random() * 5 + 5;
+        const colors = ['#00e676', '#00b0ff', '#ff4081', '#d4af37', '#ffffff'];
+        this.color = colors[Math.floor(Math.random() * colors.length)];
+        this.rotation = Math.random() * 360;
+        this.rotationSpeed = Math.random() * 4 - 2;
+    }
+    update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        this.rotation += this.rotationSpeed;
+    }
+    draw() {
+        if (!ctx) return;
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.rotation * Math.PI / 180);
+        ctx.fillStyle = this.color;
+        ctx.fillRect(-this.size/2, -this.size/2, this.size, this.size);
+        ctx.restore();
+    }
+}
+
+function startConfetti() {
+    if (!confettiCanvas) return;
+    confettiCanvas.style.display = 'block';
+    resizeConfetti();
+    window.addEventListener('resize', resizeConfetti);
+    particles = [];
+    for (let i = 0; i < 150; i++) {
+        setTimeout(() => {
+            particles.push(new ConfettiParticle());
+        }, Math.random() * 800);
+    }
+    
+    function animate() {
+        ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+        let alive = false;
+        particles.forEach((p) => {
+            p.update();
+            p.draw();
+            if (p.y < confettiCanvas.height) alive = true;
+        });
+        
+        if (alive) {
+            confettiAnimationId = requestAnimationFrame(animate);
+        } else {
+            confettiCanvas.style.display = 'none';
+            cancelAnimationFrame(confettiAnimationId);
+        }
+    }
+    animate();
+}
+
+let firestoreDb = null;
+let firestoreSetDoc = null;
+let firestoreDocFn = null;
 
 async function loadAdminCatalog() {
   if (!isFirebaseConfigured()) {
@@ -1966,13 +2711,15 @@ async function loadAdminCatalog() {
 
   try {
     const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js');
-    const { getFirestore, collection, getDocs } = await import('https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js');
+    const firestore = await import('https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js');
     const app = initializeApp(window.ZAFRAAN_FIREBASE_CONFIG);
-    const db = getFirestore(app);
-    const snapshot = await getDocs(collection(db, 'productCatalog'));
+    firestoreDb = firestore.getFirestore(app);
+    firestoreSetDoc = firestore.setDoc;
+    firestoreDocFn = firestore.doc;
+    const snapshot = await firestore.getDocs(firestore.collection(firestoreDb, 'productCatalog'));
     productSettings = {};
-    snapshot.forEach(doc => {
-        productSettings[doc.id] = doc.data();
+    snapshot.forEach(d => {
+        productSettings[d.id] = d.data();
     });
     adminCatalogLoaded = true;
   } catch (error) {
@@ -1984,10 +2731,24 @@ async function loadAdminCatalog() {
   renderProducts();
 }
 
+async function saveOrderToFirestore(orderData) {
+    if (!firestoreDb || !firestoreSetDoc || !firestoreDocFn) {
+        console.warn('Firestore not initialized, order not saved to cloud.');
+        return;
+    }
+    try {
+        await firestoreSetDoc(firestoreDocFn(firestoreDb, 'orders', orderData.orderId), orderData);
+        console.log('Order saved to Firestore:', orderData.orderId);
+    } catch (err) {
+        console.error('Failed to save order:', err);
+    }
+}
+
 // Initial calls
 updateBadge();
 renderTabs();
 loadAdminCatalog();
+initSlidePay();
 </script>
 
 </body>

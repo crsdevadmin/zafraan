@@ -3,191 +3,667 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZAFRAAN Admin</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+    <title>ZAFRAAN — Admin Console</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --cream: #fdf6f0;
-            --warm-white: #faf4ee;
-            --rose: #b5685a;
-            --rose-deep: #8c4a3c;
-            --text-dark: #2a1e1a;
-            --text-mid: #6b4a40;
-            --text-light: #a07060;
-            --border: rgba(181,104,90,0.18);
-            --green: #4f7f55;
+            --bg-primary: #050505;
+            --bg-secondary: #0c0c0c;
+            --bg-card: #121212;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-focus: #00e676;
+            --neon-green: #00e676;
+            --neon-green-glow: rgba(0, 230, 118, 0.2);
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --text-muted: #555555;
+            --gold: #d4af37;
+            --gold-glow: rgba(212, 175, 55, 0.2);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            background: var(--cream);
-            color: var(--text-dark);
-            font-family: 'Jost', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Outfit', sans-serif;
             font-weight: 300;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Ambient grid background */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.01) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.01) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--neon-green);
         }
 
         header {
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(12, 12, 12, 0.8);
+            backdrop-filter: blur(12px);
             display: flex;
             gap: 20px;
             justify-content: space-between;
-            padding: 22px 32px;
+            align-items: center;
+            padding: 16px 32px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 32px;
         }
 
         .brand {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 28px;
-            letter-spacing: 4px;
-            color: var(--rose-deep);
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 22px;
+            letter-spacing: 2px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .brand span {
+            color: var(--neon-green);
+            text-shadow: 0 0 10px var(--neon-green-glow);
+        }
+
+        .admin-nav-tabs {
+            display: flex;
+            gap: 12px;
+        }
+
+        .admin-nav-tab {
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            border-radius: 0;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            text-transform: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .admin-nav-tab:hover {
+            color: #fff;
+            background: transparent;
+            border-color: rgba(255,255,255,0.05);
+        }
+
+        .admin-nav-tab.active {
+            color: var(--neon-green);
+            border-color: var(--neon-green);
+            background: transparent;
         }
 
         .top-actions {
             display: flex;
             align-items: center;
             gap: 12px;
-            flex-wrap: wrap;
         }
 
         .status {
-            color: var(--text-light);
+            color: var(--text-secondary);
             font-size: 13px;
+            font-weight: 400;
+            background: rgba(255,255,255,0.04);
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
         }
 
         button {
-            border: 1px solid var(--border);
-            background: #fff;
-            color: var(--rose-deep);
+            border: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.03);
+            color: #fff;
             cursor: pointer;
-            font-family: 'Jost', sans-serif;
-            font-size: 11px;
-            letter-spacing: 1.6px;
-            padding: 12px 16px;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 500;
+            font-size: 12px;
+            letter-spacing: 1px;
+            padding: 10px 18px;
+            border-radius: 8px;
             text-transform: uppercase;
+            transition: all 0.2s ease;
+        }
+
+        button:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
         }
 
         button.primary {
-            background: var(--rose);
-            border-color: var(--rose);
-            color: #fff;
+            background: var(--neon-green);
+            border-color: var(--neon-green);
+            color: #000;
+            font-weight: 600;
+            box-shadow: 0 0 15px var(--neon-green-glow);
+        }
+
+        button.primary:hover:not(:disabled) {
+            background: #00ff88;
+            box-shadow: 0 0 25px rgba(0, 255, 136, 0.4);
+            transform: translateY(-1px);
         }
 
         button:disabled {
             cursor: not-allowed;
-            opacity: 0.5;
+            opacity: 0.4;
         }
 
         main {
-            padding: 28px 32px 44px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px 24px;
         }
 
         .toolbar {
-            align-items: center;
             display: flex;
             justify-content: space-between;
-            gap: 16px;
-            margin-bottom: 20px;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
         }
 
-        h1 {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 36px;
-            font-weight: 400;
+        .title-block h1 {
+            font-size: 28px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            margin-bottom: 4px;
+        }
+
+        .filter-search-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 28px;
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .search-box {
+            position: relative;
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 16px 12px 42px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            color: #fff;
+            font-family: inherit;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--neon-green);
+            background: rgba(255, 255, 255, 0.04);
+            box-shadow: 0 0 10px rgba(0, 230, 118, 0.15);
+        }
+
+        .search-box .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 18px;
+            height: 18px;
+            color: var(--text-secondary);
+            pointer-events: none;
+        }
+
+        .category-tabs {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            scrollbar-width: none;
+        }
+
+        .category-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .cat-tab {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--text-secondary);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-family: inherit;
+            cursor: pointer;
+            white-space: nowrap;
+            text-transform: none;
+            letter-spacing: 0;
+            transition: all 0.2s ease;
+        }
+
+        .cat-tab:hover {
+            background: rgba(255, 255, 255, 0.06);
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .cat-tab.active {
+            background: var(--neon-green-glow);
+            color: var(--neon-green);
+            border-color: var(--neon-green);
+            font-weight: 500;
         }
 
         .grid {
             display: grid;
-            gap: 12px;
+            gap: 16px;
         }
 
         .product-row {
             align-items: center;
-            background: #fff;
-            border: 1px solid var(--border);
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
             display: grid;
-            grid-template-columns: 1.4fr 110px 130px 1.2fr 130px;
-            gap: 16px;
+            grid-template-columns: 70px 2fr 100px 140px 1.5fr 120px;
+            gap: 20px;
             padding: 16px;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .product-row:hover {
+            border-color: rgba(0, 230, 118, 0.25);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(0, 230, 118, 0.02);
+            transform: translateY(-2px);
+        }
+
+        .product-image-container {
+            width: 70px;
+            height: 70px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #151515;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .product-image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .product-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
         }
 
         .product-name {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 21px;
+            font-size: 18px;
             font-weight: 500;
+            color: #fff;
         }
 
         .product-meta {
-            color: var(--text-light);
+            color: var(--text-secondary);
             font-size: 12px;
-            line-height: 1.5;
-            margin-top: 4px;
         }
 
         label {
-            color: var(--text-light);
+            color: var(--text-secondary);
             display: flex;
             flex-direction: column;
-            font-size: 10px;
+            font-size: 11px;
             gap: 6px;
-            letter-spacing: 1.4px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
             text-transform: uppercase;
         }
 
-        input[type="number"] {
-            border: 1px solid var(--border);
-            color: var(--text-dark);
-            font: inherit;
-            padding: 10px;
+        input[type="number"], input[type="text"] {
+            background: #161616;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--text-primary);
+            font-family: 'Outfit', sans-serif;
+            font-size: 13px;
+            padding: 10px 14px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
             width: 100%;
         }
 
-        input[type="text"] {
-            border: 1px solid var(--border);
-            color: var(--text-dark);
-            font: inherit;
-            padding: 10px;
-            width: 100%;
+        input[type="number"]:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: var(--neon-green);
+            box-shadow: 0 0 10px rgba(0, 230, 118, 0.2);
+            background: #1c1c1c;
         }
 
         .ready-toggle {
             align-items: center;
-            flex-direction: row;
-            gap: 10px;
+            flex-direction: column;
+            gap: 8px;
         }
 
-        input[type="checkbox"] {
-            accent-color: var(--rose);
-            height: 20px;
-            width: 20px;
+        /* Custom Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 46px;
+            height: 24px;
         }
-
-        .pill {
-            color: var(--green);
-            font-size: 11px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #222;
+            transition: .3s;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            bottom: 3px;
+            background-color: #777;
+            transition: .3s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: var(--neon-green-glow);
+            border-color: var(--neon-green);
+        }
+        input:checked + .slider:before {
+            transform: translateX(22px);
+            background-color: var(--neon-green);
+            box-shadow: 0 0 10px var(--neon-green);
         }
 
         .message {
-            color: var(--text-mid);
+            color: var(--neon-green);
             font-size: 13px;
             min-height: 20px;
+            text-shadow: 0 0 8px rgba(0, 230, 118, 0.3);
+            font-weight: 500;
         }
 
-        @media (max-width: 760px) {
-            header,
-            main {
-                padding-left: 18px;
-                padding-right: 18px;
-            }
+        .message.error {
+            color: #ff4081;
+            text-shadow: 0 0 8px rgba(255, 64, 129, 0.3);
+        }
 
-            header,
-            .toolbar {
-                align-items: flex-start;
-                flex-direction: column;
-            }
+        /* Orders CSS Styles */
+        .orders-grid {
+            display: grid;
+            gap: 20px;
+        }
 
+        .order-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.22s ease;
+        }
+
+        .order-card:hover {
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            padding-bottom: 12px;
+            margin-bottom: 14px;
+        }
+
+        .order-id {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--neon-green);
+        }
+
+        .order-date {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .order-customer {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+
+        .customer-detail span {
+            display: block;
+            font-size: 11px;
+            color: var(--text-secondary);
+            opacity: 0.6;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+            letter-spacing: 0.5px;
+        }
+
+        .customer-detail p {
+            color: #fff;
+            font-weight: 400;
+        }
+
+        .order-items {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+        }
+
+        .order-items-title {
+            font-size: 11px;
+            color: var(--text-secondary);
+            opacity: 0.6;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            padding-bottom: 4px;
+        }
+
+        .order-item-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: var(--text-secondary);
+            padding: 4px 0;
+        }
+
+        .order-item-row:not(:last-child) {
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.03);
+        }
+
+        .order-item-row strong {
+            color: #fff;
+        }
+
+        .order-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            padding-top: 12px;
+        }
+
+        .order-total {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .order-total span {
+            color: var(--neon-green);
+            font-size: 18px;
+        }
+
+        .order-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-select {
+            background: #161616;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 13px;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .status-select:focus {
+            border-color: var(--neon-green);
+        }
+
+        /* Status badges */
+        .status-pill {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .status-pending {
+            background: rgba(255, 152, 0, 0.15);
+            color: #ff9800;
+            border: 1px solid rgba(255, 152, 0, 0.3);
+        }
+        .status-paid {
+            background: rgba(3, 169, 244, 0.15);
+            color: #03a9f4;
+            border: 1px solid rgba(3, 169, 244, 0.3);
+        }
+        .status-delivered {
+            background: rgba(76, 175, 80, 0.15);
+            color: #4caf50;
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+        .status-cancelled {
+            background: rgba(244, 67, 54, 0.15);
+            color: #f44336;
+            border: 1px solid rgba(244, 67, 54, 0.3);
+        }
+
+        @media (max-width: 992px) {
             .product-row {
+                grid-template-columns: 70px 1.5fr 1fr 1fr 1fr;
+            }
+            .product-row > label:nth-child(5) {
+                grid-column: span 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            header {
+                padding: 16px 20px;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 16px;
+            }
+            .header-left {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+            .admin-nav-tabs {
+                width: 100%;
+                justify-content: flex-start;
+            }
+            .top-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+            main {
+                padding: 20px 16px;
+            }
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 16px;
+            }
+            .product-row {
+                grid-template-columns: 1fr;
+                gap: 14px;
+            }
+            .product-image-container {
+                width: 100%;
+                height: 120px;
+            }
+            .ready-toggle {
+                flex-direction: row;
+                justify-content: space-between;
+                width: 100%;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+                padding-bottom: 8px;
+            }
+            .order-customer {
                 grid-template-columns: 1fr;
             }
         }
@@ -195,11 +671,15 @@
 </head>
 <body>
     <header>
-        <div>
-            <div class="brand">ZAFRAAN</div>
-            <div class="status" id="authStatus">Signed out</div>
+        <div class="header-left">
+            <div class="brand">ZAFRAAN <span>ADMIN</span></div>
+            <div class="admin-nav-tabs">
+                <button id="tabCatalog" class="admin-nav-tab active" onclick="switchAdminTab('catalog')">Products</button>
+                <button id="tabOrders" class="admin-nav-tab" onclick="switchAdminTab('orders')">Orders</button>
+            </div>
         </div>
         <div class="top-actions">
+            <span class="status" id="authStatus">Signed out</span>
             <button id="loginBtn">Login with Google</button>
             <button id="logoutBtn" style="display:none;">Logout</button>
             <a href="./index.html"><button type="button">View Site</button></a>
@@ -207,34 +687,123 @@
     </header>
 
     <main>
-        <div class="toolbar">
-            <div>
-                <h1>Product Catalog</h1>
-                <div class="message" id="message"></div>
+        <!-- PRODUCTS PANEL -->
+        <div id="panelCatalog">
+            <div class="toolbar">
+                <div class="title-block">
+                    <h1>Product Catalog</h1>
+                    <div class="message" id="message"></div>
+                </div>
+                <button class="primary" id="saveBtn" disabled>Save Catalog</button>
             </div>
-            <button class="primary" id="saveBtn" disabled>Save Catalog</button>
+
+            <div class="filter-search-container">
+                <div class="search-box">
+                    <svg class="search-icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" fill="currentColor"/></svg>
+                    <input type="text" id="searchInput" placeholder="Search product name or category...">
+                </div>
+                <div class="category-tabs" id="categoryTabs">
+                    <!-- Tabs will load dynamically -->
+                </div>
+            </div>
+
+            <div class="grid" id="productGrid"></div>
         </div>
-        <div class="grid" id="productGrid"></div>
+
+        <!-- ORDERS PANEL -->
+        <div id="panelOrders" style="display:none;">
+            <div class="toolbar">
+                <div class="title-block">
+                    <h1>Orders Management</h1>
+                    <div class="message" id="ordersMessage"></div>
+                </div>
+                <button class="primary" onclick="loadOrders()">Refresh Orders</button>
+            </div>
+
+            <div class="orders-grid" id="ordersGrid">
+                <!-- Orders will render dynamically -->
+            </div>
+        </div>
     </main>
 
     <script src="./firebase-config.js"></script>
     <script type="module">
         const baseProducts = [
-            { id:1, name:'Peeled Garlic', cat:'Fresh Prep', sizes:'100g / 250g / 500g / 1kg', price:0 },
-            { id:2, name:'Peeled Small Onion', cat:'Fresh Prep', sizes:'250g / 500g / 1kg', price:0 },
-            { id:3, name:'Peeled Ginger', cat:'Fresh Prep', sizes:'100g / 250g / 500g', price:0 },
-            { id:4, name:'Cut Carrot', cat:'Cut Vegetables', sizes:'250g / 500g / 1kg', price:0 },
-            { id:5, name:'Cut Ladies Finger', cat:'Cut Vegetables', sizes:'250g / 500g / 1kg', price:0 },
-            { id:6, name:'Cut Pumpkin', cat:'Cut Vegetables', sizes:'250g / 500g / 1kg', price:0 },
-            { id:7, name:'Cut Drumstick', cat:'Cut Vegetables', sizes:'250g / 500g / 1kg', price:0 },
-            { id:8, name:'Cut Beans', cat:'Cut Vegetables', sizes:'250g / 500g / 1kg', price:0 },
-            { id:9, name:'Cut Beetroot', cat:'Cut Vegetables', sizes:'250g / 500g / 1kg', price:0 },
-            { id:10, name:'Cut Bitter Gourd', cat:'Cut Vegetables', sizes:'250g / 500g / 1kg', price:0 },
-            { id:11, name:'Beans Poriyal Pack', cat:'Poriyal Packs', sizes:'Pack', price:0 },
-            { id:12, name:'Carrot Poriyal Pack', cat:'Poriyal Packs', sizes:'Pack', price:0 },
-            { id:13, name:'Beans Carrot Combined Pack', cat:'Poriyal Packs', sizes:'Pack', price:0 },
-            { id:14, name:'Sambar Veggies Pack', cat:'Sambar Pack', sizes:'Pack', price:0 }
+            // Category: Fresh Prep
+            { id: 1,  name: 'Peeled Garlic',              cat: 'Fresh Prep',          sizes: '100g / 250g / 500g / 1kg', price: 40 },
+            { id: 2,  name: 'Peeled Small Onion',         cat: 'Fresh Prep',          sizes: '250g / 500g / 1kg',        price: 35 },
+            { id: 3,  name: 'Peeled Ginger',              cat: 'Fresh Prep',          sizes: '100g / 250g / 500g',       price: 50 },
+            { id: 4,  name: 'Chopped Onion',              cat: 'Fresh Prep',          sizes: '250g / 500g / 1kg',        price: 30 },
+            { id: 5,  name: 'Curry Leaves',               cat: 'Fresh Prep',          sizes: '50g / 100g',               price: 25 },
+            { id: 6,  name: 'Coriander Leaves',           cat: 'Fresh Prep',          sizes: '50g / 100g',               price: 30 },
+            { id: 7,  name: 'Mint Leaves',                cat: 'Fresh Prep',          sizes: '50g / 100g',               price: 35 },
+
+            // Category: Cut Vegetables
+            { id: 8,  name: 'Cut Carrot',                 cat: 'Cut Vegetables',      sizes: '250g / 500g / 1kg',        price: 35 },
+            { id: 9,  name: 'Cut Ladies Finger',          cat: 'Cut Vegetables',      sizes: '250g / 500g / 1kg',        price: 30 },
+            { id: 10, name: 'Cut Pumpkin',                cat: 'Cut Vegetables',      sizes: '250g / 500g / 1kg',        price: 25 },
+            { id: 11, name: 'Cut Drumstick',              cat: 'Cut Vegetables',      sizes: '250g / 500g / 1kg',        price: 45 },
+            { id: 12, name: 'Cut Beans',                  cat: 'Cut Vegetables',      sizes: '250g / 500g / 1kg',        price: 40 },
+            { id: 13, name: 'Sambar Veggies Pack',        cat: 'Cut Vegetables',      sizes: 'Pack',                     price: 60 },
+
+            // Category: Spices & Seasonings
+            { id: 14, name: 'Garlic Powder',              cat: 'Spices & Seasonings', sizes: '50g / 100g',               price: 120 },
+            { id: 15, name: 'Onion Powder',               cat: 'Spices & Seasonings', sizes: '50g / 100g',               price: 100 },
+            { id: 16, name: 'Ginger Powder',              cat: 'Spices & Seasonings', sizes: '50g / 100g',               price: 140 },
+            { id: 17, name: 'Peri Peri Powder',           cat: 'Spices & Seasonings', sizes: '50g / 100g',               price: 160 },
+            { id: 18, name: 'Chilli Flakes',              cat: 'Spices & Seasonings', sizes: '50g / 100g',               price: 90 },
+            { id: 19, name: 'Oregano',                    cat: 'Spices & Seasonings', sizes: '25g / 50g',                price: 200 },
+            { id: 20, name: 'Italian Seasoning',          cat: 'Spices & Seasonings', sizes: '50g / 100g',               price: 150 },
+
+            // Category: Gourmet Mayonnaise
+            { id: 21, name: 'Plain Mayonnaise',           cat: 'Gourmet Mayonnaise',  sizes: '100g / 250g',              price: 80 },
+            { id: 22, name: 'Peri Peri Mayonnaise',       cat: 'Gourmet Mayonnaise',  sizes: '100g / 250g',              price: 90 },
+            { id: 23, name: 'Garlic Mayonnaise',          cat: 'Gourmet Mayonnaise',  sizes: '100g / 250g',              price: 95 },
+            { id: 24, name: 'Mint Mayonnaise',            cat: 'Gourmet Mayonnaise',  sizes: '100g / 250g',              price: 95 },
+
+            // Category: Roasted Makhana
+            { id: 25, name: 'Plain Makhana',              cat: 'Roasted Makhana',     sizes: '50g / 100g',               price: 180 },
+            { id: 26, name: 'Peri Peri Makhana',          cat: 'Roasted Makhana',     sizes: '50g / 100g',               price: 200 },
+            { id: 27, name: 'Salt & Pepper Makhana',      cat: 'Roasted Makhana',     sizes: '50g / 100g',               price: 190 },
+            { id: 28, name: 'Mint Makhana',               cat: 'Roasted Makhana',     sizes: '50g / 100g',               price: 200 },
+
+            // Category: Premium Combos
+            { id: 29, name: 'Pizza Combo',                cat: 'Premium Combos',      sizes: 'Pack',                     price: 299 },
+            { id: 30, name: 'Burger Combo',               cat: 'Premium Combos',      sizes: 'Pack',                     price: 249 }
         ];
+
+        const productImages = {
+            'Peeled Garlic': './zafraan-images/01-peeled-garlic.png',
+            'Peeled Small Onion': './zafraan-images/02-peeled-small-onion.png',
+            'Peeled Ginger': './zafraan-images/02-peeled-ginger.png',
+            'Chopped Onion': './zafraan-images/03-chopped-onion.png',
+            'Curry Leaves': './zafraan-images/05-curry-leaves.png',
+            'Coriander Leaves': './zafraan-images/06-coriander-leaves.png',
+            'Mint Leaves': './zafraan-images/07-mint-leaves.png',
+            'Cut Carrot': './zafraan-images/04-cut-carrot.png',
+            'Cut Ladies Finger': './zafraan-images/05-cut-ladies-finger.png',
+            'Cut Pumpkin': './zafraan-images/06-cut-pumpkin.png',
+            'Cut Drumstick': './zafraan-images/07-cut-drumstick.png',
+            'Cut Beans': './zafraan-images/08-cut-beans.png',
+            'Sambar Veggies Pack': './zafraan-images/04-veg-pack.png',
+            'Garlic Powder': './zafraan-images/08-garlic-powder.png',
+            'Onion Powder': './zafraan-images/09-onion-powder.png',
+            'Ginger Powder': './zafraan-images/10-ginger-powder.png',
+            'Peri Peri Powder': './zafraan-images/11-peri-peri-powder.png',
+            'Chilli Flakes': './zafraan-images/12-chilli-flakes.png',
+            'Oregano': './zafraan-images/13-oregano.png',
+            'Italian Seasoning': './zafraan-images/14-italian-seasoning.png',
+            'Plain Mayonnaise': './zafraan-images/15-mayonnaise.png',
+            'Peri Peri Mayonnaise': './zafraan-images/16-peri-mayo.png',
+            'Garlic Mayonnaise': './zafraan-images/17-garlic-mayo.png',
+            'Mint Mayonnaise': './zafraan-images/18-mint-mayo.png',
+            'Plain Makhana': './zafraan-images/19-plain-makhana.png',
+            'Peri Peri Makhana': './zafraan-images/20-peri-makhana.png',
+            'Salt & Pepper Makhana': './zafraan-images/21-salt-pepper-makhana.png',
+            'Mint Makhana': './zafraan-images/22-mint-makhana.png',
+            'Pizza Combo': './zafraan-images/23-pizza-combo.png',
+            'Burger Combo': './zafraan-images/24-burger-combo.png'
+        };
 
         const config = window.ZAFRAAN_FIREBASE_CONFIG;
         const adminEmails = window.ZAFRAAN_ADMIN_EMAILS || [];
@@ -244,7 +813,9 @@
         const saveBtn = document.getElementById('saveBtn');
         const authStatus = document.getElementById('authStatus');
         const message = document.getElementById('message');
+        const ordersMessage = document.getElementById('ordersMessage');
         const productGrid = document.getElementById('productGrid');
+        const searchInput = document.getElementById('searchInput');
 
         let app;
         let auth;
@@ -258,9 +829,89 @@
         let doc;
         let getDocs;
         let writeBatch;
+        let updateDoc;
 
-        function setMessage(text) {
+        let loadedSettings = {};
+        let currentCategory = 'All';
+        let searchQuery = '';
+        let ordersList = [];
+
+        function sanitize(str) {
+            const div = document.createElement('div');
+            div.textContent = String(str ?? '');
+            return div.innerHTML;
+        }
+
+        // Tab switcher
+        window.switchAdminTab = function(tab) {
+            const panelCatalog = document.getElementById('panelCatalog');
+            const panelOrders = document.getElementById('panelOrders');
+            const tabCatalog = document.getElementById('tabCatalog');
+            const tabOrders = document.getElementById('tabOrders');
+            
+            if (tab === 'catalog') {
+                panelCatalog.style.display = 'block';
+                panelOrders.style.display = 'none';
+                tabCatalog.classList.add('active');
+                tabOrders.classList.remove('active');
+            } else {
+                panelCatalog.style.display = 'none';
+                panelOrders.style.display = 'block';
+                tabCatalog.classList.remove('active');
+                tabOrders.classList.add('active');
+                loadOrders();
+            }
+        };
+
+        function setMessage(text, isError = false) {
             message.textContent = text;
+            if (isError) {
+                message.className = 'message error';
+            } else {
+                message.className = 'message';
+            }
+        }
+
+        function setOrdersMessage(text, isError = false) {
+            ordersMessage.textContent = text;
+            if (isError) {
+                ordersMessage.className = 'message error';
+            } else {
+                ordersMessage.className = 'message';
+            }
+        }
+
+        function applyFilters() {
+            const rows = document.querySelectorAll('.product-row');
+            rows.forEach(row => {
+                const name = row.dataset.name.toLowerCase();
+                const cat = row.dataset.category.toLowerCase();
+                const matchesCategory = (currentCategory === 'All' || cat === currentCategory.toLowerCase());
+                const matchesSearch = (searchQuery === '' || name.includes(searchQuery) || cat.includes(searchQuery));
+                
+                if (matchesCategory && matchesSearch) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        function renderCategoryTabs() {
+            const tabsEl = document.getElementById('categoryTabs');
+            const categories = ['All', ...new Set(baseProducts.map(p => p.cat))];
+            tabsEl.innerHTML = categories.map(cat => `
+                <button class="cat-tab ${cat === currentCategory ? 'active' : ''}" data-category="${cat}">${cat}</button>
+            `).join('');
+            
+            tabsEl.querySelectorAll('.cat-tab').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    tabsEl.querySelectorAll('.cat-tab').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentCategory = btn.dataset.category;
+                    applyFilters();
+                });
+            });
         }
 
         function renderProducts(settings = {}) {
@@ -270,48 +921,57 @@
                 const price = Number(saved.price) || product.price;
                 const sizes = typeof saved.sizes === 'string' && saved.sizes.trim() ? saved.sizes.trim() : product.sizes;
                 const stockQty = saved.stockQty ?? 0;
+                const imageUrl = productImages[product.name] || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=800&q=80';
 
                 return `
-                    <div class="product-row" data-id="${product.id}">
-                        <div>
+                    <div class="product-row" data-id="${product.id}" data-name="${product.name}" data-category="${product.cat}">
+                        <div class="product-image-container">
+                            <img src="${imageUrl}" alt="${product.name}">
+                        </div>
+                        <div class="product-info">
                             <div class="product-name">${product.name}</div>
-                            <div class="product-meta">${product.cat} / ${product.sizes}</div>
+                            <div class="product-meta">${product.cat} · base ${product.sizes}</div>
                         </div>
                         <label class="ready-toggle">
-                            <input type="checkbox" class="visible-input" ${visible ? 'checked' : ''}>
-                            <span class="pill">Ready</span>
+                            <span>Ready</span>
+                            <label class="switch">
+                                <input type="checkbox" class="visible-input" ${visible ? 'checked' : ''}>
+                                <span class="slider"></span>
+                            </label>
                         </label>
                         <label>
-                            Price for 100g
+                            Price (₹)
                             <input type="number" class="price-input" min="0" value="${price}">
                         </label>
                         <label>
-                            Gram Options
-                            <input type="text" class="sizes-input" value="${sizes}" placeholder="100g / 250g / 500g">
+                            Gram/Size Options
+                            <input type="text" class="sizes-input" value="${sizes}" placeholder="50g / 100g / 250g">
                         </label>
                         <label>
-                            Quantity
+                            Stock Qty
                             <input type="number" class="stock-input" min="0" value="${stockQty}">
                         </label>
                     </div>
                 `;
             }).join('');
+            
+            applyFilters();
         }
 
         async function loadCatalog() {
             const snapshot = await getDocs(collection(db, 'productCatalog'));
-            const settings = {};
+            loadedSettings = {};
             snapshot.forEach(item => {
-                settings[item.id] = item.data();
+                loadedSettings[item.id] = item.data();
             });
-            renderProducts(settings);
+            renderProducts(loadedSettings);
         }
 
         async function saveCatalog() {
             if (!currentUser) return;
 
             saveBtn.disabled = true;
-            setMessage('Saving...');
+            setMessage('Saving changes...');
 
             const batch = writeBatch(db);
             document.querySelectorAll('.product-row').forEach(row => {
@@ -320,6 +980,15 @@
                 const price = Number(row.querySelector('.price-input').value) || product.price;
                 const sizes = row.querySelector('.sizes-input').value.trim() || product.sizes;
                 const stockQty = Number(row.querySelector('.stock-input').value) || 0;
+
+                loadedSettings[String(product.id)] = {
+                    name: product.name,
+                    cat: product.cat,
+                    visible,
+                    price,
+                    sizes,
+                    stockQty
+                };
 
                 batch.set(doc(db, 'productCatalog', String(product.id)), {
                     name: product.name,
@@ -333,18 +1002,167 @@
                 });
             });
 
-            await batch.commit();
-            saveBtn.disabled = false;
-            setMessage('Saved');
+            try {
+                await batch.commit();
+                setMessage('Catalog updated successfully!');
+                setTimeout(() => setMessage(''), 3000);
+            } catch (err) {
+                console.error(err);
+                setMessage('Error saving catalog: ' + err.message, true);
+            } finally {
+                saveBtn.disabled = false;
+            }
         }
+
+        // LOAD ORDERS FROM FIRESTORE
+        window.loadOrders = async function() {
+            if (!currentUser) return;
+            const ordersGrid = document.getElementById('ordersGrid');
+            
+            setOrdersMessage('Loading orders...');
+            ordersGrid.innerHTML = '';
+            
+            try {
+                const querySnapshot = await getDocs(collection(db, 'orders'));
+                ordersList = [];
+                querySnapshot.forEach(doc => {
+                    ordersList.push(doc.data());
+                });
+                
+                // Sort by date descending
+                ordersList.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                
+                setOrdersMessage('');
+                renderOrders();
+            } catch (err) {
+                console.error(err);
+                setOrdersMessage('Error loading orders: ' + err.message, true);
+            }
+        };
+
+        function getStatusClass(status) {
+            switch (status) {
+                case 'Pending Payment': return 'status-pending';
+                case 'Paid/Processing': return 'status-paid';
+                case 'Delivered': return 'status-delivered';
+                case 'Cancelled': return 'status-cancelled';
+                default: return 'status-pending';
+            }
+        }
+
+        // RENDER ORDERS TO SCREEN
+        function renderOrders() {
+            const ordersGrid = document.getElementById('ordersGrid');
+            if (ordersList.length === 0) {
+                ordersGrid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-secondary);">No orders found.</div>';
+                return;
+            }
+            
+            ordersGrid.innerHTML = ordersList.map(order => {
+                const dateStr = new Date(order.createdAt).toLocaleString();
+                const statusClass = getStatusClass(order.status);
+                const itemsHtml = (order.items || []).map(item => `
+                    <div class="order-item-row">
+                        <span>${sanitize(item.name)} (${sanitize(item.size)}) <strong>x${sanitize(item.qty)}</strong></span>
+                        <span>₹${sanitize(item.price * item.qty)}</span>
+                    </div>
+                `).join('');
+
+                return `
+                    <div class="order-card" id="order-${sanitize(order.orderId)}">
+                        <div class="order-header">
+                            <div>
+                                <span class="order-id">${sanitize(order.orderId)}</span>
+                                <div class="order-date">${sanitize(dateStr)}</div>
+                            </div>
+                            <span class="status-pill ${statusClass}">${sanitize(order.status)}</span>
+                        </div>
+                        <div class="order-customer">
+                            <div class="customer-detail">
+                                <span>Customer Name</span>
+                                <p>${sanitize(order.customerName)}</p>
+                            </div>
+                            <div class="customer-detail">
+                                <span>Phone Number</span>
+                                <p>${sanitize(order.customerPhone)}</p>
+                            </div>
+                            <div class="customer-detail" style="grid-column: span 2;">
+                                <span>Delivery Address</span>
+                                <p>${sanitize(order.deliveryAddress)}</p>
+                            </div>
+                        </div>
+                        <div class="order-items">
+                            <div class="order-items-title">Items Ordered</div>
+                            ${itemsHtml}
+                        </div>
+                        <div class="order-footer">
+                            <div class="order-total">Total Price: <span>₹${sanitize(order.totalPrice)}</span></div>
+                            <div class="order-actions">
+                                <label style="flex-direction:row;align-items:center;gap:8px;font-size:12px;margin:0;">
+                                    <span>UPDATE STATUS:</span>
+                                    <select class="status-select" data-order-id="${sanitize(order.orderId)}" onchange="updateOrderStatus(this.dataset.orderId, this.value)">
+                                        <option value="Pending Payment" ${order.status === 'Pending Payment' ? 'selected' : ''}>Pending Payment</option>
+                                        <option value="Paid/Processing" ${order.status === 'Paid/Processing' ? 'selected' : ''}>Paid/Processing</option>
+                                        <option value="Delivered" ${order.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                                        <option value="Cancelled" ${order.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+                                    </select>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // UPDATE STATUS IN FIRESTORE
+        window.updateOrderStatus = async function(orderId, newStatus) {
+            if (!currentUser) return;
+            
+            setOrdersMessage(`Updating order ${orderId}...`);
+            
+            try {
+                const orderRef = doc(db, 'orders', orderId);
+                await updateDoc(orderRef, {
+                    status: newStatus,
+                    updatedAt: new Date().toISOString(),
+                    updatedBy: currentUser.email
+                });
+                
+                // Update local model
+                const order = ordersList.find(o => o.orderId === orderId);
+                if (order) {
+                    order.status = newStatus;
+                }
+                
+                renderOrders();
+                setOrdersMessage(`Order ${orderId} status updated to: ${newStatus}`);
+                setTimeout(() => {
+                    if (ordersMessage.textContent.includes(orderId)) {
+                        setOrdersMessage('');
+                    }
+                }, 3000);
+            } catch (err) {
+                console.error(err);
+                setOrdersMessage('Error updating status: ' + err.message, true);
+            }
+        };
 
         function isAdmin(user) {
             return user && adminEmails.includes(user.email);
         }
 
+        // Initialize Category Tabs
+        renderCategoryTabs();
+
+        // Listen for Search input
+        searchInput.addEventListener('input', (e) => {
+            searchQuery = e.target.value.toLowerCase().trim();
+            applyFilters();
+        });
+
         if (!isConfigured) {
             authStatus.textContent = 'Firebase not configured';
-            setMessage('Update firebase-config.js before using admin.');
+            setMessage('Update firebase-config.js before using admin.', true);
             renderProducts();
         } else {
             const firebaseApp = await import('https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js');
@@ -359,6 +1177,7 @@
             doc = firebaseStore.doc;
             getDocs = firebaseStore.getDocs;
             writeBatch = firebaseStore.writeBatch;
+            updateDoc = firebaseStore.updateDoc;
 
             app = firebaseApp.initializeApp(config);
             auth = firebaseAuth.getAuth(app);
@@ -383,7 +1202,7 @@
                 authStatus.textContent = user.email;
                 if (!isAdmin(user)) {
                     saveBtn.disabled = true;
-                    setMessage('This account is not an admin.');
+                    setMessage('This account is not an admin.', true);
                     renderProducts();
                     return;
                 }
@@ -392,6 +1211,11 @@
                 setMessage('Loading...');
                 await loadCatalog();
                 setMessage('');
+                
+                // If switchAdminTab was already set to orders, load orders
+                if (document.getElementById('panelOrders').style.display === 'block') {
+                    loadOrders();
+                }
             });
         }
     </script>
