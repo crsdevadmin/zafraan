@@ -1030,6 +1030,24 @@
             background: rgba(255,255,255,0.04);
         }
 
+        .otp-btn {
+            background: var(--neon-green);
+            color: #000;
+            font-family: 'Outfit', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            padding: 13px 16px;
+            border: none;
+            cursor: pointer;
+            white-space: nowrap;
+            letter-spacing: 0.5px;
+            transition: opacity 0.2s;
+        }
+        .otp-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
         .checkout-note,
         .checkout-error {
             font-size: 12px;
@@ -1709,30 +1727,51 @@
         <div class="modal-body">
             <div id="checkoutOrderSummary" class="order-summary-box" style="margin-bottom:20px;"></div>
             <div class="checkout-form">
+
+                <!-- Step 1: Phone verification -->
                 <div class="checkout-field">
-                    <label for="checkoutName">Full Name</label>
-                    <input id="checkoutName" type="text" autocomplete="name" placeholder="Enter your full name">
+                    <label for="checkoutPhone">Mobile Number <span id="phoneVerifiedBadge" style="display:none;color:#00e676;font-size:12px;letter-spacing:0;text-transform:none;">✓ Verified</span></label>
+                    <div style="display:flex;gap:8px;">
+                        <input id="checkoutPhone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="10-digit mobile number" style="flex:1;box-sizing:border-box;">
+                        <button id="sendOtpBtn" class="otp-btn" onclick="sendOTP()">Send OTP</button>
+                    </div>
                 </div>
-                <div class="checkout-field">
-                    <label for="checkoutPhone">Mobile Number</label>
-                    <input id="checkoutPhone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="10-digit mobile number" oninput="prefillSavedAddress()">
+
+                <div id="otpSection" style="display:none;">
+                    <div class="checkout-field">
+                        <label for="otpInput">Enter OTP sent to your number</label>
+                        <div style="display:flex;gap:8px;">
+                            <input id="otpInput" type="text" inputmode="numeric" maxlength="6" placeholder="6-digit OTP" style="flex:1;letter-spacing:6px;box-sizing:border-box;">
+                            <button id="verifyOtpBtn" class="otp-btn" onclick="verifyOTP()">Verify</button>
+                        </div>
+                    </div>
                 </div>
-                <div class="checkout-field">
-                    <label for="checkoutAddress">Delivery Address</label>
-                    <textarea id="checkoutAddress" autocomplete="street-address" placeholder="House no., street, area, city"></textarea>
+
+                <!-- Step 2: Order details (shown after verification) -->
+                <div id="orderDetailsSection" style="display:none;">
+                    <div class="checkout-form" style="gap:16px;">
+                        <div class="checkout-field">
+                            <label for="checkoutName">Full Name</label>
+                            <input id="checkoutName" type="text" autocomplete="name" placeholder="Enter your full name">
+                        </div>
+                        <div class="checkout-field">
+                            <label for="checkoutAddress">Delivery Address</label>
+                            <textarea id="checkoutAddress" autocomplete="street-address" placeholder="House no., street, area, city"></textarea>
+                        </div>
+                        <div class="checkout-note" id="checkoutLocationNote">Your address will be saved for next time.</div>
+                    </div>
                 </div>
-                <div class="checkout-note" id="checkoutLocationNote">Your address will be saved for next time.</div>
 
                 <div class="payment-info-box">
                     <div class="payment-info-icon">💳</div>
                     <div>
                         <div class="payment-info-title">Payment Options</div>
-                        <div class="payment-info-desc">We currently accept <strong>Cash on Delivery</strong> or <strong>GPay</strong> to 9176048173</div>
+                        <div class="payment-info-desc">We currently accept <strong>Cash on Delivery</strong> or <strong>GPay</strong> to our delivery partner. <strong>Free delivery</strong> on orders ₹100 and above. A ₹10 delivery charge applies below ₹100.</div>
                     </div>
                 </div>
 
                 <div class="checkout-error" id="checkoutError"></div>
-                <button class="modal-btn" onclick="placeOrder()">Send Order on WhatsApp</button>
+                <button class="modal-btn" id="placeOrderBtn" onclick="placeOrder()" style="display:none;">Send Order on WhatsApp</button>
             </div>
         </div>
     </div>
@@ -2056,7 +2095,6 @@ function addToCart() {
     
     saveCart();
     closeModal();
-    toggleCart();
 }
 
 function saveCart() {
@@ -2193,21 +2231,120 @@ function prefillSavedDetails() {
     prefillSavedAddress();
 }
 
+let otpConfirmationResult = null;
+let phoneVerified = false;
+
 function checkoutUPI() {
     if (cart.length === 0) return alert('Your bag is empty');
 
     const summaryEl = document.getElementById('checkoutOrderSummary');
     const totalCash = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+    const deliveryCharge = totalCash >= 100 ? 0 : 10;
+    const grandTotal = totalCash + deliveryCharge;
+
+    const deliveryRow = deliveryCharge > 0
+        ? `<div class="summary-row"><span>Delivery Charge</span><span>₹${deliveryCharge}</span></div>`
+        : `<div class="summary-row" style="color:#00e676;"><span>Delivery</span><span>Free</span></div>`;
+
     summaryEl.innerHTML = cart.map(item => `
         <div class="summary-row">
             <span>${item.name} <span style="color:var(--text-secondary);font-size:12px;">(${item.size}) ×${item.qty}</span></span>
             <span>₹${item.price * item.qty}</span>
         </div>
-    `).join('') + `<div class="summary-total"><span>Total</span><span>₹${totalCash}</span></div>`;
+    `).join('') + deliveryRow + `<div class="summary-total"><span>Total</span><span>₹${grandTotal}</span></div>`;
+
+    // Reset OTP state
+    phoneVerified = false;
+    otpConfirmationResult = null;
+    if (window.recaptchaVerifier) { try { window.recaptchaVerifier.clear(); } catch(e) {} window.recaptchaVerifier = null; }
+    document.getElementById('checkoutPhone').value = '';
+    document.getElementById('checkoutPhone').readOnly = false;
+    document.getElementById('otpInput') && (document.getElementById('otpInput').value = '');
+    document.getElementById('otpSection').style.display = 'none';
+    document.getElementById('orderDetailsSection').style.display = 'none';
+    document.getElementById('placeOrderBtn').style.display = 'none';
+    document.getElementById('phoneVerifiedBadge').style.display = 'none';
+    document.getElementById('sendOtpBtn').disabled = false;
+    document.getElementById('sendOtpBtn').textContent = 'Send OTP';
 
     setCheckoutError('');
-    prefillSavedDetails();
     document.getElementById('upiModalOverlay').style.display = 'flex';
+
+    const savedPhone = localStorage.getItem('zafraan_customer_phone') || '';
+    if (savedPhone) document.getElementById('checkoutPhone').value = savedPhone;
+}
+
+async function sendOTP() {
+    const phone = document.getElementById('checkoutPhone').value.trim();
+    const phoneDigits = phone.replace(/\D/g, '');
+
+    if (phoneDigits.length !== 10 || !/^[6-9]/.test(phoneDigits)) {
+        setCheckoutError('Please enter a valid 10-digit Indian mobile number starting with 6, 7, 8, or 9.');
+        return;
+    }
+    setCheckoutError('');
+
+    const sendBtn = document.getElementById('sendOtpBtn');
+    sendBtn.disabled = true;
+    sendBtn.textContent = 'Sending...';
+
+    try {
+        const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js');
+        const { getAuth, RecaptchaVerifier, signInWithPhoneNumber } = await import('https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js');
+        const app = getApps().length ? getApps()[0] : initializeApp(window.ZAFRAAN_FIREBASE_CONFIG);
+        const auth = getAuth(app);
+
+        if (!window.recaptchaVerifier) {
+            window.recaptchaVerifier = new RecaptchaVerifier(auth, 'sendOtpBtn', { size: 'invisible' });
+        }
+
+        otpConfirmationResult = await signInWithPhoneNumber(auth, '+91' + phoneDigits, window.recaptchaVerifier);
+        document.getElementById('checkoutPhone').readOnly = true;
+        document.getElementById('otpSection').style.display = 'block';
+        sendBtn.textContent = 'Resend OTP';
+        sendBtn.disabled = false;
+        setCheckoutError('OTP sent! Check your SMS.');
+    } catch (e) {
+        if (window.recaptchaVerifier) { try { window.recaptchaVerifier.clear(); } catch(_) {} window.recaptchaVerifier = null; }
+        sendBtn.disabled = false;
+        sendBtn.textContent = 'Send OTP';
+        setCheckoutError('Could not send OTP. Check your number and try again.');
+    }
+}
+
+async function verifyOTP() {
+    const code = document.getElementById('otpInput').value.trim();
+    if (!/^\d{6}$/.test(code)) { setCheckoutError('Please enter the 6-digit OTP.'); return; }
+
+    const verifyBtn = document.getElementById('verifyOtpBtn');
+    verifyBtn.disabled = true;
+    verifyBtn.textContent = 'Verifying...';
+
+    try {
+        await otpConfirmationResult.confirm(code);
+        phoneVerified = true;
+
+        document.getElementById('otpSection').style.display = 'none';
+        document.getElementById('phoneVerifiedBadge').style.display = 'inline';
+        document.getElementById('orderDetailsSection').style.display = 'block';
+        document.getElementById('placeOrderBtn').style.display = 'block';
+        setCheckoutError('');
+
+        const phoneDigits = document.getElementById('checkoutPhone').value.replace(/\D/g, '');
+        const savedName = localStorage.getItem('zafraan_customer_name') || '';
+        if (savedName) document.getElementById('checkoutName').value = savedName;
+        const savedAddress = getSavedCustomerAddress(phoneDigits);
+        if (savedAddress) {
+            document.getElementById('checkoutAddress').value = savedAddress;
+            document.getElementById('checkoutLocationNote').textContent = 'Saved address filled for this mobile number.';
+        } else {
+            document.getElementById('checkoutLocationNote').textContent = 'No saved address found. Please type the delivery address.';
+        }
+    } catch (e) {
+        verifyBtn.disabled = false;
+        verifyBtn.textContent = 'Verify';
+        setCheckoutError('Incorrect OTP. Please try again.');
+    }
 }
 
 function closeUpiModal() {
@@ -2215,13 +2352,14 @@ function closeUpiModal() {
 }
 
 function placeOrder() {
+    if (!phoneVerified) { setCheckoutError('Please verify your mobile number first.'); return; }
+
     const name = document.getElementById('checkoutName').value.trim();
     const phone = document.getElementById('checkoutPhone').value.trim();
     const address = document.getElementById('checkoutAddress').value.trim();
     const phoneDigits = phone.replace(/\D/g, '');
 
     if (!name) { setCheckoutError('Please enter your full name.'); return; }
-    if (phoneDigits.length < 10) { setCheckoutError('Please enter a valid 10-digit mobile number.'); return; }
     if (!address) { setCheckoutError('Please enter your delivery address.'); return; }
     setCheckoutError('');
 
@@ -2230,6 +2368,8 @@ function placeOrder() {
     saveCustomerAddress(phoneDigits, address);
 
     const totalCash = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+    const deliveryCharge = totalCash >= 100 ? 0 : 10;
+    const grandTotal = totalCash + deliveryCharge;
 
     const orderId = 'ZAF-' + Date.now();
     saveOrderToFirestore({
@@ -2238,7 +2378,8 @@ function placeOrder() {
         customerPhone: phone,
         deliveryAddress: address,
         items: cart.map(item => ({ name: item.name, size: item.size, qty: item.qty, price: item.price })),
-        totalPrice: totalCash,
+        totalPrice: grandTotal,
+        deliveryCharge,
         status: 'Pending Payment',
         createdAt: new Date().toISOString()
     });
@@ -2247,12 +2388,16 @@ function placeOrder() {
         `${i + 1}. ${item.name} (${item.size}) x${item.qty} — ₹${item.price * item.qty}`
     ).join('\n');
 
+    const deliveryLine = deliveryCharge > 0 ? `Delivery Charge: ₹${deliveryCharge}` : 'Delivery: Free';
+
     const message = [
         'Hi Zafraan! I would like to place an order:',
         '',
         cartLines,
         '',
-        `Total: ₹${totalCash}`,
+        `Subtotal: ₹${totalCash}`,
+        deliveryLine,
+        `Total: ₹${grandTotal}`,
         '',
         `Name: ${name}`,
         `Mobile: ${phone}`,
