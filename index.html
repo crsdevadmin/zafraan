@@ -2281,9 +2281,9 @@ async function loadAdminCatalog() {
   }
 
   try {
-    const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js');
+    const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js');
     const firestore = await import('https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js');
-    const app = initializeApp(window.ZAFRAAN_FIREBASE_CONFIG);
+    const app = getApps().length ? getApps()[0] : initializeApp(window.ZAFRAAN_FIREBASE_CONFIG);
     firestoreDb = firestore.getFirestore(app);
     firestoreSetDoc = firestore.setDoc;
     firestoreDocFn = firestore.doc;
@@ -2293,8 +2293,9 @@ async function loadAdminCatalog() {
         productSettings[d.id] = d.data();
     });
     adminCatalogLoaded = true;
+    console.log('Catalog loaded from Firestore. Visible products:', Object.values(productSettings).filter(p => p.visible).length);
   } catch (error) {
-    console.error('Admin catalog could not be loaded:', error.code || error.message, error);
+    console.error('[ZAFRAAN] Catalog load failed — showing all products as fallback. Error:', error.code || error.message);
     adminCatalogLoaded = false;
   }
 
