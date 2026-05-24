@@ -1349,16 +1349,17 @@
 
         /* ---- Responsive ---- */
         @media (max-width: 900px) {
-            .hero { grid-template-columns: 1fr; padding: 60px 24px; gap: 40px; }
-            .hero h1 { font-size: 50px; }
+            .hero { grid-template-columns: 1fr; padding: 36px 24px 28px; gap: 0; min-height: auto; }
+            .hero h1 { font-size: 42px; }
+            .hero-sub { font-size: 14px; margin-top: 12px; margin-bottom: 20px; }
+            .hero-cta { margin-top: 0; gap: 14px; }
+            .hero-visual { display: none; }
+            .pillars { display: none; }
             .about { grid-template-columns: 1fr; padding: 80px 24px; gap: 50px; }
             .footer-top { grid-template-columns: 1fr; gap: 40px; }
             nav { padding: 16px 24px; }
             .nav-links { display: none; }
-            .pillars { grid-template-columns: repeat(2, 1fr); }
-            .pillar { border-bottom: 1px solid var(--border-color); }
-            .pillar:nth-child(even) { border-right: none; }
-            .products-section { padding: 60px 24px; }
+            .products-section { padding: 32px 24px; }
         }
 
         @media (max-width: 520px) {
@@ -1776,6 +1777,7 @@
         </div>
     </div>
 </div>
+<div id="recaptcha-container"></div>
 
 <script src="./firebase-config.js"></script>
 <script>
@@ -2257,6 +2259,7 @@ function checkoutUPI() {
     phoneVerified = false;
     otpConfirmationResult = null;
     if (window.recaptchaVerifier) { try { window.recaptchaVerifier.clear(); } catch(e) {} window.recaptchaVerifier = null; }
+    document.getElementById('recaptcha-container').innerHTML = '';
     document.getElementById('checkoutPhone').value = '';
     document.getElementById('checkoutPhone').readOnly = false;
     document.getElementById('otpInput') && (document.getElementById('otpInput').value = '');
@@ -2272,6 +2275,21 @@ function checkoutUPI() {
 
     const savedPhone = localStorage.getItem('zafraan_customer_phone') || '';
     if (savedPhone) document.getElementById('checkoutPhone').value = savedPhone;
+
+    // Pre-initialise reCAPTCHA so it's ready when user taps Send OTP
+    try {
+        const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js');
+        const { getAuth, RecaptchaVerifier } = await import('https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js');
+        const app = getApps().length ? getApps()[0] : initializeApp(window.ZAFRAAN_FIREBASE_CONFIG);
+        const auth = getAuth(app);
+        window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+            size: 'invisible',
+            callback: () => {}
+        });
+        await window.recaptchaVerifier.render();
+    } catch(e) {
+        // non-fatal — sendOTP will handle failure
+    }
 }
 
 async function sendOTP() {
@@ -2295,7 +2313,11 @@ async function sendOTP() {
         const auth = getAuth(app);
 
         if (!window.recaptchaVerifier) {
-            window.recaptchaVerifier = new RecaptchaVerifier(auth, 'sendOtpBtn', { size: 'invisible' });
+            window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+                size: 'invisible',
+                callback: () => {}
+            });
+            await window.recaptchaVerifier.render();
         }
 
         otpConfirmationResult = await signInWithPhoneNumber(auth, '+91' + phoneDigits, window.recaptchaVerifier);
@@ -2305,10 +2327,12 @@ async function sendOTP() {
         sendBtn.disabled = false;
         setCheckoutError('OTP sent! Check your SMS.');
     } catch (e) {
+        console.error('OTP send error:', e);
         if (window.recaptchaVerifier) { try { window.recaptchaVerifier.clear(); } catch(_) {} window.recaptchaVerifier = null; }
+        document.getElementById('recaptcha-container').innerHTML = '';
         sendBtn.disabled = false;
         sendBtn.textContent = 'Send OTP';
-        setCheckoutError('Could not send OTP. Check your number and try again.');
+        setCheckoutError('Could not send OTP. ' + (e.message || 'Please try again.'));
     }
 }
 
