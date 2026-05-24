@@ -1048,6 +1048,123 @@
             background: rgba(255,255,255,0.04);
         }
 
+        /* ---- Announcement Banner ---- */
+        .announcement-banner {
+            background: var(--neon-green);
+            color: #000;
+            text-align: center;
+            padding: 10px 20px;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            position: relative;
+            z-index: 99;
+            display: none;
+        }
+        .announcement-banner.active { display: block; }
+
+        /* ---- Today's Special ---- */
+        .specials-section {
+            margin-bottom: 40px;
+        }
+        .specials-label {
+            font-size: 11px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--neon-green);
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .specials-label::before {
+            content: '';
+            width: 28px;
+            height: 1px;
+            background: var(--neon-green);
+        }
+        .specials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 16px;
+        }
+        .special-card {
+            border: 1px solid var(--neon-green);
+            box-shadow: 0 0 16px rgba(0,230,118,0.12);
+            position: relative;
+        }
+        .special-card::before {
+            content: 'TODAY\'S SPECIAL';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--neon-green);
+            color: #000;
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            padding: 3px 8px;
+            z-index: 2;
+        }
+
+        /* ---- Search bar ---- */
+        .product-search-wrap {
+            margin-bottom: 20px;
+        }
+        .product-search {
+            width: 100%;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-color);
+            color: #fff;
+            font-family: 'Outfit', sans-serif;
+            font-size: 14px;
+            padding: 12px 16px;
+            outline: none;
+            transition: border-color 0.2s;
+            box-sizing: border-box;
+        }
+        .product-search:focus { border-color: var(--neon-green); }
+        .product-search::placeholder { color: var(--text-muted); }
+
+        /* ---- Out of Stock ---- */
+        .product-card.out-of-stock {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        .out-of-stock-label {
+            display: inline-block;
+            background: #444;
+            color: #aaa;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            padding: 2px 8px;
+            margin-left: 6px;
+            vertical-align: middle;
+        }
+
+        /* ---- Prep time badge ---- */
+        .prep-time-badge {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* ---- Min order notice ---- */
+        .min-order-notice {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            padding: 8px 12px;
+            border-left: 2px solid var(--neon-green);
+            background: rgba(0,230,118,0.04);
+            display: none;
+        }
+        .min-order-notice.active { display: block; }
+
         .otp-btn {
             background: var(--neon-green);
             color: #000;
@@ -1501,6 +1618,9 @@
     </div>
 </nav>
 
+<!-- ANNOUNCEMENT BANNER -->
+<div class="announcement-banner" id="announcementBanner"></div>
+
 <!-- CART DRAWER -->
 <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
 <div class="cart-drawer" id="cartDrawer">
@@ -1631,6 +1751,17 @@
             <div class="section-label">Our Collection</div>
             <h2 class="section-title">Premium Product Range</h2>
         </div>
+    </div>
+
+    <div class="product-search-wrap">
+        <input class="product-search" id="productSearch" type="text" placeholder="Search products..." oninput="renderProducts()">
+    </div>
+
+    <div class="min-order-notice" id="minOrderNotice"></div>
+
+    <div class="specials-section" id="specialsSection" style="display:none;">
+        <div class="specials-label">Today's Special</div>
+        <div class="specials-grid" id="specialsGrid"></div>
     </div>
 
     <div class="category-tabs" id="categoryTabs"></div>
@@ -1897,13 +2028,18 @@ function applyProductSetting(product) {
         price: Number.isFinite(price) && price >= 0 ? `₹${price}` : product.price,
         sizes: typeof setting.sizes === 'string' && setting.sizes.trim() ? setting.sizes.trim() : product.sizes,
         visible: setting.visible === true,
-        stockQty: Number.isFinite(stockQty) ? stockQty : null
+        stockQty: Number.isFinite(stockQty) ? stockQty : null,
+        marketPrice: Number(setting.marketPrice) || 0,
+        isSpecial: setting.isSpecial === true,
+        outOfStock: setting.outOfStock === true,
+        prepTime: setting.prepTime || ''
     };
 }
 
 function getCatalogProducts() {
     const withSettings = products.map(applyProductSetting);
     if (!adminCatalogLoaded) return withSettings;
+    // Out-of-stock products stay visible (greyed out); only invisible ones are hidden
     return withSettings.filter(p => p.visible === true);
 }
 
@@ -1959,45 +2095,75 @@ const productImages = {
   'Burger Combo': './zafraan-images/24-burger-combo.png'
 };
 
+function buildProductCard(p, isSpecialCard = false) {
+    const isSizeBased = getSizeGrams(p.sizes);
+    const rawPrice = typeof p.price === 'string' ? Number(p.price.replace(/[^\d.]/g, '')) : Number(p.price);
+    const priceDisplay = isSizeBased ? `₹${rawPrice}/100g` : `₹${rawPrice}`;
+    const mrp = p.marketPrice && p.marketPrice > rawPrice ? p.marketPrice : null;
+    const discountPct = mrp ? Math.round((mrp - rawPrice) / mrp * 100) : 0;
+    const mrpDisplay = mrp ? (isSizeBased ? `₹${mrp}/100g` : `₹${mrp}`) : '';
+
+    const outOfStockClass = p.outOfStock ? ' out-of-stock' : '';
+    const specialClass = isSpecialCard ? ' special-card' : '';
+    const clickHandler = p.outOfStock ? '' : `onclick="openModal(${p.id})"`;
+
+    return `
+    <div class="product-card${outOfStockClass}${specialClass}" ${clickHandler}>
+        <div class="product-img-wrap">
+            <div class="product-badge">${p.cat}</div>
+            <img src="${productImages[p.name] || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=800&q=80'}"
+                alt="${p.name}"
+                style="width:100%;height:100%;object-fit:cover;">
+        </div>
+        <div class="product-body">
+            <div class="product-cat">${p.cat}</div>
+            <div class="product-name">${p.name}</div>
+            <div class="product-sizes">${p.sizes}${isSizeBased ? ` · base ₹${rawPrice}/100g` : ''}</div>
+            ${p.prepTime ? `<div class="prep-time-badge">⏱ Ready in ${p.prepTime}</div>` : ''}
+            <div class="product-footer">
+                <div class="product-price-block">
+                    ${mrp ? `<span class="product-mrp">${mrpDisplay}</span>` : ''}
+                    <span class="product-price">
+                        ${p.outOfStock
+                            ? `${priceDisplay}<span class="out-of-stock-label">OUT OF STOCK</span>`
+                            : `${priceDisplay}${discountPct ? `<span class="product-discount-badge">${discountPct}% OFF</span>` : ''}`
+                        }
+                    </span>
+                </div>
+                ${p.outOfStock ? '' : '<div class="product-arrow">→</div>'}
+            </div>
+        </div>
+    </div>`;
+}
+
+function renderSpecials() {
+    const specials = getCatalogProducts().filter(p => p.isSpecial && !p.outOfStock);
+    const section = document.getElementById('specialsSection');
+    const grid = document.getElementById('specialsGrid');
+    if (!specials.length) { section.style.display = 'none'; return; }
+    section.style.display = 'block';
+    grid.innerHTML = specials.map(p => buildProductCard(p, true)).join('');
+}
+
 function renderProducts() {
     const grid = document.getElementById('productsGrid');
     const catalogProducts = getCatalogProducts();
-    const filtered = activeCategory === 'All' ? catalogProducts : catalogProducts.filter(p => p.cat === activeCategory);
+    const searchTerm = (document.getElementById('productSearch')?.value || '').toLowerCase().trim();
+
+    let filtered = activeCategory === 'All' ? catalogProducts : catalogProducts.filter(p => p.cat === activeCategory);
+    if (searchTerm) {
+        filtered = filtered.filter(p =>
+            p.name.toLowerCase().includes(searchTerm) ||
+            p.cat.toLowerCase().includes(searchTerm)
+        );
+    }
 
     if (!filtered.length) {
-        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-secondary)">No products are available right now. Please check back soon.</div>';
+        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-secondary)">${searchTerm ? `No products found for "${searchTerm}"` : 'No products available right now.'}</div>`;
         return;
     }
 
-    grid.innerHTML = filtered.map(p => {
-        const isSizeBased = getSizeGrams(p.sizes);
-        const priceDisplay = isSizeBased ? `₹${p.price}/100g` : `₹${p.price}`;
-        const mrp = p.marketPrice && p.marketPrice > p.price ? p.marketPrice : null;
-        const discountPct = mrp ? Math.round((mrp - p.price) / mrp * 100) : 0;
-        const mrpDisplay = mrp ? (isSizeBased ? `₹${mrp}/100g` : `₹${mrp}`) : '';
-
-        return `
-        <div class="product-card" onclick="openModal(${p.id})">
-            <div class="product-img-wrap">
-                <div class="product-badge">${p.cat}</div>
-                <img src="${productImages[p.name] || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=800&q=80'}"
-                    alt="${p.name}"
-                    style="width:100%;height:100%;object-fit:cover;">
-            </div>
-            <div class="product-body">
-                <div class="product-cat">${p.cat}</div>
-                <div class="product-name">${p.name}</div>
-                <div class="product-sizes">${p.sizes}${isSizeBased ? ` · base ${p.price}/100g` : ''}</div>
-                <div class="product-footer">
-                    <div class="product-price-block">
-                        ${mrp ? `<span class="product-mrp">${mrpDisplay}</span>` : ''}
-                        <span class="product-price">${priceDisplay}${discountPct ? `<span class="product-discount-badge">${discountPct}% OFF</span>` : ''}</span>
-                    </div>
-                    <div class="product-arrow">→</div>
-                </div>
-            </div>
-        </div>`;
-    }).join('');
+    grid.innerHTML = filtered.map(p => buildProductCard(p, false)).join('');
 }
 
 let currentProductId = null;
@@ -2394,6 +2560,7 @@ async function loadAdminCatalog() {
   if (!isFirebaseConfigured()) {
     renderTabs();
     renderProducts();
+    renderSpecials();
     return;
   }
 
@@ -2404,12 +2571,29 @@ async function loadAdminCatalog() {
     firestoreDb = firestore.getFirestore(app);
     firestoreSetDoc = firestore.setDoc;
     firestoreDocFn = firestore.doc;
-    const snapshot = await firestore.getDocs(firestore.collection(firestoreDb, 'productCatalog'));
+    const [catalogSnap, settingsSnap] = await Promise.all([
+        firestore.getDocs(firestore.collection(firestoreDb, 'productCatalog')),
+        firestore.getDoc(firestore.doc(firestoreDb, 'siteSettings', 'config')).catch(() => null)
+    ]);
+
     productSettings = {};
-    snapshot.forEach(d => {
-        productSettings[d.id] = d.data();
-    });
+    catalogSnap.forEach(d => { productSettings[d.id] = d.data(); });
     adminCatalogLoaded = true;
+
+    if (settingsSnap && settingsSnap.exists()) {
+        const cfg = settingsSnap.data();
+        if (cfg.announcementActive && cfg.announcement) {
+            const banner = document.getElementById('announcementBanner');
+            banner.textContent = cfg.announcement;
+            banner.classList.add('active');
+        }
+        if (cfg.minOrder && cfg.minOrder > 0) {
+            const notice = document.getElementById('minOrderNotice');
+            notice.textContent = `Minimum order ₹${cfg.minOrder} for delivery.`;
+            notice.classList.add('active');
+        }
+    }
+
     console.log('Catalog loaded from Firestore. Visible products:', Object.values(productSettings).filter(p => p.visible).length);
   } catch (error) {
     console.error('[ZAFRAAN] Catalog load failed — showing all products as fallback. Error:', error.code || error.message);
@@ -2418,6 +2602,7 @@ async function loadAdminCatalog() {
 
   renderTabs();
   renderProducts();
+  renderSpecials();
 }
 
 async function saveOrderToFirestore(orderData) {

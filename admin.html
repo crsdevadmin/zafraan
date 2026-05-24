@@ -676,6 +676,7 @@
             <div class="admin-nav-tabs">
                 <button id="tabCatalog" class="admin-nav-tab active" onclick="switchAdminTab('catalog')">Products</button>
                 <button id="tabOrders" class="admin-nav-tab" onclick="switchAdminTab('orders')">Orders</button>
+                <button id="tabSettings" class="admin-nav-tab" onclick="switchAdminTab('settings')">Site Settings</button>
             </div>
         </div>
         <div class="top-actions">
@@ -722,6 +723,36 @@
 
             <div class="orders-grid" id="ordersGrid">
                 <!-- Orders will render dynamically -->
+            </div>
+        </div>
+
+        <!-- SETTINGS PANEL -->
+        <div id="panelSettings" style="display:none;">
+            <div class="toolbar">
+                <div class="title-block">
+                    <h1>Site Settings</h1>
+                    <div class="message" id="settingsMessage"></div>
+                </div>
+                <button class="primary" id="saveSettingsBtn" onclick="saveSettings()">Save Settings</button>
+            </div>
+
+            <div style="max-width:560px;display:flex;flex-direction:column;gap:20px;padding:20px 0;">
+                <div style="background:#1a1a1a;border:1px solid rgba(255,255,255,0.08);padding:24px;">
+                    <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#a0a0a0;margin-bottom:16px;">Announcement Banner</div>
+                    <label style="display:flex;align-items:center;gap:10px;margin-bottom:12px;font-size:14px;">
+                        <input type="checkbox" id="announcementActive" style="width:16px;height:16px;">
+                        Show banner on main site
+                    </label>
+                    <input type="text" id="announcementText" placeholder="e.g. Free delivery today on all orders!" style="width:100%;background:#111;border:1px solid rgba(255,255,255,0.1);color:#fff;padding:10px 12px;font-family:inherit;font-size:14px;box-sizing:border-box;">
+                </div>
+
+                <div style="background:#1a1a1a;border:1px solid rgba(255,255,255,0.08);padding:24px;">
+                    <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#a0a0a0;margin-bottom:16px;">Minimum Order</div>
+                    <label style="font-size:14px;display:flex;flex-direction:column;gap:8px;">
+                        Minimum order amount for delivery (₹) — set 0 to hide
+                        <input type="number" id="minOrderAmount" min="0" value="0" style="width:160px;background:#111;border:1px solid rgba(255,255,255,0.1);color:#fff;padding:10px 12px;font-family:inherit;font-size:14px;">
+                    </label>
+                </div>
             </div>
         </div>
     </main>
@@ -828,6 +859,8 @@
         let collection;
         let doc;
         let getDocs;
+        let getDoc;
+        let setDoc;
         let writeBatch;
         let updateDoc;
 
@@ -844,24 +877,58 @@
 
         // Tab switcher
         window.switchAdminTab = function(tab) {
-            const panelCatalog = document.getElementById('panelCatalog');
-            const panelOrders = document.getElementById('panelOrders');
-            const tabCatalog = document.getElementById('tabCatalog');
-            const tabOrders = document.getElementById('tabOrders');
-            
+            document.getElementById('panelCatalog').style.display = 'none';
+            document.getElementById('panelOrders').style.display = 'none';
+            document.getElementById('panelSettings').style.display = 'none';
+            document.getElementById('tabCatalog').classList.remove('active');
+            document.getElementById('tabOrders').classList.remove('active');
+            document.getElementById('tabSettings').classList.remove('active');
+
             if (tab === 'catalog') {
-                panelCatalog.style.display = 'block';
-                panelOrders.style.display = 'none';
-                tabCatalog.classList.add('active');
-                tabOrders.classList.remove('active');
-            } else {
-                panelCatalog.style.display = 'none';
-                panelOrders.style.display = 'block';
-                tabCatalog.classList.remove('active');
-                tabOrders.classList.add('active');
+                document.getElementById('panelCatalog').style.display = 'block';
+                document.getElementById('tabCatalog').classList.add('active');
+            } else if (tab === 'orders') {
+                document.getElementById('panelOrders').style.display = 'block';
+                document.getElementById('tabOrders').classList.add('active');
                 loadOrders();
+            } else {
+                document.getElementById('panelSettings').style.display = 'block';
+                document.getElementById('tabSettings').classList.add('active');
+                loadSettings();
             }
         };
+
+        async function loadSettings() {
+            try {
+                const snap = await getDoc(doc(db, 'siteSettings', 'config'));
+                if (snap.exists()) {
+                    const cfg = snap.data();
+                    document.getElementById('announcementActive').checked = cfg.announcementActive || false;
+                    document.getElementById('announcementText').value = cfg.announcement || '';
+                    document.getElementById('minOrderAmount').value = cfg.minOrder || 0;
+                }
+            } catch(e) { /* first time — no doc yet */ }
+        }
+
+        async function saveSettings() {
+            const btn = document.getElementById('saveSettingsBtn');
+            const msg = document.getElementById('settingsMessage');
+            btn.disabled = true;
+            msg.textContent = 'Saving...';
+            try {
+                await setDoc(doc(db, 'siteSettings', 'config'), {
+                    announcementActive: document.getElementById('announcementActive').checked,
+                    announcement: document.getElementById('announcementText').value.trim(),
+                    minOrder: Number(document.getElementById('minOrderAmount').value) || 0,
+                    updatedAt: new Date().toISOString()
+                });
+                msg.textContent = 'Settings saved!';
+            } catch(e) {
+                msg.textContent = 'Error: ' + e.message;
+            }
+            btn.disabled = false;
+        }
+        window.saveSettings = saveSettings;
 
         function setMessage(text, isError = false) {
             message.textContent = text;
@@ -922,6 +989,9 @@
                 const marketPrice = Number(saved.marketPrice) || 0;
                 const sizes = typeof saved.sizes === 'string' && saved.sizes.trim() ? saved.sizes.trim() : product.sizes;
                 const stockQty = saved.stockQty ?? 0;
+                const isSpecial = saved.isSpecial === true;
+                const outOfStock = saved.outOfStock === true;
+                const prepTime = saved.prepTime || '';
                 const imageUrl = productImages[product.name] || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=800&q=80';
 
                 return `
@@ -956,6 +1026,18 @@
                             Stock Qty (0 = unlimited)
                             <input type="number" class="stock-input" min="0" value="${stockQty}" placeholder="0 = unlimited">
                         </label>
+                        <label>
+                            Prep Time
+                            <input type="text" class="prep-time-input" value="${prepTime}" placeholder="e.g. 30 mins">
+                        </label>
+                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                            <input type="checkbox" class="special-input" ${isSpecial ? 'checked' : ''}>
+                            Today's Special
+                        </label>
+                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                            <input type="checkbox" class="out-of-stock-input" ${outOfStock ? 'checked' : ''}>
+                            Out of Stock
+                        </label>
                     </div>
                 `;
             }).join('');
@@ -986,25 +1068,18 @@
                 const price = Number(row.querySelector('.price-input').value) || product.price;
                 const sizes = row.querySelector('.sizes-input').value.trim() || product.sizes;
                 const stockQty = Number(row.querySelector('.stock-input').value) || 0;
+                const prepTime = row.querySelector('.prep-time-input').value.trim();
+                const isSpecial = row.querySelector('.special-input').checked;
+                const outOfStock = row.querySelector('.out-of-stock-input').checked;
 
                 loadedSettings[String(product.id)] = {
-                    name: product.name,
-                    cat: product.cat,
-                    visible,
-                    marketPrice,
-                    price,
-                    sizes,
-                    stockQty
+                    name: product.name, cat: product.cat,
+                    visible, marketPrice, price, sizes, stockQty, prepTime, isSpecial, outOfStock
                 };
 
                 batch.set(doc(db, 'productCatalog', String(product.id)), {
-                    name: product.name,
-                    cat: product.cat,
-                    visible,
-                    marketPrice,
-                    price,
-                    sizes,
-                    stockQty,
+                    name: product.name, cat: product.cat,
+                    visible, marketPrice, price, sizes, stockQty, prepTime, isSpecial, outOfStock,
                     updatedAt: new Date().toISOString(),
                     updatedBy: currentUser.email
                 });
@@ -1184,6 +1259,8 @@
             collection = firebaseStore.collection;
             doc = firebaseStore.doc;
             getDocs = firebaseStore.getDocs;
+            getDoc = firebaseStore.getDoc;
+            setDoc = firebaseStore.setDoc;
             writeBatch = firebaseStore.writeBatch;
             updateDoc = firebaseStore.updateDoc;
 
