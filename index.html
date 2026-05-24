@@ -1756,10 +1756,19 @@
                             <input id="checkoutName" type="text" autocomplete="name" placeholder="Enter your full name">
                         </div>
                         <div class="checkout-field">
-                            <label for="checkoutAddress">Delivery Address</label>
-                            <textarea id="checkoutAddress" autocomplete="street-address" placeholder="House no., street, area, city"></textarea>
+                            <label for="checkoutFlat">Door / Flat / House No.</label>
+                            <input id="checkoutFlat" type="text" placeholder="e.g. 4B, 2nd floor, Block A">
                         </div>
-                        <div class="checkout-note" id="checkoutLocationNote">Your address will be saved for next time.</div>
+                        <div class="checkout-field">
+                            <label for="checkoutAddress">Street, Area &amp; Landmark</label>
+                            <textarea id="checkoutAddress" autocomplete="street-address" placeholder="Street name, area, landmark" style="min-height:70px;"></textarea>
+                            <button type="button" class="otp-btn" id="locationBtn" onclick="useMyLocation()" style="width:100%;margin-top:6px;font-size:12px;letter-spacing:1px;">Use My Location</button>
+                        </div>
+                        <div class="checkout-field">
+                            <label for="checkoutPincode">Pincode</label>
+                            <input id="checkoutPincode" type="text" inputmode="numeric" maxlength="6" placeholder="6-digit pincode">
+                        </div>
+                        <div class="checkout-note" id="checkoutLocationNote">Use My Location to auto-fill your area, then add your door number.</div>
                     </div>
                 </div>
 
@@ -2263,6 +2272,10 @@ function checkoutUPI() {
     document.getElementById('checkoutPhone').value = '';
     document.getElementById('checkoutPhone').readOnly = false;
     document.getElementById('otpInput') && (document.getElementById('otpInput').value = '');
+    document.getElementById('checkoutFlat') && (document.getElementById('checkoutFlat').value = '');
+    document.getElementById('checkoutPincode') && (document.getElementById('checkoutPincode').value = '');
+    const locBtn = document.getElementById('locationBtn');
+    if (locBtn) { locBtn.disabled = false; locBtn.textContent = 'Use My Location'; locBtn.style.background = ''; }
     document.getElementById('otpSection').style.display = 'none';
     document.getElementById('orderDetailsSection').style.display = 'none';
     document.getElementById('placeOrderBtn').style.display = 'none';
@@ -2359,10 +2372,17 @@ async function verifyOTP() {
         if (savedName) document.getElementById('checkoutName').value = savedName;
         const savedAddress = getSavedCustomerAddress(phoneDigits);
         if (savedAddress) {
-            document.getElementById('checkoutAddress').value = savedAddress;
-            document.getElementById('checkoutLocationNote').textContent = 'Saved address filled for this mobile number.';
+            try {
+                const parts = JSON.parse(savedAddress);
+                document.getElementById('checkoutFlat').value = parts.flat || '';
+                document.getElementById('checkoutAddress').value = parts.area || '';
+                document.getElementById('checkoutPincode').value = parts.pincode || '';
+            } catch(e) {
+                document.getElementById('checkoutAddress').value = savedAddress;
+            }
+            document.getElementById('checkoutLocationNote').textContent = 'Saved address filled. Tap "Use My Location" to update area.';
         } else {
-            document.getElementById('checkoutLocationNote').textContent = 'No saved address found. Please type the delivery address.';
+            document.getElementById('checkoutLocationNote').textContent = 'Use My Location to auto-fill your area, then add your door number.';
         }
     } catch (e) {
         verifyBtn.disabled = false;
@@ -2375,21 +2395,72 @@ function closeUpiModal() {
     document.getElementById('upiModalOverlay').style.display = 'none';
 }
 
+function useMyLocation() {
+    const btn = document.getElementById('locationBtn');
+    if (!navigator.geolocation) {
+        setCheckoutError('Your browser does not support location. Please type your address.');
+        return;
+    }
+    btn.disabled = true;
+    btn.textContent = 'Getting location...';
+
+    navigator.geolocation.getCurrentPosition(async (position) => {
+        const { latitude, longitude } = position.coords;
+        try {
+            const res = await fetch(
+                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`,
+                { headers: { 'Accept-Language': 'en-IN,en' } }
+            );
+            const data = await res.json();
+            const a = data.address || {};
+
+            const areaParts = [
+                a.road || a.pedestrian || a.footway || a.path,
+                a.neighbourhood || a.suburb || a.quarter || a.residential,
+                a.village || a.town || a.city_district || a.county,
+                a.city || a.state_district
+            ].filter(Boolean);
+
+            document.getElementById('checkoutAddress').value = areaParts.join(', ');
+            if (a.postcode) document.getElementById('checkoutPincode').value = a.postcode.replace(/\s/g, '').slice(0, 6);
+
+            btn.textContent = 'Location filled';
+            btn.style.background = '#005c2e';
+            document.getElementById('checkoutLocationNote').textContent = 'Area filled from your location. Please add your door / flat number above.';
+            setCheckoutError('');
+        } catch(e) {
+            btn.disabled = false;
+            btn.textContent = 'Use My Location';
+            setCheckoutError('Could not read your location address. Please type it manually.');
+        }
+    }, () => {
+        btn.disabled = false;
+        btn.textContent = 'Use My Location';
+        setCheckoutError('Location access denied. Please allow location or type your address manually.');
+    }, { timeout: 10000 });
+}
+
 function placeOrder() {
     if (!phoneVerified) { setCheckoutError('Please verify your mobile number first.'); return; }
 
     const name = document.getElementById('checkoutName').value.trim();
     const phone = document.getElementById('checkoutPhone').value.trim();
-    const address = document.getElementById('checkoutAddress').value.trim();
+    const flat = document.getElementById('checkoutFlat').value.trim();
+    const area = document.getElementById('checkoutAddress').value.trim();
+    const pincode = document.getElementById('checkoutPincode').value.trim();
     const phoneDigits = phone.replace(/\D/g, '');
 
     if (!name) { setCheckoutError('Please enter your full name.'); return; }
-    if (!address) { setCheckoutError('Please enter your delivery address.'); return; }
+    if (!flat) { setCheckoutError('Please enter your door / flat / house number.'); return; }
+    if (!area) { setCheckoutError('Please enter your street and area. Use "Use My Location" to auto-fill.'); return; }
+    if (!/^\d{6}$/.test(pincode)) { setCheckoutError('Please enter a valid 6-digit pincode.'); return; }
     setCheckoutError('');
+
+    const address = `${flat}, ${area}, ${pincode}`;
 
     localStorage.setItem('zafraan_customer_phone', phone);
     localStorage.setItem('zafraan_customer_name', name);
-    saveCustomerAddress(phoneDigits, address);
+    saveCustomerAddress(phoneDigits, JSON.stringify({ flat, area, pincode }));
 
     const totalCash = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
     const deliveryCharge = totalCash >= 100 ? 0 : 10;
