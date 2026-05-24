@@ -2245,7 +2245,7 @@ function prefillSavedDetails() {
 let otpConfirmationResult = null;
 let phoneVerified = false;
 
-function checkoutUPI() {
+async function checkoutUPI() {
     if (cart.length === 0) return alert('Your bag is empty');
 
     const summaryEl = document.getElementById('checkoutOrderSummary');
