@@ -1734,7 +1734,7 @@
                 </div>
                 <div class="checkout-field">
                     <label for="checkoutPhone">Mobile Number</label>
-                    <input id="checkoutPhone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="10-digit mobile number">
+                    <input id="checkoutPhone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="10-digit mobile number" oninput="autofillFromPhone()">
                 </div>
                 <div class="checkout-field">
                     <label for="checkoutAddress">Delivery Address</label>
@@ -2184,6 +2184,31 @@ function saveCustomerAddress(phoneDigits, address) {
   localStorage.setItem('zafraan_customer_addresses', JSON.stringify(saved));
 }
 
+function getSavedCustomerName(phoneDigits) {
+  const saved = JSON.parse(localStorage.getItem('zafraan_customer_names') || '{}');
+  return saved[phoneDigits] || '';
+}
+
+function saveCustomerName(phoneDigits, name) {
+  const saved = JSON.parse(localStorage.getItem('zafraan_customer_names') || '{}');
+  saved[phoneDigits] = name;
+  localStorage.setItem('zafraan_customer_names', JSON.stringify(saved));
+}
+
+function autofillFromPhone() {
+  const phoneDigits = document.getElementById('checkoutPhone').value.replace(/\D/g, '');
+  if (phoneDigits.length !== 10 || !/^[6-9]/.test(phoneDigits)) return;
+
+  const savedName = getSavedCustomerName(phoneDigits);
+  const savedAddress = getSavedCustomerAddress(phoneDigits);
+
+  if (savedName) document.getElementById('checkoutName').value = savedName;
+  if (savedAddress) {
+    document.getElementById('checkoutAddress').value = savedAddress;
+    document.getElementById('checkoutLocationNote').textContent = 'Welcome back! Your saved details have been filled in.';
+  }
+}
+
 
 function checkoutUPI() {
     if (cart.length === 0) return alert('Your bag is empty');
@@ -2209,19 +2234,12 @@ function checkoutUPI() {
     if (locBtn) { locBtn.disabled = false; locBtn.textContent = 'Use My Location'; locBtn.style.background = ''; }
 
     const savedPhone = localStorage.getItem('zafraan_customer_phone') || '';
-    const savedName = localStorage.getItem('zafraan_customer_name') || '';
-    if (savedPhone) document.getElementById('checkoutPhone').value = savedPhone;
-    if (savedName) document.getElementById('checkoutName').value = savedName;
+    document.getElementById('checkoutPhone').value = savedPhone;
+    document.getElementById('checkoutName').value = '';
+    document.getElementById('checkoutAddress').value = '';
+    document.getElementById('checkoutLocationNote').textContent = 'Tap "Use My Location" to auto-fill your area, then add your door number.';
 
-    const phoneDigits = savedPhone.replace(/\D/g, '');
-    const savedAddress = getSavedCustomerAddress(phoneDigits);
-    if (savedAddress) {
-        document.getElementById('checkoutAddress').value = savedAddress;
-        document.getElementById('checkoutLocationNote').textContent = 'Saved address filled. Update if needed.';
-    } else {
-        document.getElementById('checkoutAddress').value = '';
-        document.getElementById('checkoutLocationNote').textContent = 'Tap "Use My Location" to auto-fill your area, then add your door number.';
-    }
+    if (savedPhone) autofillFromPhone();
 
     document.getElementById('upiModalOverlay').style.display = 'flex';
 }
@@ -2291,7 +2309,7 @@ function placeOrder() {
     setCheckoutError('');
 
     localStorage.setItem('zafraan_customer_phone', phone);
-    localStorage.setItem('zafraan_customer_name', name);
+    saveCustomerName(phoneDigits, name);
     saveCustomerAddress(phoneDigits, address);
 
     const totalCash = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
