@@ -1728,49 +1728,20 @@
         <div class="modal-body">
             <div id="checkoutOrderSummary" class="order-summary-box" style="margin-bottom:20px;"></div>
             <div class="checkout-form">
-
-                <!-- Step 1: Phone verification -->
                 <div class="checkout-field">
-                    <label for="checkoutPhone">Mobile Number <span id="phoneVerifiedBadge" style="display:none;color:#00e676;font-size:12px;letter-spacing:0;text-transform:none;">✓ Verified</span></label>
-                    <div style="display:flex;gap:8px;">
-                        <input id="checkoutPhone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="10-digit mobile number" style="flex:1;box-sizing:border-box;">
-                        <button id="sendOtpBtn" class="otp-btn" onclick="sendOTP()">Send OTP</button>
-                    </div>
+                    <label for="checkoutName">Full Name</label>
+                    <input id="checkoutName" type="text" autocomplete="name" placeholder="Enter your full name">
                 </div>
-
-                <div id="otpSection" style="display:none;">
-                    <div class="checkout-field">
-                        <label for="otpInput">Enter OTP sent to your number</label>
-                        <div style="display:flex;gap:8px;">
-                            <input id="otpInput" type="text" inputmode="numeric" maxlength="6" placeholder="6-digit OTP" style="flex:1;letter-spacing:6px;box-sizing:border-box;">
-                            <button id="verifyOtpBtn" class="otp-btn" onclick="verifyOTP()">Verify</button>
-                        </div>
-                    </div>
+                <div class="checkout-field">
+                    <label for="checkoutPhone">Mobile Number</label>
+                    <input id="checkoutPhone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="10-digit mobile number">
                 </div>
-
-                <!-- Step 2: Order details (shown after verification) -->
-                <div id="orderDetailsSection" style="display:none;">
-                    <div class="checkout-form" style="gap:16px;">
-                        <div class="checkout-field">
-                            <label for="checkoutName">Full Name</label>
-                            <input id="checkoutName" type="text" autocomplete="name" placeholder="Enter your full name">
-                        </div>
-                        <div class="checkout-field">
-                            <label for="checkoutFlat">Door / Flat / House No.</label>
-                            <input id="checkoutFlat" type="text" placeholder="e.g. 4B, 2nd floor, Block A">
-                        </div>
-                        <div class="checkout-field">
-                            <label for="checkoutAddress">Street, Area &amp; Landmark</label>
-                            <textarea id="checkoutAddress" autocomplete="street-address" placeholder="Street name, area, landmark" style="min-height:70px;"></textarea>
-                            <button type="button" class="otp-btn" id="locationBtn" onclick="useMyLocation()" style="width:100%;margin-top:6px;font-size:12px;letter-spacing:1px;">Use My Location</button>
-                        </div>
-                        <div class="checkout-field">
-                            <label for="checkoutPincode">Pincode</label>
-                            <input id="checkoutPincode" type="text" inputmode="numeric" maxlength="6" placeholder="6-digit pincode">
-                        </div>
-                        <div class="checkout-note" id="checkoutLocationNote">Use My Location to auto-fill your area, then add your door number.</div>
-                    </div>
+                <div class="checkout-field">
+                    <label for="checkoutAddress">Delivery Address</label>
+                    <textarea id="checkoutAddress" autocomplete="street-address" placeholder="Door no., street, area, city, pincode"></textarea>
+                    <button type="button" class="otp-btn" id="locationBtn" onclick="useMyLocation()" style="width:100%;margin-top:6px;font-size:12px;letter-spacing:1px;">Use My Location</button>
                 </div>
+                <div class="checkout-note" id="checkoutLocationNote">Tap "Use My Location" to auto-fill your area, then add your door number.</div>
 
                 <div class="payment-info-box">
                     <div class="payment-info-icon">💳</div>
@@ -1781,12 +1752,11 @@
                 </div>
 
                 <div class="checkout-error" id="checkoutError"></div>
-                <button class="modal-btn" id="placeOrderBtn" onclick="placeOrder()" style="display:none;">Send Order on WhatsApp</button>
+                <button class="modal-btn" onclick="placeOrder()">Send Order on WhatsApp</button>
             </div>
         </div>
     </div>
 </div>
-<div id="recaptcha-container"></div>
 
 <script src="./firebase-config.js"></script>
 <script>
@@ -2214,38 +2184,8 @@ function saveCustomerAddress(phoneDigits, address) {
   localStorage.setItem('zafraan_customer_addresses', JSON.stringify(saved));
 }
 
-function prefillSavedAddress() {
-  const noteEl = document.getElementById('checkoutLocationNote');
-  const addressEl = document.getElementById('checkoutAddress');
-  const phoneDigits = document.getElementById('checkoutPhone').value.replace(/\D/g, '');
-  if (phoneDigits.length < 10) {
-    noteEl.textContent = 'Type your address once. This device will remember it for the next order.';
-    return;
-  }
 
-  const savedAddress = getSavedCustomerAddress(phoneDigits);
-  if (savedAddress && !addressEl.value.trim()) {
-    addressEl.value = savedAddress;
-    noteEl.textContent = 'Saved address filled for this mobile number.';
-  } else if (savedAddress) {
-    noteEl.textContent = 'Saved address found for this mobile number.';
-  } else {
-    noteEl.textContent = 'No saved address found. Please type the delivery address.';
-  }
-}
-
-function prefillSavedDetails() {
-    const phone = localStorage.getItem('zafraan_customer_phone') || '';
-    const name = localStorage.getItem('zafraan_customer_name') || '';
-    if (phone) document.getElementById('checkoutPhone').value = phone;
-    if (name) document.getElementById('checkoutName').value = name;
-    prefillSavedAddress();
-}
-
-let otpConfirmationResult = null;
-let phoneVerified = false;
-
-async function checkoutUPI() {
+function checkoutUPI() {
     if (cart.length === 0) return alert('Your bag is empty');
 
     const summaryEl = document.getElementById('checkoutOrderSummary');
@@ -2264,131 +2204,26 @@ async function checkoutUPI() {
         </div>
     `).join('') + deliveryRow + `<div class="summary-total"><span>Total</span><span>₹${grandTotal}</span></div>`;
 
-    // Reset OTP state
-    phoneVerified = false;
-    otpConfirmationResult = null;
-    if (window.recaptchaVerifier) { try { window.recaptchaVerifier.clear(); } catch(e) {} window.recaptchaVerifier = null; }
-    document.getElementById('recaptcha-container').innerHTML = '';
-    document.getElementById('checkoutPhone').value = '';
-    document.getElementById('checkoutPhone').readOnly = false;
-    document.getElementById('otpInput') && (document.getElementById('otpInput').value = '');
-    document.getElementById('checkoutFlat') && (document.getElementById('checkoutFlat').value = '');
-    document.getElementById('checkoutPincode') && (document.getElementById('checkoutPincode').value = '');
+    setCheckoutError('');
     const locBtn = document.getElementById('locationBtn');
     if (locBtn) { locBtn.disabled = false; locBtn.textContent = 'Use My Location'; locBtn.style.background = ''; }
-    document.getElementById('otpSection').style.display = 'none';
-    document.getElementById('orderDetailsSection').style.display = 'none';
-    document.getElementById('placeOrderBtn').style.display = 'none';
-    document.getElementById('phoneVerifiedBadge').style.display = 'none';
-    document.getElementById('sendOtpBtn').disabled = false;
-    document.getElementById('sendOtpBtn').textContent = 'Send OTP';
-
-    setCheckoutError('');
-    document.getElementById('upiModalOverlay').style.display = 'flex';
 
     const savedPhone = localStorage.getItem('zafraan_customer_phone') || '';
+    const savedName = localStorage.getItem('zafraan_customer_name') || '';
     if (savedPhone) document.getElementById('checkoutPhone').value = savedPhone;
+    if (savedName) document.getElementById('checkoutName').value = savedName;
 
-    // Pre-initialise reCAPTCHA so it's ready when user taps Send OTP
-    try {
-        const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js');
-        const { getAuth, RecaptchaVerifier } = await import('https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js');
-        const app = getApps().length ? getApps()[0] : initializeApp(window.ZAFRAAN_FIREBASE_CONFIG);
-        const auth = getAuth(app);
-        window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-            size: 'invisible',
-            callback: () => {}
-        });
-        await window.recaptchaVerifier.render();
-    } catch(e) {
-        // non-fatal — sendOTP will handle failure
+    const phoneDigits = savedPhone.replace(/\D/g, '');
+    const savedAddress = getSavedCustomerAddress(phoneDigits);
+    if (savedAddress) {
+        document.getElementById('checkoutAddress').value = savedAddress;
+        document.getElementById('checkoutLocationNote').textContent = 'Saved address filled. Update if needed.';
+    } else {
+        document.getElementById('checkoutAddress').value = '';
+        document.getElementById('checkoutLocationNote').textContent = 'Tap "Use My Location" to auto-fill your area, then add your door number.';
     }
-}
 
-async function sendOTP() {
-    const phone = document.getElementById('checkoutPhone').value.trim();
-    const phoneDigits = phone.replace(/\D/g, '');
-
-    if (phoneDigits.length !== 10 || !/^[6-9]/.test(phoneDigits)) {
-        setCheckoutError('Please enter a valid 10-digit Indian mobile number starting with 6, 7, 8, or 9.');
-        return;
-    }
-    setCheckoutError('');
-
-    const sendBtn = document.getElementById('sendOtpBtn');
-    sendBtn.disabled = true;
-    sendBtn.textContent = 'Sending...';
-
-    try {
-        const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js');
-        const { getAuth, RecaptchaVerifier, signInWithPhoneNumber } = await import('https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js');
-        const app = getApps().length ? getApps()[0] : initializeApp(window.ZAFRAAN_FIREBASE_CONFIG);
-        const auth = getAuth(app);
-
-        if (!window.recaptchaVerifier) {
-            window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-                size: 'invisible',
-                callback: () => {}
-            });
-            await window.recaptchaVerifier.render();
-        }
-
-        otpConfirmationResult = await signInWithPhoneNumber(auth, '+91' + phoneDigits, window.recaptchaVerifier);
-        document.getElementById('checkoutPhone').readOnly = true;
-        document.getElementById('otpSection').style.display = 'block';
-        sendBtn.textContent = 'Resend OTP';
-        sendBtn.disabled = false;
-        setCheckoutError('OTP sent! Check your SMS.');
-    } catch (e) {
-        console.error('OTP send error:', e);
-        if (window.recaptchaVerifier) { try { window.recaptchaVerifier.clear(); } catch(_) {} window.recaptchaVerifier = null; }
-        document.getElementById('recaptcha-container').innerHTML = '';
-        sendBtn.disabled = false;
-        sendBtn.textContent = 'Send OTP';
-        setCheckoutError('Could not send OTP. ' + (e.message || 'Please try again.'));
-    }
-}
-
-async function verifyOTP() {
-    const code = document.getElementById('otpInput').value.trim();
-    if (!/^\d{6}$/.test(code)) { setCheckoutError('Please enter the 6-digit OTP.'); return; }
-
-    const verifyBtn = document.getElementById('verifyOtpBtn');
-    verifyBtn.disabled = true;
-    verifyBtn.textContent = 'Verifying...';
-
-    try {
-        await otpConfirmationResult.confirm(code);
-        phoneVerified = true;
-
-        document.getElementById('otpSection').style.display = 'none';
-        document.getElementById('phoneVerifiedBadge').style.display = 'inline';
-        document.getElementById('orderDetailsSection').style.display = 'block';
-        document.getElementById('placeOrderBtn').style.display = 'block';
-        setCheckoutError('');
-
-        const phoneDigits = document.getElementById('checkoutPhone').value.replace(/\D/g, '');
-        const savedName = localStorage.getItem('zafraan_customer_name') || '';
-        if (savedName) document.getElementById('checkoutName').value = savedName;
-        const savedAddress = getSavedCustomerAddress(phoneDigits);
-        if (savedAddress) {
-            try {
-                const parts = JSON.parse(savedAddress);
-                document.getElementById('checkoutFlat').value = parts.flat || '';
-                document.getElementById('checkoutAddress').value = parts.area || '';
-                document.getElementById('checkoutPincode').value = parts.pincode || '';
-            } catch(e) {
-                document.getElementById('checkoutAddress').value = savedAddress;
-            }
-            document.getElementById('checkoutLocationNote').textContent = 'Saved address filled. Tap "Use My Location" to update area.';
-        } else {
-            document.getElementById('checkoutLocationNote').textContent = 'Use My Location to auto-fill your area, then add your door number.';
-        }
-    } catch (e) {
-        verifyBtn.disabled = false;
-        verifyBtn.textContent = 'Verify';
-        setCheckoutError('Incorrect OTP. Please try again.');
-    }
+    document.getElementById('upiModalOverlay').style.display = 'flex';
 }
 
 function closeUpiModal() {
@@ -2421,12 +2256,13 @@ function useMyLocation() {
                 a.city || a.state_district
             ].filter(Boolean);
 
-            document.getElementById('checkoutAddress').value = areaParts.join(', ');
-            if (a.postcode) document.getElementById('checkoutPincode').value = a.postcode.replace(/\s/g, '').slice(0, 6);
+            const pincode = a.postcode ? a.postcode.replace(/\s/g, '').slice(0, 6) : '';
+            const fullArea = [...areaParts, pincode].filter(Boolean).join(', ');
+            document.getElementById('checkoutAddress').value = fullArea;
 
             btn.textContent = 'Location filled';
             btn.style.background = '#005c2e';
-            document.getElementById('checkoutLocationNote').textContent = 'Area filled from your location. Please add your door / flat number above.';
+            document.getElementById('checkoutLocationNote').textContent = 'Area filled. Please add your door / flat number at the start.';
             setCheckoutError('');
         } catch(e) {
             btn.disabled = false;
@@ -2441,26 +2277,22 @@ function useMyLocation() {
 }
 
 function placeOrder() {
-    if (!phoneVerified) { setCheckoutError('Please verify your mobile number first.'); return; }
-
     const name = document.getElementById('checkoutName').value.trim();
     const phone = document.getElementById('checkoutPhone').value.trim();
-    const flat = document.getElementById('checkoutFlat').value.trim();
-    const area = document.getElementById('checkoutAddress').value.trim();
-    const pincode = document.getElementById('checkoutPincode').value.trim();
+    const address = document.getElementById('checkoutAddress').value.trim();
     const phoneDigits = phone.replace(/\D/g, '');
 
     if (!name) { setCheckoutError('Please enter your full name.'); return; }
-    if (!flat) { setCheckoutError('Please enter your door / flat / house number.'); return; }
-    if (!area) { setCheckoutError('Please enter your street and area. Use "Use My Location" to auto-fill.'); return; }
-    if (!/^\d{6}$/.test(pincode)) { setCheckoutError('Please enter a valid 6-digit pincode.'); return; }
+    if (phoneDigits.length !== 10 || !/^[6-9]/.test(phoneDigits)) {
+        setCheckoutError('Please enter a valid 10-digit mobile number (starting with 6, 7, 8 or 9).');
+        return;
+    }
+    if (address.length < 10) { setCheckoutError('Please enter your full delivery address including door number, street and area.'); return; }
     setCheckoutError('');
-
-    const address = `${flat}, ${area}, ${pincode}`;
 
     localStorage.setItem('zafraan_customer_phone', phone);
     localStorage.setItem('zafraan_customer_name', name);
-    saveCustomerAddress(phoneDigits, JSON.stringify({ flat, area, pincode }));
+    saveCustomerAddress(phoneDigits, address);
 
     const totalCash = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
     const deliveryCharge = totalCash >= 100 ? 0 : 10;
