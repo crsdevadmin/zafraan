@@ -919,6 +919,7 @@
                 const saved = settings[String(product.id)] || {};
                 const visible = saved.visible === true;
                 const price = Number(saved.price) || product.price;
+                const marketPrice = Number(saved.marketPrice) || 0;
                 const sizes = typeof saved.sizes === 'string' && saved.sizes.trim() ? saved.sizes.trim() : product.sizes;
                 const stockQty = saved.stockQty ?? 0;
                 const imageUrl = productImages[product.name] || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=800&q=80';
@@ -940,7 +941,11 @@
                             </label>
                         </label>
                         <label>
-                            Price (₹)
+                            Market Price (₹)
+                            <input type="number" class="market-price-input" min="0" value="${marketPrice}" placeholder="Competitor price">
+                        </label>
+                        <label>
+                            Our Price (₹)
                             <input type="number" class="price-input" min="0" value="${price}">
                         </label>
                         <label>
@@ -977,6 +982,7 @@
             document.querySelectorAll('.product-row').forEach(row => {
                 const product = baseProducts.find(item => item.id === Number(row.dataset.id));
                 const visible = row.querySelector('.visible-input').checked;
+                const marketPrice = Number(row.querySelector('.market-price-input').value) || 0;
                 const price = Number(row.querySelector('.price-input').value) || product.price;
                 const sizes = row.querySelector('.sizes-input').value.trim() || product.sizes;
                 const stockQty = Number(row.querySelector('.stock-input').value) || 0;
@@ -985,6 +991,7 @@
                     name: product.name,
                     cat: product.cat,
                     visible,
+                    marketPrice,
                     price,
                     sizes,
                     stockQty
@@ -994,6 +1001,7 @@
                     name: product.name,
                     cat: product.cat,
                     visible,
+                    marketPrice,
                     price,
                     sizes,
                     stockQty,

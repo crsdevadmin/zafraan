@@ -738,6 +738,24 @@
             font-weight: 600;
         }
 
+        .product-mrp {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-decoration: line-through;
+        }
+
+        .product-discount-badge {
+            display: inline-block;
+            background: #00e676;
+            color: #000;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            padding: 2px 7px;
+            margin-left: 6px;
+            vertical-align: middle;
+        }
+
 
 
         .product-arrow {
@@ -1952,15 +1970,18 @@ function renderProducts() {
     }
 
     grid.innerHTML = filtered.map(p => {
-        const priceDisplay = getSizeGrams(p.sizes) ? `${p.price}/100g` : p.price;
         const isSizeBased = getSizeGrams(p.sizes);
+        const priceDisplay = isSizeBased ? `₹${p.price}/100g` : `₹${p.price}`;
+        const mrp = p.marketPrice && p.marketPrice > p.price ? p.marketPrice : null;
+        const discountPct = mrp ? Math.round((mrp - p.price) / mrp * 100) : 0;
+        const mrpDisplay = mrp ? (isSizeBased ? `₹${mrp}/100g` : `₹${mrp}`) : '';
 
         return `
         <div class="product-card" onclick="openModal(${p.id})">
             <div class="product-img-wrap">
                 <div class="product-badge">${p.cat}</div>
-                <img src="${productImages[p.name] || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=800&q=80'}" 
-                    alt="${p.name}" 
+                <img src="${productImages[p.name] || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=800&q=80'}"
+                    alt="${p.name}"
                     style="width:100%;height:100%;object-fit:cover;">
             </div>
             <div class="product-body">
@@ -1969,7 +1990,8 @@ function renderProducts() {
                 <div class="product-sizes">${p.sizes}${isSizeBased ? ` · base ${p.price}/100g` : ''}</div>
                 <div class="product-footer">
                     <div class="product-price-block">
-                        <span class="product-price">${priceDisplay}</span>
+                        ${mrp ? `<span class="product-mrp">${mrpDisplay}</span>` : ''}
+                        <span class="product-price">${priceDisplay}${discountPct ? `<span class="product-discount-badge">${discountPct}% OFF</span>` : ''}</span>
                     </div>
                     <div class="product-arrow">→</div>
                 </div>
@@ -2030,7 +2052,12 @@ function updateModalPrice() {
     const unitPrice = getSizePrice(p, selectedSize);
     const totalPrice = unitPrice * currentQty;
 
-    document.getElementById('modalPrice').innerHTML = `<span>₹${totalPrice}</span>`;
+    const mrp = p.marketPrice && p.marketPrice > p.price ? p.marketPrice : null;
+    const mrpTotal = mrp ? Math.round(mrp / p.price * totalPrice) : null;
+    const discountPct = mrp ? Math.round((mrp - p.price) / mrp * 100) : 0;
+    document.getElementById('modalPrice').innerHTML = mrp
+        ? `<span style="font-size:13px;color:var(--text-secondary);text-decoration:line-through;margin-right:8px;">₹${mrpTotal}</span><span>₹${totalPrice}</span><span class="product-discount-badge" style="font-size:11px;padding:3px 8px;">${discountPct}% OFF</span>`
+        : `<span>₹${totalPrice}</span>`;
 }
 
 function closeModal() {
