@@ -738,6 +738,24 @@
             font-weight: 600;
         }
 
+        .product-mrp {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-decoration: line-through;
+        }
+
+        .product-discount-badge {
+            display: inline-block;
+            background: #00e676;
+            color: #000;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            padding: 2px 7px;
+            margin-left: 6px;
+            vertical-align: middle;
+        }
+
 
 
         .product-arrow {
@@ -1028,6 +1046,192 @@
             border-color: var(--neon-green);
             box-shadow: 0 0 10px var(--neon-green-glow);
             background: rgba(255,255,255,0.04);
+        }
+
+        /* ---- Announcement Banner ---- */
+        .announcement-banner {
+            background: var(--neon-green);
+            color: #000;
+            text-align: center;
+            padding: 10px 20px;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            position: relative;
+            z-index: 99;
+            display: none;
+        }
+        .announcement-banner.active { display: block; }
+
+        /* ---- Today's Special ---- */
+        .specials-section {
+            margin-bottom: 40px;
+        }
+        .specials-label {
+            font-size: 11px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--neon-green);
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .specials-label::before {
+            content: '';
+            width: 28px;
+            height: 1px;
+            background: var(--neon-green);
+        }
+        .specials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 16px;
+        }
+        .special-card {
+            border: 1px solid var(--neon-green);
+            box-shadow: 0 0 16px rgba(0,230,118,0.12);
+            position: relative;
+        }
+        .special-card::before {
+            content: 'TODAY\'S SPECIAL';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--neon-green);
+            color: #000;
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            padding: 3px 8px;
+            z-index: 2;
+        }
+
+        /* ---- Search bar ---- */
+        .product-search-wrap {
+            margin-bottom: 20px;
+        }
+        .product-search {
+            width: 100%;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-color);
+            color: #fff;
+            font-family: 'Outfit', sans-serif;
+            font-size: 14px;
+            padding: 12px 16px;
+            outline: none;
+            transition: border-color 0.2s;
+            box-sizing: border-box;
+        }
+        .product-search:focus { border-color: var(--neon-green); }
+        .product-search::placeholder { color: var(--text-muted); }
+
+        /* ---- Out of Stock ---- */
+        .product-card.out-of-stock {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        .out-of-stock-label {
+            display: inline-block;
+            background: #444;
+            color: #aaa;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            padding: 2px 8px;
+            margin-left: 6px;
+            vertical-align: middle;
+        }
+
+        /* ---- Prep time badge ---- */
+        .prep-time-badge {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* ---- Order History Modal ---- */
+        .history-modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+            z-index: 200; display: none; align-items: flex-end; justify-content: center;
+        }
+        .history-modal-overlay.open { display: flex; }
+        .history-modal-box {
+            background: #0c0c0c; border: 1px solid var(--border-color);
+            width: 100%; max-width: 520px; max-height: 80vh;
+            display: flex; flex-direction: column; border-radius: 0;
+        }
+        .history-modal-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 20px 24px; border-bottom: 1px solid var(--border-color);
+        }
+        .history-modal-header h3 { font-size: 16px; letter-spacing: 2px; text-transform: uppercase; }
+        .history-list { overflow-y: auto; flex: 1; padding: 16px 24px; display: flex; flex-direction: column; gap: 16px; }
+        .history-order-card {
+            border: 1px solid var(--border-color); padding: 14px 16px;
+            display: flex; flex-direction: column; gap: 8px;
+        }
+        .history-order-meta { font-size: 11px; color: var(--text-secondary); letter-spacing: 1px; }
+        .history-order-items { font-size: 13px; line-height: 1.7; color: var(--text-primary); }
+        .history-order-total { font-size: 14px; font-weight: 600; color: var(--neon-green); }
+        .history-reorder-btn {
+            background: var(--neon-green); color: #000; border: none;
+            padding: 8px 16px; font-family: 'Outfit', sans-serif;
+            font-size: 12px; font-weight: 700; letter-spacing: 1px;
+            cursor: pointer; align-self: flex-start; margin-top: 4px;
+        }
+
+        /* ---- Referral UI ---- */
+        .referral-code-box {
+            background: rgba(0,230,118,0.06); border: 1px solid rgba(0,230,118,0.25);
+            padding: 14px 16px; margin-top: 4px;
+        }
+        .referral-code-title { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--neon-green); margin-bottom: 6px; }
+        .referral-code-val { font-size: 20px; font-weight: 700; letter-spacing: 4px; color: #fff; }
+        .referral-code-desc { font-size: 11px; color: var(--text-secondary); margin-top: 6px; line-height: 1.5; }
+        .credit-notice {
+            background: rgba(0,230,118,0.08); border-left: 3px solid var(--neon-green);
+            padding: 10px 14px; font-size: 13px; color: var(--neon-green); font-weight: 500;
+        }
+        .my-orders-btn {
+            background: none; border: 1px solid var(--border-color);
+            color: var(--text-secondary); font-family: 'Outfit', sans-serif;
+            font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
+            padding: 8px 14px; cursor: pointer; transition: all 0.2s;
+        }
+        .my-orders-btn:hover { border-color: var(--neon-green); color: #fff; }
+
+        /* ---- Min order notice ---- */
+        .min-order-notice {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            padding: 8px 12px;
+            border-left: 2px solid var(--neon-green);
+            background: rgba(0,230,118,0.04);
+            display: none;
+        }
+        .min-order-notice.active { display: block; }
+
+        .otp-btn {
+            background: var(--neon-green);
+            color: #000;
+            font-family: 'Outfit', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            padding: 13px 16px;
+            border: none;
+            cursor: pointer;
+            white-space: nowrap;
+            letter-spacing: 0.5px;
+            transition: opacity 0.2s;
+        }
+        .otp-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         .checkout-note,
@@ -1331,16 +1535,17 @@
 
         /* ---- Responsive ---- */
         @media (max-width: 900px) {
-            .hero { grid-template-columns: 1fr; padding: 60px 24px; gap: 40px; }
-            .hero h1 { font-size: 50px; }
+            .hero { grid-template-columns: 1fr; padding: 36px 24px 28px; gap: 0; min-height: auto; }
+            .hero h1 { font-size: 42px; }
+            .hero-sub { font-size: 14px; margin-top: 12px; margin-bottom: 20px; }
+            .hero-cta { margin-top: 0; gap: 14px; }
+            .hero-visual { display: none; }
+            .pillars { display: none; }
             .about { grid-template-columns: 1fr; padding: 80px 24px; gap: 50px; }
             .footer-top { grid-template-columns: 1fr; gap: 40px; }
             nav { padding: 16px 24px; }
             .nav-links { display: none; }
-            .pillars { grid-template-columns: repeat(2, 1fr); }
-            .pillar { border-bottom: 1px solid var(--border-color); }
-            .pillar:nth-child(even) { border-right: none; }
-            .products-section { padding: 60px 24px; }
+            .products-section { padding: 32px 24px; }
         }
 
         @media (max-width: 520px) {
@@ -1456,13 +1661,16 @@
         <li><a href="#contact">Contact</a></li>
     </ul>
     <div class="nav-actions">
-
+        <button class="my-orders-btn" onclick="openOrderHistory()">My Orders</button>
         <button class="cart-toggle" onclick="toggleCart()">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
             <span class="cart-badge" id="cartBadge">0</span>
         </button>
     </div>
 </nav>
+
+<!-- ANNOUNCEMENT BANNER -->
+<div class="announcement-banner" id="announcementBanner"></div>
 
 <!-- CART DRAWER -->
 <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
@@ -1596,6 +1804,17 @@
         </div>
     </div>
 
+    <div class="product-search-wrap">
+        <input class="product-search" id="productSearch" type="text" placeholder="Search products..." oninput="renderProducts()">
+    </div>
+
+    <div class="min-order-notice" id="minOrderNotice"></div>
+
+    <div class="specials-section" id="specialsSection" style="display:none;">
+        <div class="specials-label">Today's Special</div>
+        <div class="specials-grid" id="specialsGrid"></div>
+    </div>
+
     <div class="category-tabs" id="categoryTabs"></div>
     <div class="products-grid" id="productsGrid"></div>
 </section>
@@ -1698,6 +1917,27 @@
     </div>
 </div>
 
+<!-- POST-ORDER SUCCESS OVERLAY -->
+<div id="postOrderOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:300;display:none;align-items:center;justify-content:center;">
+    <div style="background:#0c0c0c;border:1px solid var(--border-color);max-width:400px;width:90%;padding:36px 28px;text-align:center;">
+        <div style="font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--neon-green);margin-bottom:12px;">Order Placed!</div>
+        <div style="font-size:14px;color:var(--text-secondary);margin-bottom:28px;line-height:1.7;">Check WhatsApp — your order summary has been sent to Zafraan.</div>
+        <div id="postOrderReferral"></div>
+        <button class="modal-btn" style="margin-top:24px;width:100%;" onclick="document.getElementById('postOrderOverlay').style.display='none';">Close</button>
+    </div>
+</div>
+
+<!-- ORDER HISTORY MODAL -->
+<div class="history-modal-overlay" id="historyModalOverlay" onclick="closeOrderHistory()">
+    <div class="history-modal-box" onclick="event.stopPropagation()">
+        <div class="history-modal-header">
+            <h3>My Orders</h3>
+            <button class="modal-close" onclick="closeOrderHistory()">×</button>
+        </div>
+        <div class="history-list" id="historyList"></div>
+    </div>
+</div>
+
 <!-- CHECKOUT MODAL -->
 <div class="modal-overlay" id="upiModalOverlay" onclick="closeUpiModal()" style="display:none;">
     <div class="modal-box" style="max-width:430px;" onclick="event.stopPropagation()">
@@ -1715,19 +1955,28 @@
                 </div>
                 <div class="checkout-field">
                     <label for="checkoutPhone">Mobile Number</label>
-                    <input id="checkoutPhone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="10-digit mobile number" oninput="prefillSavedAddress()">
+                    <input id="checkoutPhone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="10-digit mobile number" oninput="autofillFromPhone()">
                 </div>
                 <div class="checkout-field">
                     <label for="checkoutAddress">Delivery Address</label>
-                    <textarea id="checkoutAddress" autocomplete="street-address" placeholder="House no., street, area, city"></textarea>
+                    <textarea id="checkoutAddress" autocomplete="street-address" placeholder="Door no., street, area, city, pincode"></textarea>
+                    <button type="button" class="otp-btn" id="locationBtn" onclick="useMyLocation()" style="width:100%;margin-top:6px;font-size:12px;letter-spacing:1px;">Use My Location</button>
                 </div>
-                <div class="checkout-note" id="checkoutLocationNote">Your address will be saved for next time.</div>
+                <div class="checkout-note" id="checkoutLocationNote">Tap "Use My Location" to auto-fill your area, then add your door number.</div>
+
+                <div id="creditNotice" class="credit-notice" style="display:none;"></div>
+
+                <div class="checkout-field">
+                    <label for="referralCodeInput">Referral Code <span style="color:var(--text-secondary);font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></label>
+                    <input id="referralCodeInput" type="text" placeholder="Enter friend's referral code" style="text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()">
+                    <div class="checkout-note" id="referralStatus"></div>
+                </div>
 
                 <div class="payment-info-box">
                     <div class="payment-info-icon">💳</div>
                     <div>
                         <div class="payment-info-title">Payment Options</div>
-                        <div class="payment-info-desc">We currently accept <strong>Cash on Delivery</strong> or <strong>GPay</strong> to 9176048173</div>
+                        <div class="payment-info-desc">We currently accept <strong>Cash on Delivery</strong> or <strong>GPay</strong> to our delivery partner. <strong>Free delivery</strong> on orders ₹100 and above. A ₹10 delivery charge applies below ₹100.</div>
                     </div>
                 </div>
 
@@ -1859,13 +2108,18 @@ function applyProductSetting(product) {
         price: Number.isFinite(price) && price >= 0 ? `₹${price}` : product.price,
         sizes: typeof setting.sizes === 'string' && setting.sizes.trim() ? setting.sizes.trim() : product.sizes,
         visible: setting.visible === true,
-        stockQty: Number.isFinite(stockQty) ? stockQty : null
+        stockQty: Number.isFinite(stockQty) ? stockQty : null,
+        marketPrice: Number(setting.marketPrice) || 0,
+        isSpecial: setting.isSpecial === true,
+        outOfStock: setting.outOfStock === true,
+        prepTime: setting.prepTime || ''
     };
 }
 
 function getCatalogProducts() {
     const withSettings = products.map(applyProductSetting);
     if (!adminCatalogLoaded) return withSettings;
+    // Out-of-stock products stay visible (greyed out); only invisible ones are hidden
     return withSettings.filter(p => p.visible === true);
 }
 
@@ -1921,41 +2175,75 @@ const productImages = {
   'Burger Combo': './zafraan-images/24-burger-combo.png'
 };
 
+function buildProductCard(p, isSpecialCard = false) {
+    const isSizeBased = getSizeGrams(p.sizes);
+    const rawPrice = typeof p.price === 'string' ? Number(p.price.replace(/[^\d.]/g, '')) : Number(p.price);
+    const priceDisplay = isSizeBased ? `₹${rawPrice}/100g` : `₹${rawPrice}`;
+    const mrp = p.marketPrice && p.marketPrice > rawPrice ? p.marketPrice : null;
+    const discountPct = mrp ? Math.round((mrp - rawPrice) / mrp * 100) : 0;
+    const mrpDisplay = mrp ? (isSizeBased ? `₹${mrp}/100g` : `₹${mrp}`) : '';
+
+    const outOfStockClass = p.outOfStock ? ' out-of-stock' : '';
+    const specialClass = isSpecialCard ? ' special-card' : '';
+    const clickHandler = p.outOfStock ? '' : `onclick="openModal(${p.id})"`;
+
+    return `
+    <div class="product-card${outOfStockClass}${specialClass}" ${clickHandler}>
+        <div class="product-img-wrap">
+            <div class="product-badge">${p.cat}</div>
+            <img src="${productImages[p.name] || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=800&q=80'}"
+                alt="${p.name}"
+                style="width:100%;height:100%;object-fit:cover;">
+        </div>
+        <div class="product-body">
+            <div class="product-cat">${p.cat}</div>
+            <div class="product-name">${p.name}</div>
+            <div class="product-sizes">${p.sizes}${isSizeBased ? ` · base ₹${rawPrice}/100g` : ''}</div>
+            ${p.prepTime ? `<div class="prep-time-badge">⏱ Ready in ${p.prepTime}</div>` : ''}
+            <div class="product-footer">
+                <div class="product-price-block">
+                    ${mrp ? `<span class="product-mrp">${mrpDisplay}</span>` : ''}
+                    <span class="product-price">
+                        ${p.outOfStock
+                            ? `${priceDisplay}<span class="out-of-stock-label">OUT OF STOCK</span>`
+                            : `${priceDisplay}${discountPct ? `<span class="product-discount-badge">${discountPct}% OFF</span>` : ''}`
+                        }
+                    </span>
+                </div>
+                ${p.outOfStock ? '' : '<div class="product-arrow">→</div>'}
+            </div>
+        </div>
+    </div>`;
+}
+
+function renderSpecials() {
+    const specials = getCatalogProducts().filter(p => p.isSpecial && !p.outOfStock);
+    const section = document.getElementById('specialsSection');
+    const grid = document.getElementById('specialsGrid');
+    if (!specials.length) { section.style.display = 'none'; return; }
+    section.style.display = 'block';
+    grid.innerHTML = specials.map(p => buildProductCard(p, true)).join('');
+}
+
 function renderProducts() {
     const grid = document.getElementById('productsGrid');
     const catalogProducts = getCatalogProducts();
-    const filtered = activeCategory === 'All' ? catalogProducts : catalogProducts.filter(p => p.cat === activeCategory);
+    const searchTerm = (document.getElementById('productSearch')?.value || '').toLowerCase().trim();
+
+    let filtered = activeCategory === 'All' ? catalogProducts : catalogProducts.filter(p => p.cat === activeCategory);
+    if (searchTerm) {
+        filtered = filtered.filter(p =>
+            p.name.toLowerCase().includes(searchTerm) ||
+            p.cat.toLowerCase().includes(searchTerm)
+        );
+    }
 
     if (!filtered.length) {
-        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-secondary)">No products are available right now. Please check back soon.</div>';
+        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-secondary)">${searchTerm ? `No products found for "${searchTerm}"` : 'No products available right now.'}</div>`;
         return;
     }
 
-    grid.innerHTML = filtered.map(p => {
-        const priceDisplay = getSizeGrams(p.sizes) ? `${p.price}/100g` : p.price;
-        const isSizeBased = getSizeGrams(p.sizes);
-
-        return `
-        <div class="product-card" onclick="openModal(${p.id})">
-            <div class="product-img-wrap">
-                <div class="product-badge">${p.cat}</div>
-                <img src="${productImages[p.name] || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=800&q=80'}" 
-                    alt="${p.name}" 
-                    style="width:100%;height:100%;object-fit:cover;">
-            </div>
-            <div class="product-body">
-                <div class="product-cat">${p.cat}</div>
-                <div class="product-name">${p.name}</div>
-                <div class="product-sizes">${p.sizes}${isSizeBased ? ` · base ${p.price}/100g` : ''}</div>
-                <div class="product-footer">
-                    <div class="product-price-block">
-                        <span class="product-price">${priceDisplay}</span>
-                    </div>
-                    <div class="product-arrow">→</div>
-                </div>
-            </div>
-        </div>`;
-    }).join('');
+    grid.innerHTML = filtered.map(p => buildProductCard(p, false)).join('');
 }
 
 let currentProductId = null;
@@ -2010,7 +2298,12 @@ function updateModalPrice() {
     const unitPrice = getSizePrice(p, selectedSize);
     const totalPrice = unitPrice * currentQty;
 
-    document.getElementById('modalPrice').innerHTML = `<span>₹${totalPrice}</span>`;
+    const mrp = p.marketPrice && p.marketPrice > p.price ? p.marketPrice : null;
+    const mrpTotal = mrp ? Math.round(mrp / p.price * totalPrice) : null;
+    const discountPct = mrp ? Math.round((mrp - p.price) / mrp * 100) : 0;
+    document.getElementById('modalPrice').innerHTML = mrp
+        ? `<span style="font-size:13px;color:var(--text-secondary);text-decoration:line-through;margin-right:8px;">₹${mrpTotal}</span><span>₹${totalPrice}</span><span class="product-discount-badge" style="font-size:11px;padding:3px 8px;">${discountPct}% OFF</span>`
+        : `<span>₹${totalPrice}</span>`;
 }
 
 function closeModal() {
@@ -2056,7 +2349,6 @@ function addToCart() {
     
     saveCart();
     closeModal();
-    toggleCart();
 }
 
 function saveCart() {
@@ -2165,108 +2457,229 @@ function saveCustomerAddress(phoneDigits, address) {
   localStorage.setItem('zafraan_customer_addresses', JSON.stringify(saved));
 }
 
-function prefillSavedAddress() {
-  const noteEl = document.getElementById('checkoutLocationNote');
-  const addressEl = document.getElementById('checkoutAddress');
+function getSavedCustomerName(phoneDigits) {
+  const saved = JSON.parse(localStorage.getItem('zafraan_customer_names') || '{}');
+  return saved[phoneDigits] || '';
+}
+
+function saveCustomerName(phoneDigits, name) {
+  const saved = JSON.parse(localStorage.getItem('zafraan_customer_names') || '{}');
+  saved[phoneDigits] = name;
+  localStorage.setItem('zafraan_customer_names', JSON.stringify(saved));
+}
+
+function autofillFromPhone() {
   const phoneDigits = document.getElementById('checkoutPhone').value.replace(/\D/g, '');
-  if (phoneDigits.length < 10) {
-    noteEl.textContent = 'Type your address once. This device will remember it for the next order.';
-    return;
-  }
+  if (phoneDigits.length !== 10 || !/^[6-9]/.test(phoneDigits)) return;
 
+  const savedName = getSavedCustomerName(phoneDigits);
   const savedAddress = getSavedCustomerAddress(phoneDigits);
-  if (savedAddress && !addressEl.value.trim()) {
-    addressEl.value = savedAddress;
-    noteEl.textContent = 'Saved address filled for this mobile number.';
-  } else if (savedAddress) {
-    noteEl.textContent = 'Saved address found for this mobile number.';
-  } else {
-    noteEl.textContent = 'No saved address found. Please type the delivery address.';
+
+  if (savedName) document.getElementById('checkoutName').value = savedName;
+  if (savedAddress) {
+    document.getElementById('checkoutAddress').value = savedAddress;
+    document.getElementById('checkoutLocationNote').textContent = 'Welcome back! Your saved details have been filled in.';
   }
 }
 
-function prefillSavedDetails() {
-    const phone = localStorage.getItem('zafraan_customer_phone') || '';
-    const name = localStorage.getItem('zafraan_customer_name') || '';
-    if (phone) document.getElementById('checkoutPhone').value = phone;
-    if (name) document.getElementById('checkoutName').value = name;
-    prefillSavedAddress();
-}
 
-function checkoutUPI() {
+async function checkoutUPI() {
     if (cart.length === 0) return alert('Your bag is empty');
+
+    appliedReferralCode = null;
+    appliedReferralDiscount = 0;
+    myReferralCredit = 0;
 
     const summaryEl = document.getElementById('checkoutOrderSummary');
     const totalCash = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+    const deliveryCharge = totalCash >= 100 ? 0 : 10;
+    const grandTotal = totalCash + deliveryCharge;
+
+    const deliveryRow = deliveryCharge > 0
+        ? `<div class="summary-row"><span>Delivery Charge</span><span>₹${deliveryCharge}</span></div>`
+        : `<div class="summary-row" style="color:#00e676;"><span>Delivery</span><span>Free</span></div>`;
+
     summaryEl.innerHTML = cart.map(item => `
         <div class="summary-row">
             <span>${item.name} <span style="color:var(--text-secondary);font-size:12px;">(${item.size}) ×${item.qty}</span></span>
             <span>₹${item.price * item.qty}</span>
         </div>
-    `).join('') + `<div class="summary-total"><span>Total</span><span>₹${totalCash}</span></div>`;
+    `).join('') + deliveryRow + `<div class="summary-total"><span>Total</span><span>₹${grandTotal}</span></div>`;
 
     setCheckoutError('');
-    prefillSavedDetails();
+    document.getElementById('referralCodeInput').value = '';
+    document.getElementById('referralStatus').textContent = '';
+    document.getElementById('creditNotice').style.display = 'none';
+    const locBtn = document.getElementById('locationBtn');
+    if (locBtn) { locBtn.disabled = false; locBtn.textContent = 'Use My Location'; locBtn.style.background = ''; }
+
+    const savedPhone = localStorage.getItem('zafraan_customer_phone') || '';
+    document.getElementById('checkoutPhone').value = savedPhone;
+    document.getElementById('checkoutName').value = '';
+    document.getElementById('checkoutAddress').value = '';
+    document.getElementById('checkoutLocationNote').textContent = 'Tap "Use My Location" to auto-fill your area, then add your door number.';
+
+    if (savedPhone) {
+        autofillFromPhone();
+        const phoneDigits = savedPhone.replace(/\D/g, '');
+        myReferralCredit = await loadMyCredit(phoneDigits);
+        if (myReferralCredit > 0) {
+            const creditEl = document.getElementById('creditNotice');
+            creditEl.textContent = `You have ₹${myReferralCredit} referral credit — will be applied to this order!`;
+            creditEl.style.display = 'block';
+        }
+    }
+
     document.getElementById('upiModalOverlay').style.display = 'flex';
 }
 
 function closeUpiModal() {
     document.getElementById('upiModalOverlay').style.display = 'none';
+    document.getElementById('postOrderOverlay').style.display = 'none';
 }
 
-function placeOrder() {
+function useMyLocation() {
+    const btn = document.getElementById('locationBtn');
+    if (!navigator.geolocation) {
+        setCheckoutError('Your browser does not support location. Please type your address.');
+        return;
+    }
+    btn.disabled = true;
+    btn.textContent = 'Getting location...';
+
+    navigator.geolocation.getCurrentPosition(async (position) => {
+        const { latitude, longitude } = position.coords;
+        try {
+            const res = await fetch(
+                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`,
+                { headers: { 'Accept-Language': 'en-IN,en' } }
+            );
+            const data = await res.json();
+            const a = data.address || {};
+
+            const areaParts = [
+                a.road || a.pedestrian || a.footway || a.path,
+                a.neighbourhood || a.suburb || a.quarter || a.residential,
+                a.village || a.town || a.city_district || a.county,
+                a.city || a.state_district
+            ].filter(Boolean);
+
+            const pincode = a.postcode ? a.postcode.replace(/\s/g, '').slice(0, 6) : '';
+            const fullArea = [...areaParts, pincode].filter(Boolean).join(', ');
+            document.getElementById('checkoutAddress').value = fullArea;
+
+            btn.textContent = 'Location filled';
+            btn.style.background = '#005c2e';
+            document.getElementById('checkoutLocationNote').textContent = 'Area filled. Please add your door / flat number at the start.';
+            setCheckoutError('');
+        } catch(e) {
+            btn.disabled = false;
+            btn.textContent = 'Use My Location';
+            setCheckoutError('Could not read your location address. Please type it manually.');
+        }
+    }, () => {
+        btn.disabled = false;
+        btn.textContent = 'Use My Location';
+        setCheckoutError('Location access denied. Please allow location or type your address manually.');
+    }, { timeout: 10000 });
+}
+
+async function placeOrder() {
     const name = document.getElementById('checkoutName').value.trim();
     const phone = document.getElementById('checkoutPhone').value.trim();
     const address = document.getElementById('checkoutAddress').value.trim();
+    const referralInput = document.getElementById('referralCodeInput').value.trim().toUpperCase();
     const phoneDigits = phone.replace(/\D/g, '');
 
     if (!name) { setCheckoutError('Please enter your full name.'); return; }
-    if (phoneDigits.length < 10) { setCheckoutError('Please enter a valid 10-digit mobile number.'); return; }
-    if (!address) { setCheckoutError('Please enter your delivery address.'); return; }
-    setCheckoutError('');
+    if (phoneDigits.length !== 10 || !/^[6-9]/.test(phoneDigits)) {
+        setCheckoutError('Please enter a valid 10-digit mobile number (starting with 6, 7, 8 or 9).');
+        return;
+    }
+    if (address.length < 10) { setCheckoutError('Please enter your full delivery address including door number, street and area.'); return; }
 
+    // Validate referral code if entered
+    let referralData = null;
+    if (referralInput) {
+        document.getElementById('referralStatus').textContent = 'Checking code...';
+        referralData = await validateReferralCode(referralInput, phoneDigits);
+        if (!referralData) {
+            document.getElementById('referralStatus').textContent = 'Invalid or your own referral code.';
+            setCheckoutError('Please check the referral code and try again.');
+            return;
+        }
+        appliedReferralCode = referralInput;
+        appliedReferralDiscount = siteReferralDiscount;
+        document.getElementById('referralStatus').textContent = `Code applied! ₹${appliedReferralDiscount} off.`;
+    }
+
+    setCheckoutError('');
     localStorage.setItem('zafraan_customer_phone', phone);
-    localStorage.setItem('zafraan_customer_name', name);
+    saveCustomerName(phoneDigits, name);
     saveCustomerAddress(phoneDigits, address);
 
     const totalCash = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+    const deliveryCharge = totalCash >= 100 ? 0 : 10;
+    const creditUsed = Math.min(myReferralCredit, totalCash + deliveryCharge);
+    const referralDiscount = appliedReferralDiscount;
+    const grandTotal = Math.max(0, totalCash + deliveryCharge - creditUsed - referralDiscount);
 
+    const createdAt = new Date().toISOString();
     const orderId = 'ZAF-' + Date.now();
-    saveOrderToFirestore({
-        orderId,
-        customerName: name,
-        customerPhone: phone,
-        deliveryAddress: address,
+    const orderData = {
+        orderId, customerName: name, customerPhone: phone, deliveryAddress: address,
         items: cart.map(item => ({ name: item.name, size: item.size, qty: item.qty, price: item.price })),
-        totalPrice: totalCash,
-        status: 'Pending Payment',
-        createdAt: new Date().toISOString()
-    });
+        totalPrice: grandTotal, deliveryCharge, creditUsed, referralDiscount,
+        referralCode: appliedReferralCode || '',
+        status: 'Pending Payment', createdAt
+    };
+    saveOrderToFirestore(orderData);
+    saveOrderToHistory(phoneDigits, orderData);
+
+    // Credit referrer + deduct own credit in background
+    if (appliedReferralCode && referralDiscount > 0) creditReferrer(appliedReferralCode, referralDiscount);
+    if (creditUsed > 0) deductMyCredit(phoneDigits, creditUsed);
 
     const cartLines = cart.map((item, i) =>
         `${i + 1}. ${item.name} (${item.size}) x${item.qty} — ₹${item.price * item.qty}`
     ).join('\n');
 
+    const discountLines = [];
+    if (deliveryCharge > 0) discountLines.push(`Delivery Charge: ₹${deliveryCharge}`);
+    else discountLines.push('Delivery: Free');
+    if (creditUsed > 0) discountLines.push(`Referral Credit Applied: -₹${creditUsed}`);
+    if (referralDiscount > 0) discountLines.push(`Referral Code Discount: -₹${referralDiscount}`);
+
     const message = [
         'Hi Zafraan! I would like to place an order:',
+        '', cartLines, '',
+        `Subtotal: ₹${totalCash}`,
+        ...discountLines,
+        `Total: ₹${grandTotal}`,
         '',
-        cartLines,
-        '',
-        `Total: ₹${totalCash}`,
-        '',
-        `Name: ${name}`,
-        `Mobile: ${phone}`,
-        `Address: ${address}`,
-        '',
-        'Payment: Cash on Delivery / GPay'
+        `Name: ${name}`, `Mobile: ${phone}`, `Address: ${address}`,
+        '', 'Payment: Cash on Delivery / GPay'
     ].join('\n');
 
     window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank');
 
     cart = [];
     saveCart();
+    updateBadge();
     closeUpiModal();
-    toggleCart();
+
+    // Show post-order overlay with referral code
+    const myCode = await getOrCreateMyReferralCode(phoneDigits, name);
+    const referralEl = document.getElementById('postOrderReferral');
+    referralEl.innerHTML = myCode ? `
+        <div class="referral-code-box" style="text-align:left;">
+            <div class="referral-code-title">Your Referral Code</div>
+            <div class="referral-code-val">${myCode}</div>
+            <div class="referral-code-desc">Share with friends. When they use it, you earn ₹${siteReferralDiscount} credit on your next order!</div>
+            <button onclick="navigator.clipboard.writeText('${myCode}').then(()=>this.textContent='Copied!')" style="margin-top:10px;background:var(--neon-green);color:#000;border:none;padding:8px 16px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;letter-spacing:1px;">Copy Code</button>
+        </div>` : '';
+    const overlay = document.getElementById('postOrderOverlay');
+    overlay.style.display = 'flex';
 }
 
 let firestoreDb = null;
@@ -2277,6 +2690,7 @@ async function loadAdminCatalog() {
   if (!isFirebaseConfigured()) {
     renderTabs();
     renderProducts();
+    renderSpecials();
     return;
   }
 
@@ -2287,12 +2701,32 @@ async function loadAdminCatalog() {
     firestoreDb = firestore.getFirestore(app);
     firestoreSetDoc = firestore.setDoc;
     firestoreDocFn = firestore.doc;
-    const snapshot = await firestore.getDocs(firestore.collection(firestoreDb, 'productCatalog'));
+    const [catalogSnap, settingsSnap] = await Promise.all([
+        firestore.getDocs(firestore.collection(firestoreDb, 'productCatalog')),
+        firestore.getDoc(firestore.doc(firestoreDb, 'siteSettings', 'config')).catch(() => null)
+    ]);
+
     productSettings = {};
-    snapshot.forEach(d => {
-        productSettings[d.id] = d.data();
-    });
+    catalogSnap.forEach(d => { productSettings[d.id] = d.data(); });
     adminCatalogLoaded = true;
+
+    if (settingsSnap && settingsSnap.exists()) {
+        const cfg = settingsSnap.data();
+        if (cfg.announcementActive && cfg.announcement) {
+            const banner = document.getElementById('announcementBanner');
+            banner.textContent = cfg.announcement;
+            banner.classList.add('active');
+        }
+        if (cfg.minOrder && cfg.minOrder > 0) {
+            const notice = document.getElementById('minOrderNotice');
+            notice.textContent = `Minimum order ₹${cfg.minOrder} for delivery.`;
+            notice.classList.add('active');
+        }
+        if (cfg.referralDiscount && cfg.referralDiscount > 0) {
+            siteReferralDiscount = cfg.referralDiscount;
+        }
+    }
+
     console.log('Catalog loaded from Firestore. Visible products:', Object.values(productSettings).filter(p => p.visible).length);
   } catch (error) {
     console.error('[ZAFRAAN] Catalog load failed — showing all products as fallback. Error:', error.code || error.message);
@@ -2301,6 +2735,7 @@ async function loadAdminCatalog() {
 
   renderTabs();
   renderProducts();
+  renderSpecials();
 }
 
 async function saveOrderToFirestore(orderData) {
@@ -2316,7 +2751,147 @@ async function saveOrderToFirestore(orderData) {
     }
 }
 
-// Initial calls
+// ---- ORDER HISTORY ----
+function saveOrderToHistory(phoneDigits, orderData) {
+    const key = `zafraan_history_${phoneDigits}`;
+    const history = JSON.parse(localStorage.getItem(key) || '[]');
+    history.unshift(orderData);
+    if (history.length > 10) history.pop();
+    localStorage.setItem(key, JSON.stringify(history));
+}
+
+function openOrderHistory() {
+    const phone = localStorage.getItem('zafraan_customer_phone') || '';
+    const phoneDigits = phone.replace(/\D/g, '');
+    const listEl = document.getElementById('historyList');
+
+    if (!phoneDigits) {
+        listEl.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--text-secondary)">Place your first order to see history here.</div>';
+        document.getElementById('historyModalOverlay').classList.add('open');
+        return;
+    }
+
+    const history = JSON.parse(localStorage.getItem(`zafraan_history_${phoneDigits}`) || '[]');
+    if (!history.length) {
+        listEl.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--text-secondary)">No orders found for this device.</div>';
+        document.getElementById('historyModalOverlay').classList.add('open');
+        return;
+    }
+
+    listEl.innerHTML = history.map((order, i) => {
+        const date = new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+        const itemLines = order.items.map(it => `${it.name} (${it.size}) ×${it.qty}`).join('<br>');
+        return `
+        <div class="history-order-card">
+            <div class="history-order-meta">${order.orderId} &nbsp;·&nbsp; ${date}</div>
+            <div class="history-order-items">${itemLines}</div>
+            <div class="history-order-total">₹${order.totalPrice}</div>
+            <button class="history-reorder-btn" onclick="reorder(${i})">Reorder</button>
+        </div>`;
+    }).join('');
+
+    document.getElementById('historyModalOverlay').classList.add('open');
+}
+
+function closeOrderHistory() {
+    document.getElementById('historyModalOverlay').classList.remove('open');
+}
+
+function reorder(index) {
+    const phoneDigits = (localStorage.getItem('zafraan_customer_phone') || '').replace(/\D/g, '');
+    const history = JSON.parse(localStorage.getItem(`zafraan_history_${phoneDigits}`) || '[]');
+    const order = history[index];
+    if (!order) return;
+
+    order.items.forEach(item => {
+        const product = getCatalogProducts().find(p => p.name === item.name);
+        if (!product) return;
+        const existing = cart.find(c => c.id === product.id && c.size === item.size);
+        if (existing) existing.qty += item.qty;
+        else cart.push({ id: product.id, name: item.name, size: item.size, qty: item.qty, price: item.price, img: productImages[item.name] || '' });
+    });
+    saveCart();
+    updateBadge();
+    closeOrderHistory();
+    toggleCart();
+}
+
+// ---- REFERRAL SYSTEM ----
+let appliedReferralCode = null;
+let appliedReferralDiscount = 0;
+let myReferralCredit = 0;
+let siteReferralDiscount = 0;
+
+function generateReferralCode() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let code = 'ZAF';
+    for (let i = 0; i < 7; i++) code += chars[Math.floor(Math.random() * chars.length)];
+    return code;
+}
+
+async function getOrCreateMyReferralCode(phoneDigits, name) {
+    const storageKey = `zafraan_refcode_${phoneDigits}`;
+    let code = localStorage.getItem(storageKey);
+    if (code) return code;
+
+    if (!firestoreDb) return null;
+    try {
+        const { getDoc, setDoc, doc, collection, query, where, getDocs } = await import('https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js');
+        const q = query(collection(firestoreDb, 'referralCodes'), where('phone', '==', phoneDigits));
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+            code = snap.docs[0].id;
+            localStorage.setItem(storageKey, code);
+            return code;
+        }
+        code = generateReferralCode();
+        await setDoc(doc(firestoreDb, 'referralCodes', code), { phone: phoneDigits, name, credit: 0, createdAt: new Date().toISOString() });
+        localStorage.setItem(storageKey, code);
+        return code;
+    } catch(e) { return null; }
+}
+
+async function loadMyCredit(phoneDigits) {
+    const storageKey = `zafraan_refcode_${phoneDigits}`;
+    const code = localStorage.getItem(storageKey);
+    if (!code || !firestoreDb) return 0;
+    try {
+        const { getDoc, doc } = await import('https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js');
+        const snap = await getDoc(doc(firestoreDb, 'referralCodes', code));
+        return snap.exists() ? (snap.data().credit || 0) : 0;
+    } catch(e) { return 0; }
+}
+
+async function validateReferralCode(code, myPhoneDigits) {
+    if (!code || !firestoreDb) return null;
+    try {
+        const { getDoc, doc } = await import('https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js');
+        const snap = await getDoc(doc(firestoreDb, 'referralCodes', code));
+        if (!snap.exists()) return null;
+        const data = snap.data();
+        if (data.phone === myPhoneDigits) return null; // can't use own code
+        return data;
+    } catch(e) { return null; }
+}
+
+async function creditReferrer(referralCode, amount) {
+    if (!firestoreDb || !referralCode || amount <= 0) return;
+    try {
+        const { getDoc, updateDoc, doc, increment } = await import('https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js');
+        await updateDoc(doc(firestoreDb, 'referralCodes', referralCode), { credit: increment(amount) });
+    } catch(e) {}
+}
+
+async function deductMyCredit(phoneDigits, amount) {
+    const code = localStorage.getItem(`zafraan_refcode_${phoneDigits}`);
+    if (!firestoreDb || !code || amount <= 0) return;
+    try {
+        const { updateDoc, doc, increment } = await import('https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js');
+        await updateDoc(doc(firestoreDb, 'referralCodes', code), { credit: increment(-amount) });
+    } catch(e) {}
+}
+
+// ---- Initial calls ----
 updateBadge();
 renderTabs();
 loadAdminCatalog();
