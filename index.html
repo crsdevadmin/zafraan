@@ -1927,6 +1927,23 @@
     </div>
 </div>
 
+<!-- LOCATION PERMISSION GUIDE MODAL -->
+<div id="locationGuideOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:400;align-items:flex-end;justify-content:center;" onclick="closeLocationGuide()">
+    <div style="background:#111;border:1px solid rgba(255,255,255,0.1);border-bottom:none;border-radius:20px 20px 0 0;width:100%;max-width:500px;padding:28px 24px 36px;text-align:left;" onclick="event.stopPropagation()">
+        <div style="width:36px;height:4px;background:rgba(255,255,255,0.15);border-radius:2px;margin:0 auto 24px;"></div>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="#00e676"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            <div>
+                <div style="font-size:16px;font-weight:600;color:#fff;">Allow Location Access</div>
+                <div style="font-size:12px;color:#a0a0a0;margin-top:2px;">To auto-fill your delivery area</div>
+            </div>
+        </div>
+        <div id="locationGuideSteps" style="background:#0a0a0a;border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:16px 18px;margin-bottom:20px;font-size:13px;color:#ccc;line-height:2;"></div>
+        <button onclick="retryLocation()" style="width:100%;background:var(--neon-green);color:#000;border:none;padding:14px;font-family:inherit;font-size:14px;font-weight:700;border-radius:10px;cursor:pointer;letter-spacing:0.5px;">Try Again</button>
+        <button onclick="closeLocationGuide()" style="width:100%;background:none;border:none;color:#666;font-family:inherit;font-size:13px;padding:12px;cursor:pointer;margin-top:4px;">Type address manually</button>
+    </div>
+</div>
+
 <!-- ORDER HISTORY MODAL -->
 <div class="history-modal-overlay" id="historyModalOverlay" onclick="closeOrderHistory()">
     <div class="history-modal-box" onclick="event.stopPropagation()">
@@ -2538,12 +2555,63 @@ function closeUpiModal() {
     document.getElementById('postOrderOverlay').style.display = 'none';
 }
 
-function useMyLocation() {
+function showLocationGuide(reason) {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isAndroid = /Android/.test(navigator.userAgent);
+    let steps = '';
+    if (reason === 'denied') {
+        if (isIOS) {
+            steps = `Location is blocked. To enable:<br><br>
+1. Open <strong>Settings</strong> on your iPhone<br>
+2. Scroll down → tap <strong>Safari</strong> (or your browser app)<br>
+3. Tap <strong>Location</strong> → select <strong>Ask</strong> or <strong>Allow</strong><br>
+4. Come back and tap <strong>Try Again</strong>`;
+        } else if (isAndroid) {
+            steps = `Location is blocked. To enable:<br><br>
+1. Tap the <strong>lock / ⓘ icon</strong> in your browser address bar<br>
+2. Tap <strong>Permissions → Location → Allow</strong><br>
+3. Or go to <strong>Settings → Apps → Chrome → Permissions → Location → Allow</strong><br>
+4. Come back and tap <strong>Try Again</strong>`;
+        } else {
+            steps = `Location is blocked. To enable:<br><br>
+1. Click the <strong>lock icon</strong> in your browser address bar<br>
+2. Set <strong>Location</strong> to <strong>Allow</strong><br>
+3. Tap <strong>Try Again</strong>`;
+        }
+    } else {
+        steps = `Could not detect your location. Make sure your device GPS / Location is turned on and try again.`;
+    }
+    document.getElementById('locationGuideSteps').innerHTML = steps;
+    document.getElementById('locationGuideOverlay').style.display = 'flex';
+}
+
+function closeLocationGuide() {
+    document.getElementById('locationGuideOverlay').style.display = 'none';
+}
+
+function retryLocation() {
+    closeLocationGuide();
+    setTimeout(useMyLocation, 200);
+}
+
+async function useMyLocation() {
     const btn = document.getElementById('locationBtn');
     if (!navigator.geolocation) {
-        setCheckoutError('Your browser does not support location. Please type your address.');
+        showLocationGuide('denied');
         return;
     }
+
+    // Check if permission is already hard-denied before even calling getCurrentPosition
+    if (navigator.permissions) {
+        try {
+            const perm = await navigator.permissions.query({ name: 'geolocation' });
+            if (perm.state === 'denied') {
+                showLocationGuide('denied');
+                return;
+            }
+        } catch(e) { /* permissions API not supported — fall through to getCurrentPosition */ }
+    }
+
     btn.disabled = true;
     btn.textContent = 'Getting location...';
 
@@ -2575,12 +2643,13 @@ function useMyLocation() {
         } catch(e) {
             btn.disabled = false;
             btn.textContent = 'Use My Location';
-            setCheckoutError('Could not read your location address. Please type it manually.');
+            showLocationGuide('error');
         }
-    }, () => {
+    }, (err) => {
         btn.disabled = false;
         btn.textContent = 'Use My Location';
-        setCheckoutError('Location access denied. Please allow location or type your address manually.');
+        // err.code 1 = PERMISSION_DENIED, 2 = POSITION_UNAVAILABLE, 3 = TIMEOUT
+        showLocationGuide(err.code === 1 ? 'denied' : 'error');
     }, { timeout: 10000 });
 }
 
