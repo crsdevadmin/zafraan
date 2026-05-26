@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background -->
+  <rect width="512" height="512" fill="#050505"/>
+
+  <!-- Saffron flower — same paths as the nav logo, scaled 5x and centered -->
+  <g transform="translate(56, 10) scale(5)" fill="none" stroke="#00e676" stroke-width="1.2">
+    <!-- petals -->
+    <path d="M40 45 C 32 38, 28 28, 34 18 C 38 12, 42 12, 46 18 C 52 28, 48 38, 40 45" stroke-width="1" fill="rgba(0,230,118,0.12)"/>
+    <path d="M40 45 C 26 42, 18 34, 20 22 C 22 16, 28 14, 32 20 C 38 30, 36 40, 40 45" stroke-width="1" fill="rgba(0,230,118,0.12)"/>
+    <path d="M40 45 C 52 42, 60 34, 58 22 C 56 16, 50 14, 48 20 C 42 30, 42 40, 40 45" stroke-width="1" fill="rgba(0,230,118,0.12)"/>
+    <!-- stamens -->
+    <line x1="40" y1="44" x2="36" y2="28" stroke="#d4af37" stroke-width="0.8"/>
+    <line x1="40" y1="44" x2="40" y2="26" stroke="#d4af37" stroke-width="0.8"/>
+    <line x1="40" y1="44" x2="44" y2="28" stroke="#d4af37" stroke-width="0.8"/>
+    <circle cx="36" cy="27" r="1.5" fill="#d4af37"/>
+    <circle cx="40" cy="25" r="1.5" fill="#d4af37"/>
+    <circle cx="44" cy="27" r="1.5" fill="#d4af37"/>
+    <!-- stem -->
+    <path d="M40 45 Q 42 60, 38 78" stroke-width="1" stroke="#00e676"/>
+  </g>
+
+  <!-- ZAFRAAN wordmark -->
+  <text x="256" y="442" font-family="Georgia,serif" font-size="54" font-weight="600"
+        fill="#ffffff" text-anchor="middle" letter-spacing="10">ZAFRAAN</text>
+  <!-- tagline -->
+  <text x="256" y="478" font-family="Arial,sans-serif" font-size="20"
+        fill="#00e676" text-anchor="middle" letter-spacing="5">FOODS</text>
+</svg>
