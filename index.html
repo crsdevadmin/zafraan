@@ -2293,7 +2293,7 @@ function openModal(id) {
     
     document.getElementById('modalCat').textContent = p.cat;
     document.getElementById('modalTitle').textContent = p.name;
-    document.getElementById('modalDesc').textContent = p.desc + (p.storage !== 'Dry' ? ` Storage: ${p.storage}.` : '');
+    document.getElementById('modalDesc').textContent = p.prepTime ? `⏱ Ready in ${p.prepTime}` : '';
     document.getElementById('modalQty').textContent = currentQty;
     
     const sizes = p.sizes
