@@ -130,6 +130,21 @@
             background: transparent;
         }
 
+        .tab-badge {
+            display: inline-flex; align-items: center; justify-content: center;
+            background: #f44336; color: #fff; font-size: 10px; font-weight: 700;
+            width: 18px; height: 18px; border-radius: 50%; margin-left: 6px;
+            animation: badge-pop 0.3s ease;
+        }
+        @keyframes badge-pop { from { transform: scale(0); } to { transform: scale(1); } }
+
+        .order-card.new-order {
+            border-color: var(--neon-green);
+            box-shadow: 0 0 20px rgba(0,230,118,0.15);
+            animation: highlight-in 0.4s ease;
+        }
+        @keyframes highlight-in { from { background: rgba(0,230,118,0.06); } to { background: var(--bg-card); } }
+
         .top-actions {
             display: flex;
             align-items: center;
@@ -675,7 +690,7 @@
             <div class="brand">ZAFRAAN <span>ADMIN</span></div>
             <div class="admin-nav-tabs">
                 <button id="tabCatalog" class="admin-nav-tab active" onclick="switchAdminTab('catalog')">Products</button>
-                <button id="tabOrders" class="admin-nav-tab" onclick="switchAdminTab('orders')">Orders</button>
+                <button id="tabOrders" class="admin-nav-tab" onclick="switchAdminTab('orders')">Orders<span id="newOrderBadge" style="display:none;" class="tab-badge">0</span></button>
                 <button id="tabSettings" class="admin-nav-tab" onclick="switchAdminTab('settings')">Site Settings</button>
             </div>
         </div>
@@ -872,11 +887,17 @@
         let setDoc;
         let writeBatch;
         let updateDoc;
+        let onSnapshot;
+        let query;
+        let orderBy;
 
         let loadedSettings = {};
         let currentCategory = 'All';
         let searchQuery = '';
         let ordersList = [];
+        let ordersUnsubscribe = null;
+        let knownOrderIds = new Set();
+        let newOrderCount = 0;
 
         function sanitize(str) {
             const div = document.createElement('div');
@@ -899,7 +920,9 @@
             } else if (tab === 'orders') {
                 document.getElementById('panelOrders').style.display = 'block';
                 document.getElementById('tabOrders').classList.add('active');
-                loadOrders();
+                // Clear new-order badge when tab is opened
+                newOrderCount = 0;
+                document.getElementById('newOrderBadge').style.display = 'none';
             } else {
                 document.getElementById('panelSettings').style.display = 'block';
                 document.getElementById('tabSettings').classList.add('active');
@@ -1108,36 +1131,80 @@
             }
         }
 
-        // LOAD ORDERS FROM FIRESTORE
-        window.loadOrders = async function() {
-            if (!currentUser) return;
-            const ordersGrid = document.getElementById('ordersGrid');
-            
-            setOrdersMessage('Loading orders...');
-            ordersGrid.innerHTML = '';
-            
-            try {
-                const querySnapshot = await getDocs(collection(db, 'orders'));
-                ordersList = [];
-                querySnapshot.forEach(doc => {
-                    ordersList.push(doc.data());
+        // REAL-TIME ORDERS LISTENER
+        function startOrdersListener() {
+            if (!currentUser || !onSnapshot) return;
+            if (ordersUnsubscribe) { ordersUnsubscribe(); ordersUnsubscribe = null; }
+
+            setOrdersMessage('Listening for orders...');
+            const ordersCol = collection(db, 'orders');
+
+            ordersUnsubscribe = onSnapshot(ordersCol, snapshot => {
+                const incoming = [];
+                const freshIds = new Set();
+
+                snapshot.forEach(d => {
+                    incoming.push(d.data());
+                    freshIds.add(d.id);
                 });
-                
-                // Sort by date descending
-                ordersList.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-                
+
+                // Detect truly new orders (not seen in this session)
+                if (knownOrderIds.size > 0) {
+                    freshIds.forEach(id => {
+                        if (!knownOrderIds.has(id)) {
+                            newOrderCount++;
+                            playNewOrderSound();
+                        }
+                    });
+                }
+                knownOrderIds = freshIds;
+
+                incoming.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                ordersList = incoming;
+
+                // If we're not on the orders tab, show badge
+                const ordersPanel = document.getElementById('panelOrders');
+                if (ordersPanel.style.display === 'none' && newOrderCount > 0) {
+                    const badge = document.getElementById('newOrderBadge');
+                    badge.textContent = newOrderCount;
+                    badge.style.display = 'inline-flex';
+                } else {
+                    newOrderCount = 0;
+                    document.getElementById('newOrderBadge').style.display = 'none';
+                }
+
                 setOrdersMessage('');
                 renderOrders();
-            } catch (err) {
-                console.error(err);
+            }, err => {
                 setOrdersMessage('Error loading orders: ' + err.message, true);
-            }
-        };
+            });
+        }
+
+        function playNewOrderSound() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                [523, 659, 784].forEach((freq, i) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.frequency.value = freq;
+                    osc.type = 'sine';
+                    gain.gain.setValueAtTime(0.3, ctx.currentTime + i * 0.12);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.12 + 0.3);
+                    osc.start(ctx.currentTime + i * 0.12);
+                    osc.stop(ctx.currentTime + i * 0.12 + 0.3);
+                });
+            } catch(e) {}
+        }
+
+        // Keep loadOrders as a manual refresh fallback
+        window.loadOrders = function() { startOrdersListener(); };
 
         function getStatusClass(status) {
             switch (status) {
                 case 'Pending Payment': return 'status-pending';
                 case 'Paid/Processing': return 'status-paid';
+                case 'Out for Delivery': return 'status-paid';
                 case 'Delivered': return 'status-delivered';
                 case 'Cancelled': return 'status-cancelled';
                 default: return 'status-pending';
@@ -1196,7 +1263,8 @@
                                     <span>UPDATE STATUS:</span>
                                     <select class="status-select" data-order-id="${sanitize(order.orderId)}" onchange="updateOrderStatus(this.dataset.orderId, this.value)">
                                         <option value="Pending Payment" ${order.status === 'Pending Payment' ? 'selected' : ''}>Pending Payment</option>
-                                        <option value="Paid/Processing" ${order.status === 'Paid/Processing' ? 'selected' : ''}>Paid/Processing</option>
+                                        <option value="Paid/Processing" ${order.status === 'Paid/Processing' ? 'selected' : ''}>Confirmed</option>
+                                        <option value="Out for Delivery" ${order.status === 'Out for Delivery' ? 'selected' : ''}>Out for Delivery</option>
                                         <option value="Delivered" ${order.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
                                         <option value="Cancelled" ${order.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
                                     </select>
@@ -1274,6 +1342,9 @@
             setDoc = firebaseStore.setDoc;
             writeBatch = firebaseStore.writeBatch;
             updateDoc = firebaseStore.updateDoc;
+            onSnapshot = firebaseStore.onSnapshot;
+            query = firebaseStore.query;
+            orderBy = firebaseStore.orderBy;
 
             app = firebaseApp.initializeApp(config);
             auth = firebaseAuth.getAuth(app);
@@ -1307,11 +1378,9 @@
                 setMessage('Loading...');
                 await loadCatalog();
                 setMessage('');
-                
-                // If switchAdminTab was already set to orders, load orders
-                if (document.getElementById('panelOrders').style.display === 'block') {
-                    loadOrders();
-                }
+
+                // Start real-time orders listener immediately on login
+                startOrdersListener();
             });
         }
     </script>
