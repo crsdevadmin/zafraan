@@ -1214,6 +1214,49 @@
         }
         .my-orders-btn:hover { border-color: var(--neon-green); color: #fff; }
 
+        /* ---- Payment method selector ---- */
+        .payment-method-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px;
+        }
+        .payment-method-option input { display: none; }
+        .payment-method-card {
+            display: flex; flex-direction: column; align-items: center; gap: 6px;
+            padding: 14px 10px; border: 1.5px solid var(--border-color);
+            border-radius: 10px; cursor: pointer; transition: all 0.2s;
+            font-size: 13px; color: var(--text-secondary); text-align: center;
+            background: rgba(255,255,255,0.02);
+        }
+        .payment-method-card .pm-icon { font-size: 22px; }
+        .payment-method-option input:checked + .payment-method-card {
+            border-color: var(--neon-green); color: #fff;
+            background: rgba(0,230,118,0.06);
+        }
+
+        /* ---- UPI app buttons ---- */
+        .upi-apps-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px;
+        }
+        .upi-app-btn {
+            display: flex; flex-direction: column; align-items: center; gap: 8px;
+            padding: 16px 10px; border-radius: 12px; border: 2px solid transparent;
+            cursor: pointer; transition: all 0.2s; font-family: 'Outfit', sans-serif;
+            font-size: 13px; font-weight: 500; background: rgba(255,255,255,0.03);
+        }
+        .upi-app-btn .upi-logo {
+            width: 36px; height: 36px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px; font-weight: 800;
+        }
+        .upi-app-btn.gpay   { color: #4285F4; border-color: rgba(66,133,244,0.25); }
+        .upi-app-btn.gpay .upi-logo { background: rgba(66,133,244,0.12); }
+        .upi-app-btn.phonepe { color: #7c4fcf; border-color: rgba(124,79,207,0.25); }
+        .upi-app-btn.phonepe .upi-logo { background: rgba(124,79,207,0.12); }
+        .upi-app-btn.paytm  { color: #4a9de3; border-color: rgba(74,157,227,0.25); }
+        .upi-app-btn.paytm .upi-logo { background: rgba(74,157,227,0.12); }
+        .upi-app-btn.cred   { color: #d4af37; border-color: rgba(212,175,55,0.25); }
+        .upi-app-btn.cred .upi-logo { background: rgba(212,175,55,0.12); }
+        .upi-app-btn.selected { border-color: var(--neon-green) !important; background: rgba(0,230,118,0.06); color: #fff !important; }
+
         /* ---- Order tracking ---- */
         .track-order-btn {
             background: var(--neon-green); border: none; color: #000;
@@ -2096,16 +2139,52 @@
                     <div class="checkout-note" id="referralStatus"></div>
                 </div>
 
-                <div class="payment-info-box">
-                    <div class="payment-info-icon">💳</div>
-                    <div>
-                        <div class="payment-info-title">Payment Options</div>
-                        <div class="payment-info-desc">We currently accept <strong>Cash on Delivery</strong> or <strong>GPay</strong> to our delivery partner. <strong>Free delivery</strong> on orders ₹100 and above. A ₹10 delivery charge applies below ₹100.</div>
+                <!-- Payment Method -->
+                <div class="checkout-field">
+                    <label>Payment Method</label>
+                    <div class="payment-method-grid">
+                        <label class="payment-method-option">
+                            <input type="radio" name="paymentMethod" value="cod" checked onchange="onPaymentMethodChange()">
+                            <div class="payment-method-card">
+                                <span class="pm-icon">💵</span>
+                                <span>Cash on Delivery</span>
+                            </div>
+                        </label>
+                        <label class="payment-method-option">
+                            <input type="radio" name="paymentMethod" value="upi" onchange="onPaymentMethodChange()">
+                            <div class="payment-method-card">
+                                <span class="pm-icon">📱</span>
+                                <span>UPI Payment</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- UPI App Selector (shown when UPI is chosen) -->
+                <div id="upiAppSelector" style="display:none;">
+                    <label style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:2px;">Choose UPI App</label>
+                    <div class="upi-apps-grid">
+                        <button type="button" class="upi-app-btn gpay" onclick="selectUpiApp('gpay', this)">
+                            <div class="upi-logo">G</div>
+                            <span>Google Pay</span>
+                        </button>
+                        <button type="button" class="upi-app-btn phonepe" onclick="selectUpiApp('phonepe', this)">
+                            <div class="upi-logo">Ph</div>
+                            <span>PhonePe</span>
+                        </button>
+                        <button type="button" class="upi-app-btn paytm" onclick="selectUpiApp('paytm', this)">
+                            <div class="upi-logo">Pt</div>
+                            <span>Paytm</span>
+                        </button>
+                        <button type="button" class="upi-app-btn cred" onclick="selectUpiApp('cred', this)">
+                            <div class="upi-logo">C</div>
+                            <span>CRED</span>
+                        </button>
                     </div>
                 </div>
 
                 <div class="checkout-error" id="checkoutError"></div>
-                <button class="modal-btn" onclick="placeOrder()">Send Order on WhatsApp</button>
+                <button class="modal-btn" id="placeOrderBtn" onclick="placeOrder()">Place Order</button>
             </div>
         </div>
     </div>
@@ -2564,6 +2643,33 @@ function renderCart() {
 
 const whatsappNumber = "917904788173";
 
+// ---- Payment method ----
+let selectedUpiApp = null;
+
+const UPI_SCHEMES = {
+    gpay:    amt => `tez://upi/pay?pa=${encodeURIComponent(window.ZAFRAAN_UPI_ID)}&pn=ZAFRAAN+Foods&am=${amt}&cu=INR`,
+    phonepe: amt => `phonepe://pay?pa=${encodeURIComponent(window.ZAFRAAN_UPI_ID)}&pn=ZAFRAAN+Foods&am=${amt}&cu=INR`,
+    paytm:   amt => `paytmmp://pay?pa=${encodeURIComponent(window.ZAFRAAN_UPI_ID)}&pn=ZAFRAAN+Foods&am=${amt}&cu=INR`,
+    cred:    amt => `credpay://pay?pa=${encodeURIComponent(window.ZAFRAAN_UPI_ID)}&pn=ZAFRAAN+Foods&am=${amt}&cu=INR`,
+};
+const UPI_NAMES = { gpay: 'Google Pay', phonepe: 'PhonePe', paytm: 'Paytm', cred: 'CRED' };
+
+function onPaymentMethodChange() {
+    const isUpi = document.querySelector('input[name="paymentMethod"]:checked')?.value === 'upi';
+    document.getElementById('upiAppSelector').style.display = isUpi ? 'block' : 'none';
+    if (!isUpi) {
+        selectedUpiApp = null;
+        document.querySelectorAll('.upi-app-btn').forEach(b => b.classList.remove('selected'));
+    }
+    document.getElementById('placeOrderBtn').textContent = isUpi ? 'Pay & Place Order' : 'Place Order';
+}
+
+function selectUpiApp(app, btn) {
+    selectedUpiApp = app;
+    document.querySelectorAll('.upi-app-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+}
+
 function setCheckoutError(message) {
   const errorEl = document.getElementById('checkoutError');
   errorEl.textContent = message;
@@ -2660,6 +2766,13 @@ async function checkoutUPI() {
 function closeUpiModal() {
     document.getElementById('upiModalOverlay').style.display = 'none';
     document.getElementById('postOrderOverlay').style.display = 'none';
+    // Reset payment selection
+    selectedUpiApp = null;
+    document.querySelectorAll('.upi-app-btn').forEach(b => b.classList.remove('selected'));
+    document.getElementById('upiAppSelector').style.display = 'none';
+    const codRadio = document.querySelector('input[name="paymentMethod"][value="cod"]');
+    if (codRadio) { codRadio.checked = true; }
+    document.getElementById('placeOrderBtn').textContent = 'Place Order';
 }
 
 function showLocationGuide(reason) {
@@ -2767,12 +2880,16 @@ async function placeOrder() {
     const referralInput = document.getElementById('referralCodeInput').value.trim().toUpperCase();
     const phoneDigits = phone.replace(/\D/g, '');
 
+    const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'cod';
+    const isUpi = paymentMethod === 'upi';
+
     if (!name) { setCheckoutError('Please enter your full name.'); return; }
     if (phoneDigits.length !== 10 || !/^[6-9]/.test(phoneDigits)) {
         setCheckoutError('Please enter a valid 10-digit mobile number (starting with 6, 7, 8 or 9).');
         return;
     }
     if (address.length < 10) { setCheckoutError('Please enter your full delivery address including door number, street and area.'); return; }
+    if (isUpi && !selectedUpiApp) { setCheckoutError('Please select a UPI app to pay with.'); return; }
 
     // Validate referral code if entered
     let referralData = null;
@@ -2807,7 +2924,8 @@ async function placeOrder() {
         items: cart.map(item => ({ name: item.name, size: item.size, qty: item.qty, price: item.price })),
         totalPrice: grandTotal, deliveryCharge, creditUsed, referralDiscount,
         referralCode: appliedReferralCode || '',
-        status: 'Pending Payment', createdAt
+        paymentMethod: isUpi ? UPI_NAMES[selectedUpiApp] + ' (UPI)' : 'Cash on Delivery',
+        status: isUpi ? 'Pending Payment' : 'Confirmed', createdAt
     };
     saveOrderToFirestore(orderData);
     saveOrderToHistory(phoneDigits, orderData);
@@ -2834,10 +2952,14 @@ async function placeOrder() {
         `Total: ₹${grandTotal}`,
         '',
         `Name: ${name}`, `Mobile: ${phone}`, `Address: ${address}`,
-        '', 'Payment: Cash on Delivery / GPay'
+        '', `Payment: ${isUpi ? UPI_NAMES[selectedUpiApp] + ' (UPI)' : 'Cash on Delivery'}`
     ].join('\n');
 
     window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank');
+
+    if (isUpi && UPI_SCHEMES[selectedUpiApp]) {
+        setTimeout(() => { window.location.href = UPI_SCHEMES[selectedUpiApp](grandTotal); }, 800);
+    }
 
     cart = [];
     saveCart();
