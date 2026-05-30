@@ -2048,13 +2048,23 @@
 </div>
 
 <!-- POST-ORDER SUCCESS OVERLAY -->
-<div id="postOrderOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:300;display:none;align-items:center;justify-content:center;padding:20px;">
+<div id="postOrderOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:300;align-items:center;justify-content:center;padding:20px;">
     <div style="background:#0c0c0c;border:1px solid var(--border-color);max-width:400px;width:100%;padding:36px 28px;text-align:center;">
-        <div style="font-size:32px;margin-bottom:12px;">✓</div>
-        <div style="font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--neon-green);margin-bottom:8px;">Order Placed!</div>
-        <div id="postOrderId" style="font-size:13px;color:#666;margin-bottom:20px;font-family:monospace;letter-spacing:1px;"></div>
-        <div style="font-size:14px;color:var(--text-secondary);margin-bottom:20px;line-height:1.7;">Your order has been received. We'll confirm it shortly.</div>
-        <button onclick="openTrackOrderFromPost()" style="width:100%;background:var(--neon-green);color:#000;border:none;padding:13px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;cursor:pointer;border-radius:8px;margin-bottom:10px;">Track My Order</button>
+        <div style="font-size:32px;margin-bottom:12px;" id="postOrderIcon">✓</div>
+        <div style="font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--neon-green);margin-bottom:8px;" id="postOrderTitle">Order Placed!</div>
+        <div id="postOrderId" style="font-size:13px;color:#666;margin-bottom:16px;font-family:monospace;letter-spacing:1px;"></div>
+        <!-- UPI payment step -->
+        <div id="postOrderUpiStep" style="display:none;margin-bottom:8px;">
+            <div style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;line-height:1.7;">Complete your payment below, then confirm your order on WhatsApp so we can prepare it.</div>
+            <button id="postOrderUpiBtn" style="width:100%;background:var(--neon-green);color:#000;border:none;padding:14px;font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;cursor:pointer;border-radius:8px;margin-bottom:10px;letter-spacing:0.5px;"></button>
+            <button id="postOrderWaBtn" style="width:100%;background:#25D366;color:#000;border:none;padding:13px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;cursor:pointer;border-radius:8px;margin-bottom:4px;">Confirm Order on WhatsApp</button>
+            <div style="font-size:11px;color:#555;margin-top:4px;">Pay first, then tap WhatsApp to confirm.</div>
+        </div>
+        <!-- COD step -->
+        <div id="postOrderCodStep" style="display:none;margin-bottom:8px;">
+            <div style="font-size:14px;color:var(--text-secondary);margin-bottom:16px;line-height:1.7;">Your order has been received. We'll confirm it shortly.</div>
+            <button onclick="openTrackOrderFromPost()" style="width:100%;background:var(--neon-green);color:#000;border:none;padding:13px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;cursor:pointer;border-radius:8px;margin-bottom:10px;">Track My Order</button>
+        </div>
         <div id="postOrderReferral" style="margin-top:4px;"></div>
         <button class="modal-btn" style="margin-top:16px;width:100%;" onclick="document.getElementById('postOrderOverlay').style.display='none';">Close</button>
     </div>
@@ -2955,18 +2965,12 @@ async function placeOrder() {
         '', `Payment: ${isUpi ? UPI_NAMES[selectedUpiApp] + ' (UPI)' : 'Cash on Delivery'}`
     ].join('\n');
 
-    window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank');
-
-    if (isUpi && UPI_SCHEMES[selectedUpiApp]) {
-        setTimeout(() => { window.location.href = UPI_SCHEMES[selectedUpiApp](grandTotal); }, 800);
-    }
-
     cart = [];
     saveCart();
     updateBadge();
     closeUpiModal();
 
-    // Show post-order overlay with referral code
+    // Show post-order overlay
     const myCode = await getOrCreateMyReferralCode(phoneDigits, name);
     const referralEl = document.getElementById('postOrderReferral');
     referralEl.innerHTML = myCode ? `
@@ -2977,8 +2981,27 @@ async function placeOrder() {
             <button onclick="navigator.clipboard.writeText('${myCode}').then(()=>this.textContent='Copied!')" style="margin-top:10px;background:var(--neon-green);color:#000;border:none;padding:8px 16px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;letter-spacing:1px;">Copy Code</button>
         </div>` : '';
     document.getElementById('postOrderId').textContent = `Order ID: ${orderId}`;
-    const overlay = document.getElementById('postOrderOverlay');
-    overlay.style.display = 'flex';
+
+    if (isUpi) {
+        // UPI flow: show Pay button + WhatsApp confirm button
+        document.getElementById('postOrderIcon').textContent = '📱';
+        document.getElementById('postOrderTitle').textContent = 'Almost Done!';
+        document.getElementById('postOrderUpiStep').style.display = 'block';
+        document.getElementById('postOrderCodStep').style.display = 'none';
+        const upiBtn = document.getElementById('postOrderUpiBtn');
+        upiBtn.textContent = `Pay ₹${grandTotal} with ${UPI_NAMES[selectedUpiApp]}`;
+        upiBtn.onclick = () => { window.location.href = UPI_SCHEMES[selectedUpiApp](grandTotal); };
+        document.getElementById('postOrderWaBtn').onclick = () => { window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank'); };
+    } else {
+        // COD flow: auto-open WhatsApp, show tracking button
+        document.getElementById('postOrderIcon').textContent = '✓';
+        document.getElementById('postOrderTitle').textContent = 'Order Placed!';
+        document.getElementById('postOrderUpiStep').style.display = 'none';
+        document.getElementById('postOrderCodStep').style.display = 'block';
+        window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank');
+    }
+
+    document.getElementById('postOrderOverlay').style.display = 'flex';
 }
 
 let firestoreDb = null;
