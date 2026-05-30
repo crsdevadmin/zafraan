@@ -10,3 +10,6 @@ window.ZAFRAAN_FIREBASE_CONFIG = {
 window.ZAFRAAN_ADMIN_EMAILS = [
   "padhomjs@gmail.com"
 ];
+
+// Your UPI ID — replace with your actual UPI ID (e.g. "zafraan@oksbi")
+window.ZAFRAAN_UPI_ID = "m.jaffer.s-1@okaxis";
