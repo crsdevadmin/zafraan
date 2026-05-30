@@ -2960,6 +2960,8 @@ async function placeOrder() {
         '', `Payment: ${isUpi ? UPI_NAMES[selectedUpiApp] + ' (UPI)' : 'Cash on Delivery'}`
     ].join('\n');
 
+    const chosenUpiApp = selectedUpiApp; // capture before closeUpiModal resets it to null
+
     cart = [];
     saveCart();
     updateBadge();
@@ -2987,8 +2989,8 @@ async function placeOrder() {
         document.getElementById('postOrderUpiStep').style.display = 'block';
         document.getElementById('postOrderCodStep').style.display = 'none';
         const upiBtn = document.getElementById('postOrderUpiBtn');
-        upiBtn.textContent = `Pay ₹${grandTotal} with ${UPI_NAMES[selectedUpiApp]}`;
-        upiBtn.onclick = () => { window.location.href = UPI_SCHEMES[selectedUpiApp](grandTotal); };
+        upiBtn.textContent = `Pay ₹${grandTotal} with ${UPI_NAMES[chosenUpiApp]}`;
+        upiBtn.onclick = () => { window.location.href = UPI_SCHEMES[chosenUpiApp](grandTotal); };
         document.getElementById('postOrderWaBtn').onclick = () => { window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank'); };
     } else {
         // COD flow: auto-open WhatsApp, show tracking button
