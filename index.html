@@ -2739,8 +2739,11 @@ async function checkoutUPI() {
     `).join('') + deliveryRow + `<div class="summary-total"><span>Total</span><span>₹${grandTotal}</span></div>`;
 
     setCheckoutError('');
-    document.getElementById('referralCodeInput').value = '';
-    document.getElementById('referralStatus').textContent = '';
+    const pendingRef = sessionStorage.getItem('zafraan_pending_ref') || '';
+    document.getElementById('referralCodeInput').value = pendingRef;
+    document.getElementById('referralStatus').textContent = pendingRef
+        ? `Referral code from your friend applied${siteReferralDiscount > 0 ? ' — ₹' + siteReferralDiscount + ' off!' : '!'}`
+        : '';
     document.getElementById('creditNotice').style.display = 'none';
     const locBtn = document.getElementById('locationBtn');
     if (locBtn) { locBtn.disabled = false; locBtn.textContent = 'Use My Location'; locBtn.style.background = ''; }
@@ -2933,7 +2936,7 @@ async function placeOrder() {
     saveOrderToHistory(phoneDigits, orderData);
 
     // Credit referrer + deduct own credit in background
-    if (appliedReferralCode && referralDiscount > 0) creditReferrer(appliedReferralCode, referralDiscount);
+    if (appliedReferralCode && referralDiscount > 0) creditReferrer(appliedReferralCode, siteReferrerReward > 0 ? siteReferrerReward : referralDiscount);
     if (creditUsed > 0) deductMyCredit(phoneDigits, creditUsed);
 
     const cartLines = cart.map((item, i) =>
@@ -2969,8 +2972,11 @@ async function placeOrder() {
         <div class="referral-code-box" style="text-align:left;">
             <div class="referral-code-title">Your Referral Code</div>
             <div class="referral-code-val">${myCode}</div>
-            <div class="referral-code-desc">Share with friends. When they use it, you earn ₹${siteReferralDiscount} credit on your next order!</div>
-            <button onclick="navigator.clipboard.writeText('${myCode}').then(()=>this.textContent='Copied!')" style="margin-top:10px;background:var(--neon-green);color:#000;border:none;padding:8px 16px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;letter-spacing:1px;">Copy Code</button>
+            <div class="referral-code-desc">Share with friends — they get ₹${siteReferralDiscount} off${siteReferrerReward > 0 ? ', you earn ₹' + siteReferrerReward + ' credit' : ''} every time someone orders using your code!</div>
+            <div style="display:flex;gap:8px;margin-top:12px;">
+                <button onclick="shareReferralCode('${myCode}')" style="flex:1;background:#25D366;color:#fff;border:none;padding:10px 16px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:0.5px;border-radius:6px;">Share on WhatsApp</button>
+                <button onclick="navigator.clipboard.writeText('${myCode}').then(()=>this.textContent='Copied!')" style="background:transparent;color:var(--neon-green);border:1px solid var(--neon-green);padding:10px 16px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;letter-spacing:1px;border-radius:6px;">Copy</button>
+            </div>
         </div>` : '';
     document.getElementById('postOrderId').textContent = `Order ID: ${orderId}`;
 
@@ -3049,6 +3055,9 @@ async function loadAdminCatalog() {
         }
         if (cfg.referralDiscount && cfg.referralDiscount > 0) {
             siteReferralDiscount = cfg.referralDiscount;
+        }
+        if (cfg.referrerReward && cfg.referrerReward > 0) {
+            siteReferrerReward = cfg.referrerReward;
         }
     }
 
@@ -3154,6 +3163,7 @@ let appliedReferralCode = null;
 let appliedReferralDiscount = 0;
 let myReferralCredit = 0;
 let siteReferralDiscount = 0;
+let siteReferrerReward = 0;
 
 function generateReferralCode() {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -3205,6 +3215,19 @@ async function validateReferralCode(code, myPhoneDigits) {
         if (data.phone === myPhoneDigits) return null; // can't use own code
         return data;
     } catch(e) { return null; }
+}
+
+function shareReferralCode(code) {
+    const discountLine = siteReferralDiscount > 0 ? ` to get ₹${siteReferralDiscount} off your first order` : '';
+    const rewardLine = siteReferrerReward > 0 ? `\n\nI earn ₹${siteReferrerReward} credit every time a friend orders — so help us both out! 😄` : '';
+    const url = `https://zafraanfood.com?ref=${code}`;
+    const text = `Hey! Get fresh veggies, spices & more from ZAFRAAN Foods 🌿\n\nUse my code *${code}*${discountLine}!\n\nOrder here 👉 ${url}${rewardLine}`;
+
+    if (navigator.share) {
+        navigator.share({ title: 'ZAFRAAN Foods', text, url }).catch(() => {});
+    } else {
+        window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+    }
 }
 
 async function creditReferrer(referralCode, amount) {
@@ -3334,6 +3357,12 @@ function startTracking() {
 updateBadge();
 renderTabs();
 loadAdminCatalog();
+
+// ---- Referral deep link — read ?ref= from URL ----
+(function() {
+    const ref = new URLSearchParams(window.location.search).get('ref');
+    if (ref) sessionStorage.setItem('zafraan_pending_ref', ref.trim().toUpperCase());
+})();
 
 // ---- Register Service Worker (PWA) ----
 if ('serviceWorker' in navigator) {
