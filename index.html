@@ -2977,6 +2977,9 @@ async function placeOrder() {
 
     const chosenUpiApp = selectedUpiApp; // capture before closeUpiModal resets it to null
 
+    // Open UPI app immediately — synchronous, within the user gesture from "Pay & Place Order"
+    if (isUpi) window.location.href = UPI_SCHEMES[chosenUpiApp](grandTotal);
+
     cart = [];
     saveCart();
     updateBadge();
