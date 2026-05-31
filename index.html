@@ -2983,23 +2983,11 @@ async function placeOrder() {
     updateBadge();
     closeUpiModal();
 
-    // Show post-order overlay
-    const myCode = await getOrCreateMyReferralCode(phoneDigits, name);
-    const referralEl = document.getElementById('postOrderReferral');
-    referralEl.innerHTML = myCode ? `
-        <div class="referral-code-box" style="text-align:left;">
-            <div class="referral-code-title">Your Referral Code</div>
-            <div class="referral-code-val">${myCode}</div>
-            <div class="referral-code-desc">Share with friends — they get ₹${siteReferralDiscount} off${siteReferrerReward > 0 ? ', you earn ₹' + siteReferrerReward + ' credit' : ''} every time someone orders using your code!</div>
-            <div style="display:flex;gap:8px;margin-top:12px;">
-                <button onclick="shareReferralCode('${myCode}')" style="flex:1;background:#25D366;color:#fff;border:none;padding:10px 16px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:0.5px;border-radius:6px;">Share on WhatsApp</button>
-                <button onclick="navigator.clipboard.writeText('${myCode}').then(()=>this.textContent='Copied!')" style="background:transparent;color:var(--neon-green);border:1px solid var(--neon-green);padding:10px 16px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;letter-spacing:1px;border-radius:6px;">Copy</button>
-            </div>
-        </div>` : '';
+    // Show overlay immediately — never leave screen blank
     document.getElementById('postOrderId').textContent = `Order ID: ${orderId}`;
+    document.getElementById('postOrderReferral').innerHTML = '';
 
     if (isUpi) {
-        // UPI flow: show Pay button + WhatsApp confirm button
         document.getElementById('postOrderIcon').textContent = '📱';
         document.getElementById('postOrderTitle').textContent = 'Almost Done!';
         document.getElementById('postOrderUpiStep').style.display = 'block';
@@ -3019,6 +3007,21 @@ async function placeOrder() {
     }
 
     document.getElementById('postOrderOverlay').style.display = 'flex';
+
+    // Load referral code in background and update overlay when ready
+    getOrCreateMyReferralCode(phoneDigits, name).then(myCode => {
+        if (!myCode) return;
+        document.getElementById('postOrderReferral').innerHTML = `
+        <div class="referral-code-box" style="text-align:left;">
+            <div class="referral-code-title">Your Referral Code</div>
+            <div class="referral-code-val">${myCode}</div>
+            <div class="referral-code-desc">Share with friends — they get ₹${siteReferralDiscount} off${siteReferrerReward > 0 ? ', you earn ₹' + siteReferrerReward + ' credit' : ''} every time someone orders using your code!</div>
+            <div style="display:flex;gap:8px;margin-top:12px;">
+                <button onclick="shareReferralCode('${myCode}')" style="flex:1;background:#25D366;color:#fff;border:none;padding:10px 16px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:0.5px;border-radius:6px;">Share on WhatsApp</button>
+                <button onclick="navigator.clipboard.writeText('${myCode}').then(()=>this.textContent='Copied!')" style="background:transparent;color:var(--neon-green);border:1px solid var(--neon-green);padding:10px 16px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;letter-spacing:1px;border-radius:6px;">Copy</button>
+            </div>
+        </div>`;
+    }).catch(() => {});
 }
 
 let firestoreDb = null;
