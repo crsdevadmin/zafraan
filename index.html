@@ -3009,13 +3009,13 @@ async function placeOrder() {
         const upiBtn = document.getElementById('postOrderUpiBtn');
         upiBtn.textContent = `Open ${UPI_NAMES[chosenUpiApp]} to Pay`;
         upiBtn.onclick = () => { window.location.href = UPI_SCHEMES[chosenUpiApp](grandTotal); };
-        document.getElementById('postOrderWaBtn').onclick = () => { window.location.href = `whatsapp://send?phone=${whatsappNumber}&text=${encodeURIComponent(message)}`; };
+        document.getElementById('postOrderWaBtn').onclick = () => { window.location.href = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`; };
     } else {
         document.getElementById('postOrderIcon').textContent = '✓';
         document.getElementById('postOrderTitle').textContent = 'Order Placed!';
         document.getElementById('postOrderUpiStep').style.display = 'none';
         document.getElementById('postOrderCodStep').style.display = 'block';
-        document.getElementById('postOrderCodWaBtn').onclick = () => { window.location.href = `whatsapp://send?phone=${whatsappNumber}&text=${encodeURIComponent(message)}`; };
+        document.getElementById('postOrderCodWaBtn').onclick = () => { window.location.href = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`; };
     }
 
     document.getElementById('postOrderOverlay').style.display = 'flex';
