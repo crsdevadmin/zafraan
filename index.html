@@ -2165,7 +2165,15 @@
                             <input type="radio" name="paymentMethod" value="upi" onchange="onPaymentMethodChange()">
                             <div class="payment-method-card">
                                 <span class="pm-icon">📱</span>
-                                <span>UPI Payment</span>
+                                <span>UPI (Direct)</span>
+                            </div>
+                        </label>
+                        <label class="payment-method-option">
+                            <input type="radio" name="paymentMethod" value="razorpay" onchange="onPaymentMethodChange()">
+                            <div class="payment-method-card">
+                                <span class="pm-icon">💳</span>
+                                <span>Pay Online</span>
+                                <div style="font-size:10px;color:var(--text-secondary);margin-top:2px;">UPI · Cards · NetBanking</div>
                             </div>
                         </label>
                     </div>
@@ -2716,13 +2724,21 @@ function openUpiApp(app, amount) {
 const UPI_NAMES = { gpay: 'Google Pay', phonepe: 'PhonePe', paytm: 'Paytm', cred: 'CRED' };
 
 function onPaymentMethodChange() {
-    const isUpi = document.querySelector('input[name="paymentMethod"]:checked')?.value === 'upi';
+    const val = document.querySelector('input[name="paymentMethod"]:checked')?.value;
+    const isUpi = val === 'upi';
+    const isRazorpay = val === 'razorpay';
     document.getElementById('upiAppSelector').style.display = isUpi ? 'block' : 'none';
     if (!isUpi) {
         selectedUpiApp = null;
         document.querySelectorAll('.upi-app-btn').forEach(b => b.classList.remove('selected'));
     }
-    document.getElementById('placeOrderBtn').textContent = isUpi ? 'Pay & Place Order' : 'Place Order';
+    if (isRazorpay) {
+        document.getElementById('placeOrderBtn').textContent = 'Pay Online via Razorpay';
+    } else if (isUpi) {
+        document.getElementById('placeOrderBtn').textContent = 'Pay & Place Order';
+    } else {
+        document.getElementById('placeOrderBtn').textContent = 'Place Order';
+    }
 }
 
 function selectUpiApp(app, btn) {
@@ -2949,6 +2965,7 @@ async function placeOrder() {
 
     const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'cod';
     const isUpi = paymentMethod === 'upi';
+    const isRazorpay = paymentMethod === 'razorpay';
 
     if (!name) { setCheckoutError('Please enter your full name.'); return; }
     if (phoneDigits.length !== 10 || !/^[6-9]/.test(phoneDigits)) {
@@ -2957,6 +2974,7 @@ async function placeOrder() {
     }
     if (address.length < 10) { setCheckoutError('Please enter your full delivery address including door number, street and area.'); return; }
     if (isUpi && !selectedUpiApp) { setCheckoutError('Please select a UPI app to pay with.'); return; }
+    if (isRazorpay && typeof Razorpay === 'undefined') { setCheckoutError('Payment gateway not loaded. Please refresh the page and try again.'); return; }
 
     // Validate referral code if entered
     let referralData = null;
@@ -2991,15 +3009,17 @@ async function placeOrder() {
         items: cart.map(item => ({ name: item.name, size: item.size, qty: item.qty, price: item.price })),
         totalPrice: grandTotal, deliveryCharge, creditUsed, referralDiscount,
         referralCode: appliedReferralCode || '',
-        paymentMethod: isUpi ? UPI_NAMES[selectedUpiApp] + ' (UPI)' : 'Cash on Delivery',
-        status: isUpi ? 'Pending Payment' : 'Confirmed', createdAt
+        paymentMethod: isUpi ? UPI_NAMES[selectedUpiApp] + ' (UPI)' : isRazorpay ? 'Razorpay (Online)' : 'Cash on Delivery',
+        status: isUpi ? 'Pending Payment' : isRazorpay ? 'Pending Payment' : 'Confirmed', createdAt
     };
-    saveOrderToFirestore(orderData);
-    saveOrderToHistory(phoneDigits, orderData);
 
-    // Credit referrer + deduct own credit in background
-    if (appliedReferralCode && referralDiscount > 0) creditReferrer(appliedReferralCode, siteReferrerReward > 0 ? siteReferrerReward : referralDiscount);
-    if (creditUsed > 0) deductMyCredit(phoneDigits, creditUsed);
+    // Firestore save + credits happen immediately for COD/UPI; Razorpay handler does it after payment
+    if (!isRazorpay) {
+        saveOrderToFirestore(orderData);
+        saveOrderToHistory(phoneDigits, orderData);
+        if (appliedReferralCode && referralDiscount > 0) creditReferrer(appliedReferralCode, siteReferrerReward > 0 ? siteReferrerReward : referralDiscount);
+        if (creditUsed > 0) deductMyCredit(phoneDigits, creditUsed);
+    }
 
     const cartLines = cart.map((item, i) =>
         `${i + 1}. ${item.name} (${item.size}) x${item.qty} — ₹${item.price * item.qty}`
@@ -3019,10 +3039,79 @@ async function placeOrder() {
         `Total: ₹${grandTotal}`,
         '',
         `Name: ${name}`, `Mobile: ${phone}`, `Address: ${address}`,
-        '', `Payment: ${isUpi ? UPI_NAMES[selectedUpiApp] + ' (UPI)' : 'Cash on Delivery'}`
+        '', `Payment: ${isUpi ? UPI_NAMES[selectedUpiApp] + ' (UPI)' : isRazorpay ? 'Razorpay (Online)' : 'Cash on Delivery'}`
     ].join('\n');
 
     const chosenUpiApp = selectedUpiApp; // capture before state reset
+
+    // ---- RAZORPAY FLOW ----
+    if (isRazorpay) {
+        const rzpOptions = {
+            key: window.ZAFRAAN_RAZORPAY_KEY_ID,
+            amount: grandTotal * 100, // paise
+            currency: 'INR',
+            name: 'ZAFRAAN Foods',
+            description: 'Fresh Vegetables & Foods — ' + orderId,
+            image: './icon.svg',
+            prefill: { name: name, contact: '+91' + phoneDigits },
+            notes: { address: address, order_ref: orderId },
+            theme: { color: '#00e676' },
+            handler: function(response) {
+                const paymentId = response.razorpay_payment_id;
+                // Save order with payment confirmation
+                const paidOrder = { ...orderData, status: 'Payment Received', razorpayPaymentId: paymentId };
+                saveOrderToFirestore(paidOrder);
+                saveOrderToHistory(phoneDigits, paidOrder);
+                if (appliedReferralCode && referralDiscount > 0) creditReferrer(appliedReferralCode, siteReferrerReward > 0 ? siteReferrerReward : referralDiscount);
+                if (creditUsed > 0) deductMyCredit(phoneDigits, creditUsed);
+                // Clear cart
+                cart = []; saveCart(); updateBadge();
+                // WhatsApp message includes payment ID for your records
+                const rzpMsg = message + `\nRazorpay Payment ID: ${paymentId}`;
+                // Set up and show success overlay
+                const oid = document.getElementById('postOrderId');
+                const oicon = document.getElementById('postOrderIcon');
+                const otitle = document.getElementById('postOrderTitle');
+                const oupiStep = document.getElementById('postOrderUpiStep');
+                const ocodStep = document.getElementById('postOrderCodStep');
+                const oref = document.getElementById('postOrderReferral');
+                const ooverlay = document.getElementById('postOrderOverlay');
+                if (oid) oid.textContent = `Order ID: ${orderId}`;
+                if (oref) oref.innerHTML = '';
+                if (oicon) oicon.textContent = '✅';
+                if (otitle) otitle.textContent = 'Payment Successful!';
+                if (oupiStep) oupiStep.style.display = 'none';
+                if (ocodStep) {
+                    ocodStep.style.display = 'block';
+                    const codWaBtn = document.getElementById('postOrderCodWaBtn');
+                    if (codWaBtn) codWaBtn.onclick = () => { window.location.href = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(rzpMsg)}`; };
+                }
+                if (ooverlay) ooverlay.style.display = 'flex';
+                document.getElementById('upiModalOverlay').style.display = 'none';
+                selectedUpiApp = null; appliedReferralCode = null; appliedReferralDiscount = 0;
+                const codR = document.querySelector('input[name="paymentMethod"][value="cod"]');
+                if (codR) codR.checked = true;
+                onPaymentMethodChange();
+                // Load referral code in background
+                getOrCreateMyReferralCode(phoneDigits, name).then(myCode => {
+                    if (!myCode || !oref) return;
+                    oref.innerHTML = `<div class="referral-code-box" style="text-align:left;"><div class="referral-code-title">Your Referral Code</div><div class="referral-code-val">${myCode}</div><div class="referral-code-desc">Share with friends — they get ₹${siteReferralDiscount} off!</div><div style="display:flex;gap:8px;margin-top:12px;"><button onclick="shareReferralCode('${myCode}')" style="flex:1;background:#25D366;color:#fff;border:none;padding:10px 16px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;border-radius:6px;">Share on WhatsApp</button><button onclick="navigator.clipboard.writeText('${myCode}').then(()=>this.textContent='Copied!')" style="background:transparent;color:var(--neon-green);border:1px solid var(--neon-green);padding:10px 16px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;border-radius:6px;">Copy</button></div></div>`;
+                }).catch(() => {});
+            },
+            modal: {
+                ondismiss: function() {
+                    setCheckoutError('Payment was cancelled. Your order has not been placed.');
+                }
+            }
+        };
+        const rzpInstance = new Razorpay(rzpOptions);
+        rzpInstance.on('payment.failed', function(resp) {
+            setCheckoutError('Payment failed: ' + (resp.error.description || 'Please try again.'));
+        });
+        rzpInstance.open();
+        return; // Razorpay handler takes over from here
+    }
+    // ---- END RAZORPAY ----
 
     cart = [];
     saveCart();
@@ -3464,5 +3553,6 @@ if ('serviceWorker' in navigator) {
 }
 </script>
 
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </body>
 </html>
