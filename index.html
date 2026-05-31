@@ -2062,8 +2062,9 @@
         </div>
         <!-- COD step -->
         <div id="postOrderCodStep" style="display:none;margin-bottom:8px;">
-            <div style="font-size:14px;color:var(--text-secondary);margin-bottom:16px;line-height:1.7;">Your order has been received. We'll confirm it shortly.</div>
-            <button onclick="openTrackOrderFromPost()" style="width:100%;background:var(--neon-green);color:#000;border:none;padding:13px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;cursor:pointer;border-radius:8px;margin-bottom:10px;">Track My Order</button>
+            <div style="font-size:14px;color:var(--text-secondary);margin-bottom:16px;line-height:1.7;">Your order has been received! Tap below to confirm on WhatsApp.</div>
+            <button id="postOrderCodWaBtn" style="width:100%;background:#25D366;color:#fff;border:none;padding:13px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;cursor:pointer;border-radius:8px;margin-bottom:10px;">Confirm Order on WhatsApp</button>
+            <button onclick="openTrackOrderFromPost()" style="width:100%;background:transparent;border:1px solid var(--border-color);color:var(--text-secondary);padding:12px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;cursor:pointer;border-radius:8px;margin-bottom:4px;">Track My Order</button>
         </div>
         <div id="postOrderReferral" style="margin-top:4px;"></div>
         <button class="modal-btn" style="margin-top:16px;width:100%;" onclick="document.getElementById('postOrderOverlay').style.display='none';">Close</button>
@@ -3010,12 +3011,11 @@ async function placeOrder() {
         upiBtn.onclick = () => { window.location.href = UPI_SCHEMES[chosenUpiApp](grandTotal); };
         document.getElementById('postOrderWaBtn').onclick = () => { window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank'); };
     } else {
-        // COD flow: auto-open WhatsApp, show tracking button
         document.getElementById('postOrderIcon').textContent = '✓';
         document.getElementById('postOrderTitle').textContent = 'Order Placed!';
         document.getElementById('postOrderUpiStep').style.display = 'none';
         document.getElementById('postOrderCodStep').style.display = 'block';
-        window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank');
+        document.getElementById('postOrderCodWaBtn').onclick = () => { window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank'); };
     }
 
     document.getElementById('postOrderOverlay').style.display = 'flex';
