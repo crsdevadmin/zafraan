@@ -2649,10 +2649,10 @@ const whatsappNumber = "917904788173";
 let selectedUpiApp = null;
 
 const UPI_SCHEMES = {
-    gpay:    amt => `tez://upi/pay?pa=${encodeURIComponent(window.ZAFRAAN_UPI_ID)}&pn=ZAFRAAN+Foods&am=${amt}&cu=INR`,
-    phonepe: amt => `phonepe://pay?pa=${encodeURIComponent(window.ZAFRAAN_UPI_ID)}&pn=ZAFRAAN+Foods&am=${amt}&cu=INR`,
-    paytm:   amt => `paytmmp://pay?pa=${encodeURIComponent(window.ZAFRAAN_UPI_ID)}&pn=ZAFRAAN+Foods&am=${amt}&cu=INR`,
-    cred:    amt => `credpay://pay?pa=${encodeURIComponent(window.ZAFRAAN_UPI_ID)}&pn=ZAFRAAN+Foods&am=${amt}&cu=INR`,
+    gpay:    amt => `tez://upi/pay?pa=${encodeURIComponent(window.ZAFRAAN_UPI_ID)}&pn=ZAFRAAN+Foods&am=${amt}&cu=INR&tn=ZAFRAAN+Order+Payment`,
+    phonepe: amt => `phonepe://pay?pa=${encodeURIComponent(window.ZAFRAAN_UPI_ID)}&pn=ZAFRAAN+Foods&am=${amt}&cu=INR&tn=ZAFRAAN+Order+Payment`,
+    paytm:   amt => `paytmmp://pay?pa=${encodeURIComponent(window.ZAFRAAN_UPI_ID)}&pn=ZAFRAAN+Foods&am=${amt}&cu=INR&tn=ZAFRAAN+Order+Payment`,
+    cred:    amt => `credpay://pay?pa=${encodeURIComponent(window.ZAFRAAN_UPI_ID)}&pn=ZAFRAAN+Foods&am=${amt}&cu=INR&tn=ZAFRAAN+Order+Payment`,
 };
 const UPI_NAMES = { gpay: 'Google Pay', phonepe: 'PhonePe', paytm: 'Paytm', cred: 'CRED' };
 
@@ -2717,6 +2717,9 @@ function autofillFromPhone() {
 
 async function checkoutUPI() {
     if (cart.length === 0) return alert('Your bag is empty');
+
+    // Close cart drawer before opening checkout
+    document.getElementById('cartDrawer').classList.remove('open');
 
     appliedReferralCode = null;
     appliedReferralDiscount = 0;
