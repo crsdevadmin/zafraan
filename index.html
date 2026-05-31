@@ -2657,10 +2657,10 @@ const whatsappNumber = "917904788173";
 let selectedUpiApp = null;
 
 const UPI_SCHEMES = {
-    gpay:    amt => `tez://upi/pay?pa=${encodeURIComponent(window.ZAFRAAN_UPI_ID)}&pn=ZAFRAAN+Foods&am=${amt}&cu=INR&tn=ZAFRAAN+Order`,
-    phonepe: amt => `phonepe://pay?pa=${encodeURIComponent(window.ZAFRAAN_UPI_ID)}&pn=ZAFRAAN+Foods&am=${amt}&cu=INR&tn=ZAFRAAN+Order`,
-    paytm:   amt => `paytmmp://pay?pa=${encodeURIComponent(window.ZAFRAAN_UPI_ID)}&pn=ZAFRAAN+Foods&am=${amt}&cu=INR&tn=ZAFRAAN+Order`,
-    cred:    amt => `credpay://pay?pa=${encodeURIComponent(window.ZAFRAAN_UPI_ID)}&pn=ZAFRAAN+Foods&am=${amt}&cu=INR&tn=ZAFRAAN+Order`,
+    gpay:    amt => `tez://upi/pay?pa=${encodeURIComponent(window.ZAFRAAN_UPI_ID)}&pn=ZAFRAAN+Foods&am=${amt}&cu=INR`,
+    phonepe: amt => `phonepe://pay?pa=${encodeURIComponent(window.ZAFRAAN_UPI_ID)}&pn=ZAFRAAN+Foods&am=${amt}&cu=INR`,
+    paytm:   amt => `paytmmp://pay?pa=${encodeURIComponent(window.ZAFRAAN_UPI_ID)}&pn=ZAFRAAN+Foods&am=${amt}&cu=INR`,
+    cred:    amt => `credpay://pay?pa=${encodeURIComponent(window.ZAFRAAN_UPI_ID)}&pn=ZAFRAAN+Foods&am=${amt}&cu=INR`,
 };
 
 function openUpiApp(app, amount) {
