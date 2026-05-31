@@ -2056,7 +2056,7 @@
                 <div style="font-size:22px;font-weight:700;color:var(--neon-green);" id="postOrderUpiAmt"></div>
                 <button onclick="navigator.clipboard.writeText(document.getElementById('postOrderUpiId').textContent).then(()=>this.textContent='Copied ✓').catch(()=>{})" style="margin-top:8px;background:transparent;border:1px solid var(--border-color);color:var(--text-secondary);padding:5px 12px;font-family:inherit;font-size:11px;cursor:pointer;border-radius:4px;">Copy UPI ID</button>
             </div>
-            <a id="postOrderUpiBtn" style="display:block;width:100%;background:var(--neon-green);color:#000;padding:14px;font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;cursor:pointer;border-radius:8px;margin-bottom:10px;letter-spacing:0.5px;text-align:center;text-decoration:none;box-sizing:border-box;"></a>
+            <button id="postOrderUpiBtn" type="button" style="width:100%;background:var(--neon-green);color:#000;border:none;padding:14px;font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;cursor:pointer;border-radius:8px;margin-bottom:10px;letter-spacing:0.5px;"></button>
             <button id="postOrderWaBtn" style="width:100%;background:#25D366;color:#fff;border:none;padding:13px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;cursor:pointer;border-radius:8px;margin-bottom:4px;">Confirm Order on WhatsApp</button>
             <div style="font-size:11px;color:#555;margin-top:4px;">Pay first, then tap WhatsApp to confirm.</div>
         </div>
@@ -3007,7 +3007,7 @@ async function placeOrder() {
         document.getElementById('postOrderUpiAmt').textContent = `₹${grandTotal}`;
         const upiBtn = document.getElementById('postOrderUpiBtn');
         upiBtn.textContent = `Open ${UPI_NAMES[chosenUpiApp]} to Pay`;
-        upiBtn.href = UPI_SCHEMES[chosenUpiApp](grandTotal);
+        upiBtn.onclick = () => { window.location.href = UPI_SCHEMES[chosenUpiApp](grandTotal); };
         document.getElementById('postOrderWaBtn').onclick = () => { window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank'); };
     } else {
         // COD flow: auto-open WhatsApp, show tracking button
@@ -3019,6 +3019,11 @@ async function placeOrder() {
     }
 
     document.getElementById('postOrderOverlay').style.display = 'flex';
+
+    // Auto-open UPI app after overlay renders
+    if (isUpi) {
+        setTimeout(() => { window.location.href = UPI_SCHEMES[chosenUpiApp](grandTotal); }, 400);
+    }
 }
 
 let firestoreDb = null;
