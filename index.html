@@ -3019,11 +3019,6 @@ async function placeOrder() {
     }
 
     document.getElementById('postOrderOverlay').style.display = 'flex';
-
-    // Auto-open UPI app after overlay renders
-    if (isUpi) {
-        setTimeout(() => { window.location.href = UPI_SCHEMES[chosenUpiApp](grandTotal); }, 400);
-    }
 }
 
 let firestoreDb = null;
