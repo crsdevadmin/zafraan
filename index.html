@@ -2047,9 +2047,17 @@
         <div id="postOrderId" style="font-size:13px;color:#666;margin-bottom:16px;font-family:monospace;letter-spacing:1px;"></div>
         <!-- UPI payment step -->
         <div id="postOrderUpiStep" style="display:none;margin-bottom:8px;">
-            <div style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;line-height:1.7;">Complete your payment below, then confirm your order on WhatsApp so we can prepare it.</div>
+            <!-- UPI ID + amount shown so customer can pay manually if deep link fails -->
+            <div id="postOrderUpiDetails" style="background:#111;border:1px solid var(--border-color);border-radius:8px;padding:14px;margin-bottom:14px;text-align:left;">
+                <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--text-secondary);margin-bottom:6px;">Pay to</div>
+                <div style="font-size:15px;font-weight:600;color:#fff;margin-bottom:2px;" id="postOrderUpiId"></div>
+                <div style="font-size:12px;color:#888;">ZAFRAAN Foods</div>
+                <div style="margin-top:10px;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--text-secondary);">Amount</div>
+                <div style="font-size:22px;font-weight:700;color:var(--neon-green);" id="postOrderUpiAmt"></div>
+                <button onclick="navigator.clipboard.writeText(document.getElementById('postOrderUpiId').textContent).then(()=>this.textContent='Copied ✓').catch(()=>{})" style="margin-top:8px;background:transparent;border:1px solid var(--border-color);color:var(--text-secondary);padding:5px 12px;font-family:inherit;font-size:11px;cursor:pointer;border-radius:4px;">Copy UPI ID</button>
+            </div>
             <button id="postOrderUpiBtn" style="width:100%;background:var(--neon-green);color:#000;border:none;padding:14px;font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;cursor:pointer;border-radius:8px;margin-bottom:10px;letter-spacing:0.5px;"></button>
-            <button id="postOrderWaBtn" style="width:100%;background:#25D366;color:#000;border:none;padding:13px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;cursor:pointer;border-radius:8px;margin-bottom:4px;">Confirm Order on WhatsApp</button>
+            <button id="postOrderWaBtn" style="width:100%;background:#25D366;color:#fff;border:none;padding:13px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;cursor:pointer;border-radius:8px;margin-bottom:4px;">Confirm Order on WhatsApp</button>
             <div style="font-size:11px;color:#555;margin-top:4px;">Pay first, then tap WhatsApp to confirm.</div>
         </div>
         <!-- COD step -->
@@ -2665,9 +2673,15 @@ const UPI_SCHEMES = {
 
 function openUpiApp(app, amount) {
     const ua = navigator.userAgent;
-    // intent:// works in Chrome and Samsung Internet on Android
     const useIntent = /Android/.test(ua) && (/Chrome\//.test(ua) || /SamsungBrowser/.test(ua));
-    window.location.href = useIntent ? UPI_INTENT[app](amount) : UPI_SCHEMES[app](amount);
+    const url = useIntent ? UPI_INTENT[app](amount) : UPI_SCHEMES[app](amount);
+    // Anchor click avoids full page navigation — preserves the overlay
+    const a = document.createElement('a');
+    a.href = url;
+    a.style.cssText = 'position:fixed;top:0;left:0;opacity:0;pointer-events:none;';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => a.remove(), 300);
 }
 const UPI_NAMES = { gpay: 'Google Pay', phonepe: 'PhonePe', paytm: 'Paytm', cred: 'CRED' };
 
@@ -3006,8 +3020,10 @@ async function placeOrder() {
         document.getElementById('postOrderTitle').textContent = 'Almost Done!';
         document.getElementById('postOrderUpiStep').style.display = 'block';
         document.getElementById('postOrderCodStep').style.display = 'none';
+        document.getElementById('postOrderUpiId').textContent = window.ZAFRAAN_UPI_ID;
+        document.getElementById('postOrderUpiAmt').textContent = `₹${grandTotal}`;
         const upiBtn = document.getElementById('postOrderUpiBtn');
-        upiBtn.textContent = `Pay ₹${grandTotal} with ${UPI_NAMES[chosenUpiApp]}`;
+        upiBtn.textContent = `Open ${UPI_NAMES[chosenUpiApp]} to Pay`;
         upiBtn.onclick = () => openUpiApp(chosenUpiApp, grandTotal);
         document.getElementById('postOrderWaBtn').onclick = () => { window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank'); };
     } else {
