@@ -2648,12 +2648,27 @@ const whatsappNumber = "917904788173";
 // ---- Payment method ----
 let selectedUpiApp = null;
 
-const UPI_SCHEMES = {
-    gpay:    amt => `tez://upi/pay?pa=${encodeURIComponent(window.ZAFRAAN_UPI_ID)}&pn=ZAFRAAN+Foods&am=${amt}&cu=INR&tn=ZAFRAAN+Order+Payment`,
-    phonepe: amt => `phonepe://pay?pa=${encodeURIComponent(window.ZAFRAAN_UPI_ID)}&pn=ZAFRAAN+Foods&am=${amt}&cu=INR&tn=ZAFRAAN+Order+Payment`,
-    paytm:   amt => `paytmmp://pay?pa=${encodeURIComponent(window.ZAFRAAN_UPI_ID)}&pn=ZAFRAAN+Foods&am=${amt}&cu=INR&tn=ZAFRAAN+Order+Payment`,
-    cred:    amt => `credpay://pay?pa=${encodeURIComponent(window.ZAFRAAN_UPI_ID)}&pn=ZAFRAAN+Foods&am=${amt}&cu=INR&tn=ZAFRAAN+Order+Payment`,
+// intent:// keeps the page alive on Android Chrome — app opens on top, no blank screen
+const UPI_INTENT = {
+    gpay:    amt => `intent://upi/pay?pa=${encodeURIComponent(window.ZAFRAAN_UPI_ID)}&pn=ZAFRAAN+Foods&am=${amt}&cu=INR&tn=ZAFRAAN+Order#Intent;scheme=tez;package=com.google.android.apps.nbu.paisa.user;S.browser_fallback_url=https%3A%2F%2Fzafraanfood.com;end`,
+    phonepe: amt => `intent://pay?pa=${encodeURIComponent(window.ZAFRAAN_UPI_ID)}&pn=ZAFRAAN+Foods&am=${amt}&cu=INR&tn=ZAFRAAN+Order#Intent;scheme=phonepe;package=com.phonepe.app;S.browser_fallback_url=https%3A%2F%2Fzafraanfood.com;end`,
+    paytm:   amt => `intent://pay?pa=${encodeURIComponent(window.ZAFRAAN_UPI_ID)}&pn=ZAFRAAN+Foods&am=${amt}&cu=INR&tn=ZAFRAAN+Order#Intent;scheme=paytmmp;package=net.one97.paytm;S.browser_fallback_url=https%3A%2F%2Fzafraanfood.com;end`,
+    cred:    amt => `intent://pay?pa=${encodeURIComponent(window.ZAFRAAN_UPI_ID)}&pn=ZAFRAAN+Foods&am=${amt}&cu=INR&tn=ZAFRAAN+Order#Intent;scheme=credpay;package=com.dreamplug.androidapp;S.browser_fallback_url=https%3A%2F%2Fzafraanfood.com;end`,
 };
+// Fallback direct schemes for non-Chrome Android browsers
+const UPI_SCHEMES = {
+    gpay:    amt => `tez://upi/pay?pa=${encodeURIComponent(window.ZAFRAAN_UPI_ID)}&pn=ZAFRAAN+Foods&am=${amt}&cu=INR&tn=ZAFRAAN+Order`,
+    phonepe: amt => `phonepe://pay?pa=${encodeURIComponent(window.ZAFRAAN_UPI_ID)}&pn=ZAFRAAN+Foods&am=${amt}&cu=INR&tn=ZAFRAAN+Order`,
+    paytm:   amt => `paytmmp://pay?pa=${encodeURIComponent(window.ZAFRAAN_UPI_ID)}&pn=ZAFRAAN+Foods&am=${amt}&cu=INR&tn=ZAFRAAN+Order`,
+    cred:    amt => `credpay://pay?pa=${encodeURIComponent(window.ZAFRAAN_UPI_ID)}&pn=ZAFRAAN+Foods&am=${amt}&cu=INR&tn=ZAFRAAN+Order`,
+};
+
+function openUpiApp(app, amount) {
+    const ua = navigator.userAgent;
+    // intent:// works in Chrome and Samsung Internet on Android
+    const useIntent = /Android/.test(ua) && (/Chrome\//.test(ua) || /SamsungBrowser/.test(ua));
+    window.location.href = useIntent ? UPI_INTENT[app](amount) : UPI_SCHEMES[app](amount);
+}
 const UPI_NAMES = { gpay: 'Google Pay', phonepe: 'PhonePe', paytm: 'Paytm', cred: 'CRED' };
 
 function onPaymentMethodChange() {
@@ -2993,7 +3008,7 @@ async function placeOrder() {
         document.getElementById('postOrderCodStep').style.display = 'none';
         const upiBtn = document.getElementById('postOrderUpiBtn');
         upiBtn.textContent = `Pay ₹${grandTotal} with ${UPI_NAMES[chosenUpiApp]}`;
-        upiBtn.onclick = () => { window.location.href = UPI_SCHEMES[chosenUpiApp](grandTotal); };
+        upiBtn.onclick = () => openUpiApp(chosenUpiApp, grandTotal);
         document.getElementById('postOrderWaBtn').onclick = () => { window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank'); };
     } else {
         // COD flow: auto-open WhatsApp, show tracking button
