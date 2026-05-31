@@ -2657,10 +2657,10 @@ const whatsappNumber = "917904788173";
 let selectedUpiApp = null;
 
 const UPI_SCHEMES = {
-    gpay:    amt => `tez://upi/pay?pa=${encodeURIComponent(window.ZAFRAAN_UPI_ID)}&pn=ZAFRAAN+Foods&am=${amt}&cu=INR`,
-    phonepe: amt => `phonepe://pay?pa=${encodeURIComponent(window.ZAFRAAN_UPI_ID)}&pn=ZAFRAAN+Foods&am=${amt}&cu=INR`,
-    paytm:   amt => `paytmmp://pay?pa=${encodeURIComponent(window.ZAFRAAN_UPI_ID)}&pn=ZAFRAAN+Foods&am=${amt}&cu=INR`,
-    cred:    amt => `credpay://pay?pa=${encodeURIComponent(window.ZAFRAAN_UPI_ID)}&pn=ZAFRAAN+Foods&am=${amt}&cu=INR`,
+    gpay:    amt => `tez://upi/pay?pa=${window.ZAFRAAN_UPI_ID}&pn=ZAFRAAN+Foods&am=${amt}&cu=INR`,
+    phonepe: amt => `phonepe://pay?pa=${window.ZAFRAAN_UPI_ID}&pn=ZAFRAAN+Foods&am=${amt}&cu=INR`,
+    paytm:   amt => `paytmmp://pay?pa=${window.ZAFRAAN_UPI_ID}&pn=ZAFRAAN+Foods&am=${amt}&cu=INR`,
+    cred:    amt => `credpay://pay?pa=${window.ZAFRAAN_UPI_ID}&pn=ZAFRAAN+Foods&am=${amt}&cu=INR`,
 };
 
 function openUpiApp(app, amount) {
@@ -2976,9 +2976,6 @@ async function placeOrder() {
     ].join('\n');
 
     const chosenUpiApp = selectedUpiApp; // capture before closeUpiModal resets it to null
-
-    // Open UPI app immediately — synchronous, within the user gesture from "Pay & Place Order"
-    if (isUpi) window.location.href = UPI_SCHEMES[chosenUpiApp](grandTotal);
 
     cart = [];
     saveCart();
