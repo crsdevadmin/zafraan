@@ -2203,7 +2203,7 @@
 
 <script src="./firebase-config.js"></script>
 <script>
-const categories = ['All', 'Fresh Prep', 'Cut Vegetables', 'Spices & Seasonings', 'Gourmet Mayonnaise', 'Roasted Makhana', 'Premium Combos'];
+const categories = ['All', 'Fresh Vegetables', 'Fresh Prep', 'Cut Vegetables', 'Spices & Seasonings', 'Gourmet Mayonnaise', 'Roasted Makhana', 'Premium Combos'];
 
 const bgColors = {
     'Fresh Prep': ['#121212', '#181818'],
@@ -3022,37 +3022,61 @@ async function placeOrder() {
         '', `Payment: ${isUpi ? UPI_NAMES[selectedUpiApp] + ' (UPI)' : 'Cash on Delivery'}`
     ].join('\n');
 
-    const chosenUpiApp = selectedUpiApp; // capture before closeUpiModal resets it to null
+    const chosenUpiApp = selectedUpiApp; // capture before state reset
 
     cart = [];
     saveCart();
     updateBadge();
-    closeUpiModal();
 
-    // Show overlay immediately — never leave screen blank
-    document.getElementById('postOrderId').textContent = `Order ID: ${orderId}`;
-    document.getElementById('postOrderReferral').innerHTML = '';
+    // Build overlay content while checkout modal is still visible
+    const oid = document.getElementById('postOrderId');
+    const oicon = document.getElementById('postOrderIcon');
+    const otitle = document.getElementById('postOrderTitle');
+    const oupiStep = document.getElementById('postOrderUpiStep');
+    const ocodStep = document.getElementById('postOrderCodStep');
+    const oref = document.getElementById('postOrderReferral');
+    const ooverlay = document.getElementById('postOrderOverlay');
+
+    if (oid) oid.textContent = `Order ID: ${orderId}`;
+    if (oref) oref.innerHTML = '';
 
     if (isUpi) {
-        document.getElementById('postOrderIcon').textContent = '📱';
-        document.getElementById('postOrderTitle').textContent = 'Almost Done!';
-        document.getElementById('postOrderUpiStep').style.display = 'block';
-        document.getElementById('postOrderCodStep').style.display = 'none';
-        document.getElementById('postOrderUpiId').textContent = window.ZAFRAAN_UPI_ID;
-        document.getElementById('postOrderUpiAmt').textContent = `₹${grandTotal}`;
+        if (oicon) oicon.textContent = '📱';
+        if (otitle) otitle.textContent = 'Almost Done!';
+        if (oupiStep) oupiStep.style.display = 'block';
+        if (ocodStep) ocodStep.style.display = 'none';
+        const upiIdEl = document.getElementById('postOrderUpiId');
+        const upiAmtEl = document.getElementById('postOrderUpiAmt');
         const upiBtn = document.getElementById('postOrderUpiBtn');
-        upiBtn.textContent = `Open ${UPI_NAMES[chosenUpiApp]} to Pay`;
-        upiBtn.onclick = () => { window.location.href = UPI_SCHEMES[chosenUpiApp](grandTotal); };
-        document.getElementById('postOrderWaBtn').onclick = () => { window.location.href = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`; };
+        const waBtn = document.getElementById('postOrderWaBtn');
+        if (upiIdEl) upiIdEl.textContent = window.ZAFRAAN_UPI_ID;
+        if (upiAmtEl) upiAmtEl.textContent = `₹${grandTotal}`;
+        if (upiBtn) { upiBtn.textContent = `Open ${UPI_NAMES[chosenUpiApp]} to Pay`; upiBtn.onclick = () => { window.location.href = UPI_SCHEMES[chosenUpiApp](grandTotal); }; }
+        if (waBtn) waBtn.onclick = () => { window.location.href = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`; };
     } else {
-        document.getElementById('postOrderIcon').textContent = '✓';
-        document.getElementById('postOrderTitle').textContent = 'Order Placed!';
-        document.getElementById('postOrderUpiStep').style.display = 'none';
-        document.getElementById('postOrderCodStep').style.display = 'block';
-        document.getElementById('postOrderCodWaBtn').onclick = () => { window.location.href = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`; };
+        if (oicon) oicon.textContent = '✓';
+        if (otitle) otitle.textContent = 'Order Placed!';
+        if (oupiStep) oupiStep.style.display = 'none';
+        if (ocodStep) ocodStep.style.display = 'block';
+        const codWaBtn = document.getElementById('postOrderCodWaBtn');
+        if (codWaBtn) codWaBtn.onclick = () => { window.location.href = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`; };
     }
 
-    document.getElementById('postOrderOverlay').style.display = 'flex';
+    // Show overlay FIRST — checkout modal is still behind it (z-index 300 covers it)
+    if (ooverlay) ooverlay.style.display = 'flex';
+
+    // Now close checkout modal and reset state
+    document.getElementById('upiModalOverlay').style.display = 'none';
+    selectedUpiApp = null;
+    appliedReferralCode = null;
+    appliedReferralDiscount = 0;
+    document.querySelectorAll('.upi-app-btn').forEach(b => b.classList.remove('selected'));
+    const upiSel = document.getElementById('upiAppSelector');
+    if (upiSel) upiSel.style.display = 'none';
+    const codR = document.querySelector('input[name="paymentMethod"][value="cod"]');
+    if (codR) codR.checked = true;
+    const pob = document.getElementById('placeOrderBtn');
+    if (pob) pob.textContent = 'Place Order';
 
     // Load referral code in background and update overlay when ready
     getOrCreateMyReferralCode(phoneDigits, name).then(myCode => {
