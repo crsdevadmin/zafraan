@@ -2675,13 +2675,7 @@ function openUpiApp(app, amount) {
     const ua = navigator.userAgent;
     const useIntent = /Android/.test(ua) && (/Chrome\//.test(ua) || /SamsungBrowser/.test(ua));
     const url = useIntent ? UPI_INTENT[app](amount) : UPI_SCHEMES[app](amount);
-    // Anchor click avoids full page navigation — preserves the overlay
-    const a = document.createElement('a');
-    a.href = url;
-    a.style.cssText = 'position:fixed;top:0;left:0;opacity:0;pointer-events:none;';
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => a.remove(), 300);
+    window.open(url, '_blank');
 }
 const UPI_NAMES = { gpay: 'Google Pay', phonepe: 'PhonePe', paytm: 'Paytm', cred: 'CRED' };
 
