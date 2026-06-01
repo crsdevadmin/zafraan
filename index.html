@@ -3046,9 +3046,12 @@ async function placeOrder() {
 
     // ---- RAZORPAY FLOW ----
     if (isRazorpay) {
+        // Hide checkout modal NOW so its backdrop-filter stacking context doesn't block Razorpay's iframe
+        document.getElementById('upiModalOverlay').style.display = 'none';
+
         const rzpOptions = {
             key: window.ZAFRAAN_RAZORPAY_KEY_ID,
-            amount: grandTotal * 100, // paise
+            amount: Math.round(grandTotal * 100), // integer paise — no floating-point drift
             currency: 'INR',
             name: 'ZAFRAAN Foods',
             description: 'Fresh Vegetables & Foods — ' + orderId,
@@ -3058,17 +3061,13 @@ async function placeOrder() {
             theme: { color: '#00e676' },
             handler: function(response) {
                 const paymentId = response.razorpay_payment_id;
-                // Save order with payment confirmation
                 const paidOrder = { ...orderData, status: 'Payment Received', razorpayPaymentId: paymentId };
                 saveOrderToFirestore(paidOrder);
                 saveOrderToHistory(phoneDigits, paidOrder);
                 if (appliedReferralCode && referralDiscount > 0) creditReferrer(appliedReferralCode, siteReferrerReward > 0 ? siteReferrerReward : referralDiscount);
                 if (creditUsed > 0) deductMyCredit(phoneDigits, creditUsed);
-                // Clear cart
                 cart = []; saveCart(); updateBadge();
-                // WhatsApp message includes payment ID for your records
                 const rzpMsg = message + `\nRazorpay Payment ID: ${paymentId}`;
-                // Set up and show success overlay
                 const oid = document.getElementById('postOrderId');
                 const oicon = document.getElementById('postOrderIcon');
                 const otitle = document.getElementById('postOrderTitle');
@@ -3087,12 +3086,10 @@ async function placeOrder() {
                     if (codWaBtn) codWaBtn.onclick = () => { window.location.href = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(rzpMsg)}`; };
                 }
                 if (ooverlay) ooverlay.style.display = 'flex';
-                document.getElementById('upiModalOverlay').style.display = 'none';
                 selectedUpiApp = null; appliedReferralCode = null; appliedReferralDiscount = 0;
                 const codR = document.querySelector('input[name="paymentMethod"][value="cod"]');
                 if (codR) codR.checked = true;
                 onPaymentMethodChange();
-                // Load referral code in background
                 getOrCreateMyReferralCode(phoneDigits, name).then(myCode => {
                     if (!myCode || !oref) return;
                     oref.innerHTML = `<div class="referral-code-box" style="text-align:left;"><div class="referral-code-title">Your Referral Code</div><div class="referral-code-val">${myCode}</div><div class="referral-code-desc">Share with friends — they get ₹${siteReferralDiscount} off!</div><div style="display:flex;gap:8px;margin-top:12px;"><button onclick="shareReferralCode('${myCode}')" style="flex:1;background:#25D366;color:#fff;border:none;padding:10px 16px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;border-radius:6px;">Share on WhatsApp</button><button onclick="navigator.clipboard.writeText('${myCode}').then(()=>this.textContent='Copied!')" style="background:transparent;color:var(--neon-green);border:1px solid var(--neon-green);padding:10px 16px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;border-radius:6px;">Copy</button></div></div>`;
@@ -3100,16 +3097,19 @@ async function placeOrder() {
             },
             modal: {
                 ondismiss: function() {
+                    // Re-open the checkout modal so user can try again
+                    document.getElementById('upiModalOverlay').style.display = 'flex';
                     setCheckoutError('Payment was cancelled. Your order has not been placed.');
                 }
             }
         };
         const rzpInstance = new Razorpay(rzpOptions);
         rzpInstance.on('payment.failed', function(resp) {
+            document.getElementById('upiModalOverlay').style.display = 'flex';
             setCheckoutError('Payment failed: ' + (resp.error.description || 'Please try again.'));
         });
         rzpInstance.open();
-        return; // Razorpay handler takes over from here
+        return;
     }
     // ---- END RAZORPAY ----
 
