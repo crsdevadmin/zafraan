@@ -13,7 +13,7 @@ window.ZAFRAAN_ADMIN_EMAILS = [
 
 // Delivery user emails — add the Google accounts of your delivery riders here
 window.ZAFRAAN_DELIVERY_EMAILS = [
-  // "rider1@gmail.com",
+  "padhomjs@gmail.com"
   // "rider2@gmail.com"
 ];
 
