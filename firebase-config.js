@@ -15,4 +15,4 @@ window.ZAFRAAN_ADMIN_EMAILS = [
 window.ZAFRAAN_UPI_ID = "m.jaffer.s-1@okaxis";
 
 // Razorpay publishable key (KEY_ID only — safe for frontend; KEY_SECRET never goes here)
-window.ZAFRAAN_RAZORPAY_KEY_ID = "rzp_test_SwHwpBQZfp4YgP";
+window.ZAFRAAN_RAZORPAY_KEY_ID = "rzp_live_SwI0qMoU2vDCuj";
