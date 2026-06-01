@@ -626,6 +626,87 @@
             border: 1px solid rgba(244, 67, 54, 0.3);
         }
 
+        /* ---- Order filter tabs ---- */
+        .order-filter-tabs {
+            display: flex; gap: 8px; flex-wrap: wrap;
+            margin-bottom: 20px; padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .order-filter-tab {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            color: var(--text-secondary);
+            padding: 7px 14px; border-radius: 20px;
+            font-size: 13px; font-family: inherit;
+            cursor: pointer; white-space: nowrap;
+            text-transform: none; letter-spacing: 0;
+            transition: all 0.2s ease;
+        }
+        .order-filter-tab:hover { color: #fff; border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.06); }
+        .order-filter-tab.active { background: var(--neon-green-glow); color: var(--neon-green); border-color: var(--neon-green); font-weight: 600; }
+        .ftab-count {
+            display: inline-flex; align-items: center; justify-content: center;
+            background: rgba(255,255,255,0.12); color: inherit;
+            font-size: 10px; font-weight: 700; min-width: 18px; height: 18px;
+            padding: 0 4px; border-radius: 9px; margin-left: 5px;
+        }
+        .order-filter-tab.active .ftab-count { background: rgba(0,230,118,0.25); }
+
+        /* ---- Stock alert banner ---- */
+        .stock-alert-banner {
+            background: rgba(244,67,54,0.08);
+            border: 1px solid rgba(244,67,54,0.3);
+            border-radius: 10px; padding: 12px 18px;
+            margin-bottom: 20px; display: flex; align-items: flex-start; gap: 10px;
+        }
+        .stock-alert-banner .alert-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+        .stock-alert-banner .alert-body { flex: 1; }
+        .stock-alert-banner .alert-title { font-size: 13px; font-weight: 600; color: #f44336; margin-bottom: 4px; }
+        .stock-alert-banner .alert-items { font-size: 12px; color: var(--text-secondary); }
+
+        /* ---- Reports ---- */
+        .report-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px; margin-bottom: 28px;
+        }
+        .report-card {
+            background: var(--bg-card); border: 1px solid var(--border-color);
+            border-radius: 12px; padding: 20px;
+        }
+        .report-card-label {
+            font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
+            color: var(--text-secondary); margin-bottom: 8px;
+        }
+        .report-card-value {
+            font-size: 28px; font-weight: 700; color: var(--neon-green);
+            text-shadow: 0 0 15px rgba(0,230,118,0.3); margin-bottom: 4px;
+        }
+        .report-card-sub { font-size: 12px; color: var(--text-muted); }
+        .report-section-title {
+            font-size: 13px; font-weight: 600; letter-spacing: 1px;
+            text-transform: uppercase; color: var(--text-secondary);
+            margin-bottom: 14px; padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .report-section { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+        .report-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .report-table th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); padding: 6px 10px; border-bottom: 1px solid var(--border-color); }
+        .report-table td { padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.03); color: #fff; }
+        .report-table tr:last-child td { border-bottom: none; }
+        .report-table tr:hover td { background: rgba(255,255,255,0.02); }
+        .stock-low { color: #ff9800; }
+        .stock-out { color: #f44336; font-weight: 600; }
+        .stock-ok { color: #4caf50; }
+        .day-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+        .day-bar-label { font-size: 12px; color: var(--text-secondary); width: 80px; flex-shrink: 0; }
+        .day-bar-track { flex: 1; height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; }
+        .day-bar-fill { height: 100%; background: var(--neon-green); border-radius: 3px; transition: width 0.5s ease; }
+        .day-bar-val { font-size: 12px; color: #fff; font-weight: 600; width: 70px; text-align: right; }
+
+        @media (max-width: 992px) {
+            .report-summary-grid { grid-template-columns: repeat(2, 1fr); }
+        }
         @media (max-width: 992px) {
             .product-row {
                 grid-template-columns: 70px 1.5fr 1fr 1fr 1fr;
@@ -691,6 +772,7 @@
             <div class="admin-nav-tabs">
                 <button id="tabCatalog" class="admin-nav-tab active" onclick="switchAdminTab('catalog')">Products</button>
                 <button id="tabOrders" class="admin-nav-tab" onclick="switchAdminTab('orders')">Orders<span id="newOrderBadge" style="display:none;" class="tab-badge">0</span></button>
+                <button id="tabReports" class="admin-nav-tab" onclick="switchAdminTab('reports')">Reports</button>
                 <button id="tabSettings" class="admin-nav-tab" onclick="switchAdminTab('settings')">Site Settings</button>
             </div>
         </div>
@@ -713,6 +795,7 @@
                 <button class="primary" id="saveBtn" disabled>Save Catalog</button>
             </div>
 
+            <div id="stockAlertBanner" style="display:none;"></div>
             <div class="filter-search-container">
                 <div class="search-box">
                     <svg class="search-icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" fill="currentColor"/></svg>
@@ -736,9 +819,28 @@
                 <button class="primary" onclick="loadOrders()">Refresh Orders</button>
             </div>
 
+            <div class="order-filter-tabs" id="orderFilterTabs">
+                <button class="order-filter-tab active" data-filter="all">All <span class="ftab-count" id="fcAll">0</span></button>
+                <button class="order-filter-tab" data-filter="ordered">Ordered <span class="ftab-count" id="fcOrdered">0</span></button>
+                <button class="order-filter-tab" data-filter="dispatched">Dispatched <span class="ftab-count" id="fcDispatched">0</span></button>
+                <button class="order-filter-tab" data-filter="delivered">Delivered <span class="ftab-count" id="fcDelivered">0</span></button>
+                <button class="order-filter-tab" data-filter="cancelled">Cancelled <span class="ftab-count" id="fcCancelled">0</span></button>
+            </div>
+
             <div class="orders-grid" id="ordersGrid">
                 <!-- Orders will render dynamically -->
             </div>
+        </div>
+
+        <!-- REPORTS PANEL -->
+        <div id="panelReports" style="display:none;">
+            <div class="toolbar">
+                <div class="title-block">
+                    <h1>Reports & Analytics</h1>
+                    <div class="message" id="reportsMessage"></div>
+                </div>
+            </div>
+            <div id="reportsContent"><div style="text-align:center;padding:60px;color:var(--text-secondary);">Loading reports...</div></div>
         </div>
 
         <!-- SETTINGS PANEL -->
@@ -949,6 +1051,7 @@
         let ordersUnsubscribe = null;
         let knownOrderIds = new Set();
         let newOrderCount = 0;
+        let currentOrderFilter = 'all';
 
         function sanitize(str) {
             const div = document.createElement('div');
@@ -958,12 +1061,14 @@
 
         // Tab switcher
         window.switchAdminTab = function(tab) {
-            document.getElementById('panelCatalog').style.display = 'none';
-            document.getElementById('panelOrders').style.display = 'none';
-            document.getElementById('panelSettings').style.display = 'none';
-            document.getElementById('tabCatalog').classList.remove('active');
-            document.getElementById('tabOrders').classList.remove('active');
-            document.getElementById('tabSettings').classList.remove('active');
+            ['panelCatalog','panelOrders','panelReports','panelSettings'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = 'none';
+            });
+            ['tabCatalog','tabOrders','tabReports','tabSettings'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.remove('active');
+            });
 
             if (tab === 'catalog') {
                 document.getElementById('panelCatalog').style.display = 'block';
@@ -971,9 +1076,12 @@
             } else if (tab === 'orders') {
                 document.getElementById('panelOrders').style.display = 'block';
                 document.getElementById('tabOrders').classList.add('active');
-                // Clear new-order badge when tab is opened
                 newOrderCount = 0;
                 document.getElementById('newOrderBadge').style.display = 'none';
+            } else if (tab === 'reports') {
+                document.getElementById('panelReports').style.display = 'block';
+                document.getElementById('tabReports').classList.add('active');
+                renderReports();
             } else {
                 document.getElementById('panelSettings').style.display = 'block';
                 document.getElementById('tabSettings').classList.add('active');
@@ -1264,15 +1372,80 @@
             }
         }
 
+        function statusToFilter(status) {
+            if (['Confirmed','Pending Payment','Payment Received','Paid/Processing'].includes(status)) return 'ordered';
+            if (status === 'Out for Delivery') return 'dispatched';
+            if (status === 'Delivered') return 'delivered';
+            if (status === 'Cancelled') return 'cancelled';
+            return 'ordered';
+        }
+
+        function updateFilterCounts() {
+            const counts = { all: ordersList.length, ordered: 0, dispatched: 0, delivered: 0, cancelled: 0 };
+            ordersList.forEach(o => { const f = statusToFilter(o.status); if (counts[f] !== undefined) counts[f]++; });
+            ['all','ordered','dispatched','delivered','cancelled'].forEach(f => {
+                const el = document.getElementById('fc' + f.charAt(0).toUpperCase() + f.slice(1));
+                if (el) el.textContent = counts[f];
+            });
+        }
+
+        function updateStockAlerts() {
+            const outItems = Object.entries(loadedSettings)
+                .filter(([, s]) => s.outOfStock === true)
+                .map(([id, s]) => s.name || (baseProducts.find(p => String(p.id) === id) || {}).name || id);
+
+            // Compute today's sold qty per product
+            const todayStart = new Date(); todayStart.setHours(0,0,0,0);
+            const soldToday = {};
+            ordersList.forEach(o => {
+                if (o.status === 'Cancelled') return;
+                if (new Date(o.createdAt) < todayStart) return;
+                (o.items || []).forEach(item => {
+                    soldToday[item.name] = (soldToday[item.name] || 0) + (item.qty || 1);
+                });
+            });
+
+            // Find products where stockQty > 0 and sold >= stockQty (over-ordered)
+            const lowStock = [];
+            Object.entries(loadedSettings).forEach(([id, s]) => {
+                if (!s.stockQty || s.stockQty <= 0) return;
+                const sold = soldToday[s.name] || 0;
+                const remaining = s.stockQty - sold;
+                const name = s.name || (baseProducts.find(p => String(p.id) === id) || {}).name || id;
+                if (remaining <= 0) lowStock.push(name + ' (out)');
+                else if (remaining <= 2) lowStock.push(name + ' (only ' + remaining + ' left)');
+            });
+
+            const allAlerts = [...new Set([...outItems, ...lowStock])];
+            const banner = document.getElementById('stockAlertBanner');
+            if (!banner) return;
+            if (allAlerts.length === 0) { banner.style.display = 'none'; return; }
+            banner.style.display = 'block';
+            banner.innerHTML = `<div class="stock-alert-banner">
+                <div class="alert-icon">⚠️</div>
+                <div class="alert-body">
+                    <div class="alert-title">Stock Alert — ${allAlerts.length} item(s) need attention</div>
+                    <div class="alert-items">${allAlerts.join(' · ')}</div>
+                </div>
+            </div>`;
+        }
+
         // RENDER ORDERS TO SCREEN
         function renderOrders() {
+            updateFilterCounts();
+            updateStockAlerts();
+
+            const filtered = currentOrderFilter === 'all'
+                ? ordersList
+                : ordersList.filter(o => statusToFilter(o.status) === currentOrderFilter);
+
             const ordersGrid = document.getElementById('ordersGrid');
-            if (ordersList.length === 0) {
-                ordersGrid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-secondary);">No orders found.</div>';
+            if (filtered.length === 0) {
+                ordersGrid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-secondary);">No orders in this category.</div>';
                 return;
             }
-            
-            ordersGrid.innerHTML = ordersList.map(order => {
+
+            ordersGrid.innerHTML = filtered.map(order => {
                 const dateStr = new Date(order.createdAt).toLocaleString();
                 const statusClass = getStatusClass(order.status);
                 const itemsHtml = (order.items || []).map(item => `
@@ -1329,6 +1502,150 @@
             }).join('');
         }
 
+        // Wire filter tab clicks
+        document.getElementById('orderFilterTabs').addEventListener('click', e => {
+            const btn = e.target.closest('.order-filter-tab');
+            if (!btn) return;
+            document.querySelectorAll('.order-filter-tab').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentOrderFilter = btn.dataset.filter;
+            renderOrders();
+        });
+
+        // REPORTS
+        function renderReports() {
+            const now = new Date();
+            const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const weekStart = new Date(now - 6 * 86400000);
+            const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+            const nonCancelled = ordersList.filter(o => o.status !== 'Cancelled');
+            const todayOrders = nonCancelled.filter(o => new Date(o.createdAt) >= todayStart);
+            const weekOrders  = nonCancelled.filter(o => new Date(o.createdAt) >= weekStart);
+            const monthOrders = nonCancelled.filter(o => new Date(o.createdAt) >= monthStart);
+
+            const sum = arr => arr.reduce((s, o) => s + (Number(o.totalPrice) || 0), 0);
+            const todayRev = sum(todayOrders), weekRev = sum(weekOrders),
+                  monthRev = sum(monthOrders), totalRev = sum(nonCancelled);
+
+            // Item quantities sold (all time)
+            const allItemQty = {};
+            nonCancelled.forEach(o => (o.items || []).forEach(item => {
+                allItemQty[item.name] = (allItemQty[item.name] || 0) + (item.qty || 1);
+            }));
+            const topSellers = Object.entries(allItemQty).sort((a,b) => b[1]-a[1]).slice(0,10);
+
+            // Today's prep requirements
+            const todayItemQty = {};
+            todayOrders.forEach(o => (o.items || []).forEach(item => {
+                if (!todayItemQty[item.name]) todayItemQty[item.name] = { qty: 0, size: item.size };
+                todayItemQty[item.name].qty += item.qty || 1;
+            }));
+            const todayPrep = Object.entries(todayItemQty).sort((a,b) => b[1].qty - a[1].qty);
+
+            // Last 7 days revenue chart data
+            const dayRevs = [];
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date(now - i * 86400000);
+                const ds = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+                const de = new Date(ds.getTime() + 86400000);
+                const rev = nonCancelled
+                    .filter(o => { const t = new Date(o.createdAt); return t >= ds && t < de; })
+                    .reduce((s,o) => s + (Number(o.totalPrice)||0), 0);
+                dayRevs.push({ label: d.toLocaleDateString('en-IN', {weekday:'short', day:'numeric'}), rev });
+            }
+            const maxRev = Math.max(...dayRevs.map(d => d.rev), 1);
+
+            // Stock status table
+            const stockRows = Object.entries(loadedSettings)
+                .filter(([,s]) => s.stockQty > 0 || s.outOfStock)
+                .map(([id, s]) => {
+                    const name = s.name || (baseProducts.find(p => String(p.id) === id)||{}).name || id;
+                    const sold = todayItemQty[name]?.qty || 0;
+                    const stock = s.stockQty || 0;
+                    const remaining = stock - sold;
+                    const cls = s.outOfStock ? 'stock-out' : remaining <= 0 ? 'stock-out' : remaining <= 2 ? 'stock-low' : 'stock-ok';
+                    const status = s.outOfStock ? 'Out of Stock' : remaining <= 0 ? 'Depleted' : remaining <= 2 ? 'Low Stock' : 'In Stock';
+                    return { name, stock, sold, remaining: Math.max(0, remaining), cls, status };
+                });
+
+            document.getElementById('reportsContent').innerHTML = `
+            <div class="report-summary-grid">
+                <div class="report-card">
+                    <div class="report-card-label">Today's Revenue</div>
+                    <div class="report-card-value">₹${todayRev.toLocaleString('en-IN')}</div>
+                    <div class="report-card-sub">${todayOrders.length} order${todayOrders.length !== 1 ? 's' : ''}</div>
+                </div>
+                <div class="report-card">
+                    <div class="report-card-label">This Week</div>
+                    <div class="report-card-value">₹${weekRev.toLocaleString('en-IN')}</div>
+                    <div class="report-card-sub">${weekOrders.length} orders</div>
+                </div>
+                <div class="report-card">
+                    <div class="report-card-label">This Month</div>
+                    <div class="report-card-value">₹${monthRev.toLocaleString('en-IN')}</div>
+                    <div class="report-card-sub">${monthOrders.length} orders</div>
+                </div>
+                <div class="report-card">
+                    <div class="report-card-label">All Time</div>
+                    <div class="report-card-value">₹${totalRev.toLocaleString('en-IN')}</div>
+                    <div class="report-card-sub">${nonCancelled.length} orders</div>
+                </div>
+            </div>
+
+            <div class="report-section">
+                <div class="report-section-title">Last 7 Days</div>
+                ${dayRevs.map(d => `
+                    <div class="day-bar">
+                        <div class="day-bar-label">${d.label}</div>
+                        <div class="day-bar-track"><div class="day-bar-fill" style="width:${Math.round(d.rev/maxRev*100)}%"></div></div>
+                        <div class="day-bar-val">₹${d.rev.toLocaleString('en-IN')}</div>
+                    </div>`).join('')}
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
+                <div class="report-section">
+                    <div class="report-section-title">Today's Prep Requirements</div>
+                    ${todayPrep.length === 0 ? '<div style="color:var(--text-secondary);font-size:13px;">No orders today yet.</div>' : `
+                    <table class="report-table">
+                        <thead><tr><th>Item</th><th>Size</th><th>Units Ordered</th></tr></thead>
+                        <tbody>${todayPrep.map(([name, d]) => `
+                            <tr><td>${sanitize(name)}</td><td style="color:var(--text-secondary)">${sanitize(d.size||'')}</td><td><strong>${d.qty}</strong></td></tr>`).join('')}
+                        </tbody>
+                    </table>`}
+                </div>
+                <div class="report-section">
+                    <div class="report-section-title">Best Sellers (All Time)</div>
+                    ${topSellers.length === 0 ? '<div style="color:var(--text-secondary);font-size:13px;">No sales data yet.</div>' : `
+                    <table class="report-table">
+                        <thead><tr><th>Item</th><th>Units Sold</th></tr></thead>
+                        <tbody>${topSellers.map(([name, qty]) => `
+                            <tr><td>${sanitize(name)}</td><td><strong>${qty}</strong></td></tr>`).join('')}
+                        </tbody>
+                    </table>`}
+                </div>
+            </div>
+
+            ${stockRows.length > 0 ? `
+            <div class="report-section">
+                <div class="report-section-title">Stock Status (Today)</div>
+                <table class="report-table">
+                    <thead><tr><th>Product</th><th>Set Stock</th><th>Sold Today</th><th>Remaining</th><th>Status</th></tr></thead>
+                    <tbody>${stockRows.map(r => `
+                        <tr>
+                            <td>${sanitize(r.name)}</td>
+                            <td>${r.stock}</td>
+                            <td>${r.sold}</td>
+                            <td><strong class="${r.cls}">${r.remaining}</strong></td>
+                            <td><span class="${r.cls}">${r.status}</span></td>
+                        </tr>`).join('')}
+                    </tbody>
+                </table>
+                <div style="font-size:11px;color:var(--text-muted);margin-top:10px;">Stock qty is set in the Products tab. Sold today is calculated from today's non-cancelled orders.</div>
+            </div>` : ''}
+            `;
+        }
+
         // UPDATE STATUS IN FIRESTORE
         window.updateOrderStatus = async function(orderId, newStatus) {
             if (!currentUser) return;
@@ -1350,6 +1667,7 @@
                 }
                 
                 renderOrders();
+                if (document.getElementById('panelReports').style.display !== 'none') renderReports();
                 setOrdersMessage(`Order ${orderId} status updated to: ${newStatus}`);
                 setTimeout(() => {
                     if (ordersMessage.textContent.includes(orderId)) {
