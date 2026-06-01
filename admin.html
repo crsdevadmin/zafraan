@@ -1519,25 +1519,26 @@
             const weekStart = new Date(now - 6 * 86400000);
             const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
-            const nonCancelled = ordersList.filter(o => o.status !== 'Cancelled');
-            const todayOrders = nonCancelled.filter(o => new Date(o.createdAt) >= todayStart);
-            const weekOrders  = nonCancelled.filter(o => new Date(o.createdAt) >= weekStart);
-            const monthOrders = nonCancelled.filter(o => new Date(o.createdAt) >= monthStart);
+            const dispatched = ordersList.filter(o => ['Out for Delivery','Delivered'].includes(o.status));
+            const todayOrders = dispatched.filter(o => new Date(o.createdAt) >= todayStart);
+            const weekOrders  = dispatched.filter(o => new Date(o.createdAt) >= weekStart);
+            const monthOrders = dispatched.filter(o => new Date(o.createdAt) >= monthStart);
 
             const sum = arr => arr.reduce((s, o) => s + (Number(o.totalPrice) || 0), 0);
             const todayRev = sum(todayOrders), weekRev = sum(weekOrders),
-                  monthRev = sum(monthOrders), totalRev = sum(nonCancelled);
+                  monthRev = sum(monthOrders), totalRev = sum(dispatched);
 
-            // Item quantities sold (all time)
+            // Item quantities sold (all time, dispatched only)
             const allItemQty = {};
-            nonCancelled.forEach(o => (o.items || []).forEach(item => {
+            dispatched.forEach(o => (o.items || []).forEach(item => {
                 allItemQty[item.name] = (allItemQty[item.name] || 0) + (item.qty || 1);
             }));
             const topSellers = Object.entries(allItemQty).sort((a,b) => b[1]-a[1]).slice(0,10);
 
-            // Today's prep requirements
+            // Today's prep requirements (all non-cancelled orders today, not just dispatched)
+            const allTodayOrders = ordersList.filter(o => o.status !== 'Cancelled' && new Date(o.createdAt) >= todayStart);
             const todayItemQty = {};
-            todayOrders.forEach(o => (o.items || []).forEach(item => {
+            allTodayOrders.forEach(o => (o.items || []).forEach(item => {
                 if (!todayItemQty[item.name]) todayItemQty[item.name] = { qty: 0, size: item.size };
                 todayItemQty[item.name].qty += item.qty || 1;
             }));
@@ -1549,7 +1550,7 @@
                 const d = new Date(now - i * 86400000);
                 const ds = new Date(d.getFullYear(), d.getMonth(), d.getDate());
                 const de = new Date(ds.getTime() + 86400000);
-                const rev = nonCancelled
+                const rev = dispatched
                     .filter(o => { const t = new Date(o.createdAt); return t >= ds && t < de; })
                     .reduce((s,o) => s + (Number(o.totalPrice)||0), 0);
                 dayRevs.push({ label: d.toLocaleDateString('en-IN', {weekday:'short', day:'numeric'}), rev });
