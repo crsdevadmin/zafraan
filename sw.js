@@ -1,4 +1,4 @@
-const CACHE = 'zafraan-v9';
+const CACHE = 'zafraan-v10';
 
 const PRECACHE = [
   './',
@@ -51,6 +51,38 @@ self.addEventListener('activate', event => {
     caches.keys().then(keys =>
       Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
     ).then(() => self.clients.claim())
+  );
+});
+
+// FCM background push — fires when delivery.html is closed but the browser is running
+self.addEventListener('push', event => {
+  if (!event.data) return;
+  let d = {};
+  try { d = event.data.json(); } catch { d = { title: event.data.text() }; }
+  event.waitUntil(
+    self.registration.showNotification(d.title || 'New Order — ZAFRAAN', {
+      body: d.body || '',
+      icon: './icon.svg',
+      badge: './icon.svg',
+      tag: d.orderId || 'new-order',
+      requireInteraction: true,
+      vibrate: [200, 100, 200, 100, 200],
+      data: { url: d.url || './delivery.html' }
+    })
+  );
+});
+
+// Open / focus delivery.html when the user taps the notification
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  const target = event.notification.data?.url || './delivery.html';
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+      for (const c of list) {
+        if (c.url.includes('delivery.html') && 'focus' in c) return c.focus();
+      }
+      return clients.openWindow(target);
+    })
   );
 });
 

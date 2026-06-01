@@ -1053,6 +1053,36 @@
         let newOrderCount = 0;
         let currentOrderFilter = 'all';
 
+        // Push FCM notification to all registered delivery phones
+        async function sendFCMToDelivery(order) {
+            const serverKey = window.ZAFRAAN_FCM_SERVER_KEY;
+            if (!serverKey || serverKey === 'YOUR_FCM_SERVER_KEY_HERE') return;
+            try {
+                const tokensSnap = await getDocs(collection(db, 'fcmTokens'));
+                const tokens = [];
+                tokensSnap.forEach(d => { if (d.data().token) tokens.push(d.data().token); });
+                if (!tokens.length) return;
+                await fetch('https://fcm.googleapis.com/fcm/send', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'key=' + serverKey
+                    },
+                    body: JSON.stringify({
+                        registration_ids: tokens,
+                        data: {
+                            title: 'New Order — ' + order.orderId,
+                            body: (order.customerName || '') + '  ·  ₹' + (order.totalPrice || ''),
+                            orderId: order.orderId,
+                            url: './delivery.html'
+                        }
+                    })
+                });
+            } catch (e) {
+                console.warn('FCM send failed:', e.message);
+            }
+        }
+
         function sanitize(str) {
             const div = document.createElement('div');
             div.textContent = String(str ?? '');
@@ -1315,6 +1345,8 @@
                         if (!knownOrderIds.has(id)) {
                             newOrderCount++;
                             playNewOrderSound();
+                            const newOrder = incoming.find(o => o.orderId === id);
+                            if (newOrder) sendFCMToDelivery(newOrder);
                         }
                     });
                 }
@@ -1592,7 +1624,7 @@
                 <div class="report-card">
                     <div class="report-card-label">All Time</div>
                     <div class="report-card-value">₹${totalRev.toLocaleString('en-IN')}</div>
-                    <div class="report-card-sub">${nonCancelled.length} orders</div>
+                    <div class="report-card-sub">${dispatched.length} orders</div>
                 </div>
             </div>
 

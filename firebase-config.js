@@ -11,6 +11,24 @@ window.ZAFRAAN_ADMIN_EMAILS = [
   "padhomjs@gmail.com"
 ];
 
+// Delivery user emails — add the Google accounts of your delivery riders here
+window.ZAFRAAN_DELIVERY_EMAILS = [
+  // "rider1@gmail.com",
+  // "rider2@gmail.com"
+];
+
+// FCM Web Push VAPID key — needed for background push when the delivery app is closed
+// How to get it:
+//   1. Firebase Console → Project Settings → Cloud Messaging
+//   2. Under "Web configuration" → Generate key pair → copy the public key
+window.ZAFRAAN_FCM_VAPID_KEY = 'YOUR_VAPID_KEY_HERE';
+
+// FCM Server Key — used by the admin panel to push notifications to delivery phones
+// How to get it:
+//   Firebase Console → Project Settings → Cloud Messaging → "Cloud Messaging API (Legacy)" → Server key
+// Note: keep this file out of public git repos if you add the real key
+window.ZAFRAAN_FCM_SERVER_KEY = 'YOUR_FCM_SERVER_KEY_HERE';
+
 // Your UPI ID — replace with your actual UPI ID (e.g. "zafraan@oksbi")
 window.ZAFRAAN_UPI_ID = "m.jaffer.s-1@okaxis";
 

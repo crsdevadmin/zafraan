@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZAFRAAN — Delivery</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #050505;
+            --bg-secondary: #0c0c0c;
+            --bg-card: #121212;
+            --border-color: rgba(255,255,255,0.08);
+            --neon-green: #00e676;
+            --neon-green-glow: rgba(0,230,118,0.2);
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --text-muted: #555555;
+            --amber: #ffab40;
+            --amber-glow: rgba(255,171,64,0.15);
+            --red: #ff5252;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Outfit', sans-serif;
+            font-weight: 300;
+            min-height: 100vh;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.01) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.01) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* ── LOGIN ── */
+        #loginScreen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 24px;
+        }
+        .login-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 52px 40px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+        .login-logo {
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            margin-bottom: 6px;
+        }
+        .login-logo em { font-style: normal; color: var(--neon-green); }
+        .login-role {
+            font-size: 11px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--amber);
+            margin-bottom: 40px;
+        }
+        .login-icon { font-size: 56px; margin-bottom: 28px; }
+        .btn-google {
+            width: 100%;
+            padding: 14px 20px;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-family: 'Outfit', sans-serif;
+            font-size: 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .btn-google:hover { border-color: var(--neon-green); background: var(--neon-green-glow); }
+        #loginError {
+            color: var(--red);
+            font-size: 13px;
+            margin-top: 16px;
+            display: none;
+            line-height: 1.5;
+        }
+
+        /* ── HEADER ── */
+        header {
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(12,12,12,0.9);
+            backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 24px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 18px;
+            letter-spacing: 2px;
+        }
+        .brand em { font-style: normal; color: var(--neon-green); }
+        .delivery-tag {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            background: var(--amber-glow);
+            color: var(--amber);
+            border: 1px solid rgba(255,171,64,0.3);
+            padding: 3px 8px;
+            border-radius: 6px;
+        }
+        .live-dot {
+            width: 7px;
+            height: 7px;
+            background: var(--neon-green);
+            border-radius: 50%;
+            display: inline-block;
+            animation: blink 1.4s ease-in-out infinite;
+        }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.15} }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        #userEmail { font-size: 12px; color: var(--text-muted); }
+        .btn-sm {
+            padding: 7px 14px;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-family: 'Outfit', sans-serif;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-sm:hover { border-color: var(--neon-green); color: var(--neon-green); }
+
+        /* ── NOTIFICATION BANNER ── */
+        #notifBanner {
+            margin: 16px 24px 0;
+            padding: 13px 18px;
+            background: var(--amber-glow);
+            border: 1px solid rgba(255,171,64,0.25);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        #notifBanner p { font-size: 13px; color: var(--amber); }
+        .btn-enable {
+            padding: 8px 16px;
+            background: var(--amber);
+            border: none;
+            border-radius: 8px;
+            color: #000;
+            font-family: 'Outfit', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .btn-enable:hover { opacity: 0.85; }
+
+        /* ── MAIN ── */
+        main { max-width: 880px; margin: 0 auto; padding: 24px; }
+
+        #statusMsg {
+            font-size: 13px;
+            padding: 10px 16px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        #statusMsg.info { background: rgba(0,230,118,0.07); color: var(--neon-green); border: 1px solid rgba(0,230,118,0.2); }
+        #statusMsg.err  { background: rgba(255,82,82,0.07);  color: var(--red);       border: 1px solid rgba(255,82,82,0.2); }
+        #statusMsg:empty { display: none; }
+
+        .section-head {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        .section-title { font-size: 15px; font-weight: 600; letter-spacing: 0.5px; }
+        .badge {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 9px;
+            border-radius: 20px;
+            background: var(--neon-green);
+            color: #000;
+            min-width: 22px;
+            text-align: center;
+        }
+        .badge.amber { background: var(--amber); }
+
+        .orders-grid { display: grid; gap: 16px; }
+
+        /* ── ORDER CARD ── */
+        .order-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 20px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .order-card.new {
+            border-color: var(--neon-green);
+            box-shadow: 0 0 24px rgba(0,230,118,0.18);
+            animation: glow-pulse 2s ease-in-out 3;
+        }
+        @keyframes glow-pulse {
+            0%,100% { box-shadow: 0 0 24px rgba(0,230,118,0.18); }
+            50%     { box-shadow: 0 0 40px rgba(0,230,118,0.38); }
+        }
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+        .order-id { font-size: 14px; font-weight: 600; color: var(--neon-green); font-family: monospace; }
+        .order-time { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+        .status-pill {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+        .pill-green { background: rgba(0,230,118,0.1); color: var(--neon-green); border: 1px solid rgba(0,230,118,0.3); }
+        .pill-amber { background: rgba(255,171,64,0.1); color: var(--amber); border: 1px solid rgba(255,171,64,0.3); }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .info-cell.wide { grid-column: span 2; }
+        .info-cell label {
+            font-size: 10px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: block;
+            margin-bottom: 4px;
+        }
+        .info-cell p { font-size: 14px; line-height: 1.5; }
+        .phone-link { color: var(--neon-green); text-decoration: none; }
+        .phone-link:hover { text-decoration: underline; }
+
+        .items-wrap {
+            border-top: 1px solid var(--border-color);
+            padding-top: 14px;
+            margin-bottom: 16px;
+        }
+        .items-label {
+            font-size: 10px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+        .item-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: var(--text-secondary);
+            padding: 2px 0;
+        }
+        .item-row span:last-child { color: var(--text-primary); }
+
+        .card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .order-total { font-size: 15px; font-weight: 600; }
+        .order-total span { color: var(--neon-green); }
+        .pay-method { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+        .btn-action {
+            padding: 10px 22px;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.15s;
+        }
+        .btn-action:hover { opacity: 0.85; transform: translateY(-1px); }
+        .btn-action:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+        .btn-dispatch { background: var(--neon-green); color: #000; }
+        .btn-deliver  { background: var(--amber); color: #000; }
+
+        .empty { text-align: center; padding: 50px 20px; color: var(--text-muted); font-size: 14px; }
+        .empty .ei { font-size: 40px; margin-bottom: 10px; }
+
+        .divider { margin: 32px 0 24px; border: none; border-top: 1px solid var(--border-color); }
+
+        @media (max-width: 520px) {
+            main { padding: 16px; }
+            .info-grid { grid-template-columns: 1fr; }
+            .info-cell.wide { grid-column: span 1; }
+            #notifBanner { flex-direction: column; align-items: flex-start; }
+            #userEmail { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── LOGIN SCREEN ── -->
+<div id="loginScreen">
+    <div class="login-card">
+        <div class="login-logo">ZAFR<em>AA</em>N</div>
+        <div class="login-role">Delivery Portal</div>
+        <div class="login-icon">🚴</div>
+        <button class="btn-google" id="loginBtn">
+            <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285f4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 0 0 2.38-5.88c0-.57-.05-.66-.15-1.18z"/><path fill="#34a853" d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2a4.8 4.8 0 0 1-7.18-2.54H1.83v2.07A8 8 0 0 0 8.98 17z"/><path fill="#fbbc05" d="M4.5 10.52a4.8 4.8 0 0 1 0-3.04V5.41H1.83a8 8 0 0 0 0 7.18l2.67-2.07z"/><path fill="#ea4335" d="M8.98 4.18c1.17 0 2.23.4 3.06 1.2l2.3-2.3A8 8 0 0 0 1.83 5.4L4.5 7.49a4.77 4.77 0 0 1 4.48-3.3z"/></svg>
+            Sign in with Google
+        </button>
+        <p id="loginError">Your Google account is not registered as a delivery user. Contact the admin.</p>
+    </div>
+</div>
+
+<!-- ── DASHBOARD ── -->
+<div id="dashboard" style="display:none">
+    <header>
+        <div class="brand">
+            ZAFR<em>AA</em>N
+            <span class="delivery-tag">Delivery</span>
+            <span class="live-dot" title="Live"></span>
+        </div>
+        <div class="header-right">
+            <span id="userEmail"></span>
+            <button class="btn-sm" id="logoutBtn">Sign Out</button>
+        </div>
+    </header>
+
+    <div id="notifBanner">
+        <p>Enable notifications to receive alerts even when the app is in the background</p>
+        <button class="btn-enable" id="enableNotifBtn">Enable</button>
+    </div>
+
+    <main>
+        <div id="statusMsg" role="status"></div>
+
+        <!-- Pending pickup -->
+        <div class="section-head">
+            <span class="section-title">Ready for Pickup</span>
+            <span class="badge" id="pendingBadge">0</span>
+        </div>
+        <div class="orders-grid" id="pendingGrid">
+            <div class="empty"><div class="ei">📦</div>Loading orders…</div>
+        </div>
+
+        <hr class="divider">
+
+        <!-- Out for delivery -->
+        <div class="section-head">
+            <span class="section-title">Out for Delivery</span>
+            <span class="badge amber" id="activeBadge">0</span>
+        </div>
+        <div class="orders-grid" id="activeGrid">
+            <div class="empty" style="padding:30px 20px">No active deliveries</div>
+        </div>
+    </main>
+</div>
+
+<script type="module">
+    const config        = window.ZAFRAAN_FIREBASE_CONFIG;
+    const deliveryEmails = window.ZAFRAAN_DELIVERY_EMAILS || [];
+    const vapidKey      = window.ZAFRAAN_FCM_VAPID_KEY;
+    const isConfigured  = config && config.apiKey && config.apiKey !== 'YOUR_API_KEY';
+
+    let auth, db, currentUser;
+    let GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged;
+    let collection, doc, onSnapshot, updateDoc, setDoc;
+    let unsubscribe = null;
+    let knownIds    = new Set();
+    let allOrders   = [];
+
+    // ── HELPERS ──────────────────────────────────────────────────────────────
+    function s(str) {
+        const d = document.createElement('div');
+        d.textContent = String(str ?? '');
+        return d.innerHTML;
+    }
+
+    function showStatus(msg, isErr = false) {
+        const el = document.getElementById('statusMsg');
+        el.textContent = msg;
+        el.className = isErr ? 'err' : msg ? 'info' : '';
+        if (msg) {
+            clearTimeout(el._t);
+            el._t = setTimeout(() => { el.textContent = ''; el.className = ''; }, 4500);
+        }
+    }
+
+    // ── NOTIFICATIONS ────────────────────────────────────────────────────────
+    function refreshNotifBanner() {
+        const banner = document.getElementById('notifBanner');
+        if (Notification.permission === 'granted') {
+            banner.style.display = 'none';
+        } else if (Notification.permission === 'denied') {
+            document.getElementById('enableNotifBtn').style.display = 'none';
+            banner.querySelector('p').textContent =
+                'Notifications blocked — enable them in your browser/phone settings';
+        }
+    }
+
+    document.getElementById('enableNotifBtn').addEventListener('click', async () => {
+        const perm = await Notification.requestPermission();
+        refreshNotifBanner();
+        if (perm === 'granted') {
+            registerFCMToken();
+            showStatus('Notifications enabled — you will receive alerts for new orders');
+        }
+    });
+
+    async function notify(order) {
+        if (!('Notification' in window) || Notification.permission !== 'granted') return;
+        const title   = `New Order — ${s(order.orderId)}`;
+        const body    = `${order.customerName}  ·  ₹${order.totalPrice}\n${order.deliveryAddress}`;
+        const options = {
+            body,
+            icon: './icon.svg',
+            badge: './icon.svg',
+            tag: order.orderId,
+            requireInteraction: true,
+            vibrate: [200, 100, 200, 100, 200],
+            data: { url: './delivery.html' }
+        };
+        try {
+            // showNotification via SW persists even when the tab is backgrounded
+            const reg = await navigator.serviceWorker.ready;
+            await reg.showNotification(title, options);
+        } catch {
+            // fallback for browsers without SW notification support
+            new Notification(title, options);
+        }
+    }
+
+    function playAlert() {
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            [523, 659, 784, 1047].forEach((freq, i) => {
+                const osc = ctx.createOscillator(), gain = ctx.createGain();
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.frequency.value = freq; osc.type = 'sine';
+                const t = ctx.currentTime + i * 0.13;
+                gain.gain.setValueAtTime(0.4, t);
+                gain.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+                osc.start(t); osc.stop(t + 0.35);
+            });
+        } catch { /* audio not available */ }
+    }
+
+    // ── FCM TOKEN (stored for background push via Cloud Functions) ────────────
+    async function registerFCMToken() {
+        if (!vapidKey || vapidKey === 'YOUR_VAPID_KEY_HERE') return;
+        try {
+            const { getMessaging, getToken } = await import(
+                'https://www.gstatic.com/firebasejs/10.12.4/firebase-messaging.js'
+            );
+            const messaging = getMessaging(app);
+            const reg = await navigator.serviceWorker.ready;
+            const token = await getToken(messaging, { vapidKey, serviceWorkerRegistration: reg });
+            if (token && currentUser) {
+                await setDoc(doc(db, 'fcmTokens', currentUser.uid), {
+                    token,
+                    email: currentUser.email,
+                    updatedAt: new Date().toISOString()
+                });
+            }
+        } catch (e) {
+            console.warn('FCM token registration skipped:', e.message);
+        }
+    }
+
+    // ── RENDER ───────────────────────────────────────────────────────────────
+    function renderOrders() {
+        const pending   = allOrders.filter(o => ['Confirmed', 'Paid/Processing'].includes(o.status));
+        const active    = allOrders.filter(o => o.status === 'Out for Delivery');
+
+        document.getElementById('pendingBadge').textContent = pending.length;
+        document.getElementById('activeBadge').textContent  = active.length;
+        document.title = pending.length > 0
+            ? `(${pending.length}) ZAFRAAN — Delivery`
+            : 'ZAFRAAN — Delivery';
+
+        renderGrid('pendingGrid', pending, true);
+        renderGrid('activeGrid', active, false);
+    }
+
+    function renderGrid(id, orders, isPending) {
+        const grid = document.getElementById(id);
+        if (!orders.length) {
+            grid.innerHTML = isPending
+                ? '<div class="empty"><div class="ei">✅</div>No orders waiting for pickup</div>'
+                : '<div class="empty" style="padding:28px 20px">No active deliveries</div>';
+            return;
+        }
+        grid.innerHTML = orders.map(o => {
+            const time = new Date(o.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const date = new Date(o.createdAt).toLocaleDateString([], { day: 'numeric', month: 'short' });
+            const pillClass   = isPending ? 'pill-green' : 'pill-amber';
+            const statusLabel = o.status === 'Paid/Processing' ? 'Confirmed' : o.status;
+            const items = (o.items || []).map(it =>
+                `<div class="item-row"><span>${s(it.name)} (${s(it.size)}) × ${s(it.qty)}</span><span>₹${s(it.price * it.qty)}</span></div>`
+            ).join('');
+            const btn = isPending
+                ? `<button class="btn-action btn-dispatch" onclick="dispatchOrder('${s(o.orderId)}',this)">Accept &amp; Dispatch</button>`
+                : `<button class="btn-action btn-deliver"  onclick="deliverOrder('${s(o.orderId)}',this)">Mark Delivered</button>`;
+            return `
+            <div class="order-card${o._new ? ' new' : ''}" id="oc-${s(o.orderId)}">
+                <div class="card-top">
+                    <div>
+                        <div class="order-id">${s(o.orderId)}</div>
+                        <div class="order-time">${s(date)} · ${s(time)}</div>
+                    </div>
+                    <span class="status-pill ${pillClass}">${s(statusLabel)}</span>
+                </div>
+                <div class="info-grid">
+                    <div class="info-cell">
+                        <label>Customer</label>
+                        <p>${s(o.customerName)}</p>
+                    </div>
+                    <div class="info-cell">
+                        <label>Phone</label>
+                        <p><a class="phone-link" href="tel:${s(o.customerPhone)}">${s(o.customerPhone)}</a></p>
+                    </div>
+                    <div class="info-cell wide">
+                        <label>Delivery Address</label>
+                        <p>${s(o.deliveryAddress)}</p>
+                    </div>
+                </div>
+                <div class="items-wrap">
+                    <div class="items-label">Items</div>
+                    ${items}
+                </div>
+                <div class="card-footer">
+                    <div>
+                        <div class="order-total">Total: <span>₹${s(o.totalPrice)}</span></div>
+                        <div class="pay-method">${s(o.paymentMethod || 'Cash on Delivery')}</div>
+                    </div>
+                    ${btn}
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    // ── ORDER ACTIONS ────────────────────────────────────────────────────────
+    window.dispatchOrder = async function(orderId, btn) {
+        btn.disabled = true; btn.textContent = 'Dispatching…';
+        try {
+            await updateDoc(doc(db, 'orders', orderId), {
+                status: 'Out for Delivery',
+                updatedAt: new Date().toISOString(),
+                updatedBy: currentUser.email
+            });
+        } catch (e) {
+            showStatus('Error: ' + e.message, true);
+            btn.disabled = false; btn.textContent = 'Accept & Dispatch';
+        }
+    };
+
+    window.deliverOrder = async function(orderId, btn) {
+        btn.disabled = true; btn.textContent = 'Marking…';
+        try {
+            await updateDoc(doc(db, 'orders', orderId), {
+                status: 'Delivered',
+                updatedAt: new Date().toISOString(),
+                updatedBy: currentUser.email
+            });
+        } catch (e) {
+            showStatus('Error: ' + e.message, true);
+            btn.disabled = false; btn.textContent = 'Mark Delivered';
+        }
+    };
+
+    // ── ORDERS LISTENER ──────────────────────────────────────────────────────
+    function startListener() {
+        if (unsubscribe) { unsubscribe(); unsubscribe = null; }
+
+        unsubscribe = onSnapshot(collection(db, 'orders'), snapshot => {
+            const fresh = [], freshIds = new Set(), newOrders = [];
+
+            snapshot.forEach(d => {
+                fresh.push(d.data());
+                freshIds.add(d.id);
+            });
+
+            if (knownIds.size > 0) {
+                fresh.forEach(o => {
+                    if (!knownIds.has(o.orderId) && ['Confirmed', 'Paid/Processing'].includes(o.status)) {
+                        o._new = true;
+                        newOrders.push(o);
+                    }
+                });
+            }
+            knownIds = freshIds;
+            fresh.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            allOrders = fresh;
+            renderOrders();
+
+            newOrders.forEach(o => {
+                playAlert();
+                notify(o);
+                // Remove the highlight after 12 s
+                setTimeout(() => { o._new = false; renderOrders(); }, 12000);
+            });
+        }, err => showStatus('Error loading orders: ' + err.message, true));
+    }
+
+    // ── BOOT ─────────────────────────────────────────────────────────────────
+    if (!isConfigured) {
+        document.getElementById('loginError').textContent = 'Firebase not configured. Update firebase-config.js.';
+        document.getElementById('loginError').style.display = 'block';
+    } else {
+        const [{ initializeApp, getApps }] = await Promise.all([
+            import('https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js')
+        ]);
+        const { GoogleAuthProvider: GAP, signInWithPopup: siwp, signOut: so, onAuthStateChanged: oAC, getAuth } =
+            await import('https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js');
+        const { collection: col, doc: docFn, onSnapshot: os, updateDoc: ud, setDoc: sd, getFirestore } =
+            await import('https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js');
+
+        GoogleAuthProvider = GAP; signInWithPopup = siwp; signOut = so; onAuthStateChanged = oAC;
+        collection = col; doc = docFn; onSnapshot = os; updateDoc = ud; setDoc = sd;
+
+        const existing = getApps().find(a => a.name === 'delivery');
+        const app      = existing || initializeApp(config, 'delivery');
+        auth = getAuth(app);
+        db   = getFirestore(app);
+
+        // Make app accessible in registerFCMToken
+        window.app = app;
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js').catch(() => {});
+        }
+
+        document.getElementById('loginBtn').addEventListener('click', () =>
+            signInWithPopup(auth, new GoogleAuthProvider())
+        );
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            if (unsubscribe) unsubscribe();
+            await signOut(auth);
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('loginScreen').style.display = 'flex';
+        });
+
+        onAuthStateChanged(auth, async user => {
+            currentUser = user;
+            if (!user) {
+                document.getElementById('dashboard').style.display = 'none';
+                document.getElementById('loginScreen').style.display = 'flex';
+                return;
+            }
+            if (!deliveryEmails.includes(user.email)) {
+                document.getElementById('loginError').style.display = 'block';
+                await signOut(auth);
+                return;
+            }
+            document.getElementById('loginError').style.display = 'none';
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('dashboard').style.display  = 'block';
+            document.getElementById('userEmail').textContent = user.email;
+            refreshNotifBanner();
+            startListener();
+            if (Notification.permission === 'granted') registerFCMToken();
+        });
+    }
+</script>
+</body>
+</html>
