@@ -1336,6 +1336,7 @@
 
                 setOrdersMessage('');
                 renderOrders();
+                if (document.getElementById('panelReports') && document.getElementById('panelReports').style.display !== 'none') renderReports();
             }, err => {
                 setOrdersMessage('Error loading orders: ' + err.message, true);
             });
@@ -1514,6 +1515,7 @@
 
         // REPORTS
         function renderReports() {
+          try {
             const now = new Date();
             const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
             const weekStart = new Date(now - 6 * 86400000);
@@ -1645,6 +1647,10 @@
                 <div style="font-size:11px;color:var(--text-muted);margin-top:10px;">Stock qty is set in the Products tab. Sold today is calculated from today's non-cancelled orders.</div>
             </div>` : ''}
             `;
+          } catch(e) {
+            const el = document.getElementById('reportsContent');
+            if (el) el.innerHTML = `<div style="color:#f44336;padding:24px;font-size:13px;">Error rendering reports: ${e.message}<br><pre style="margin-top:8px;font-size:11px;color:#888;">${e.stack||''}</pre></div>`;
+          }
         }
 
         // UPDATE STATUS IN FIRESTORE
