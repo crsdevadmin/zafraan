@@ -1046,9 +1046,11 @@
             transition: all 0.3s;
         }
 
-        .checkout-field textarea {
-            min-height: 86px;
-            resize: vertical;
+        .addr-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 8px;
         }
 
         .checkout-field input:focus,
@@ -2136,11 +2138,17 @@
                     <input id="checkoutPhone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="10-digit mobile number" oninput="autofillFromPhone()">
                 </div>
                 <div class="checkout-field">
-                    <label for="checkoutAddress">Delivery Address</label>
-                    <textarea id="checkoutAddress" autocomplete="street-address" placeholder="Door no., street, area, city, pincode"></textarea>
-                    <button type="button" class="otp-btn" id="locationBtn" onclick="useMyLocation()" style="width:100%;margin-top:6px;font-size:12px;letter-spacing:1px;">Use My Location</button>
+                    <label>Delivery Address</label>
+                    <button type="button" class="otp-btn" id="locationBtn" onclick="useMyLocation()" style="width:100%;margin-bottom:10px;font-size:12px;letter-spacing:1px;">📍 Use My Location</button>
+                    <input id="addrDoor"    type="text"    autocomplete="address-line1" placeholder="Door / Flat / Building No *">
+                    <input id="addrStreet"  type="text"    autocomplete="address-line2" placeholder="Street / Landmark" style="margin-top:8px;">
+                    <input id="addrArea"    type="text"    autocomplete="address-level3" placeholder="Area / Locality *" style="margin-top:8px;">
+                    <div class="addr-row">
+                        <input id="addrCity"    type="text"    autocomplete="address-level2" placeholder="City *">
+                        <input id="addrPincode" type="text"    inputmode="numeric" maxlength="6" autocomplete="postal-code" placeholder="Pincode *">
+                    </div>
                 </div>
-                <div class="checkout-note" id="checkoutLocationNote">Tap "Use My Location" to auto-fill your area, then add your door number.</div>
+                <div class="checkout-note" id="checkoutLocationNote">Tap "Use My Location" to auto-fill area, city &amp; pincode — then add your door number.</div>
 
                 <div id="creditNotice" class="credit-notice" style="display:none;"></div>
 
@@ -2755,12 +2763,12 @@ function setCheckoutError(message) {
 
 function getSavedCustomerAddress(phoneDigits) {
   const saved = JSON.parse(localStorage.getItem('zafraan_customer_addresses') || '{}');
-  return saved[phoneDigits] || '';
+  return saved[phoneDigits] || null;
 }
 
-function saveCustomerAddress(phoneDigits, address) {
+function saveCustomerAddress(phoneDigits, addrObj) {
   const saved = JSON.parse(localStorage.getItem('zafraan_customer_addresses') || '{}');
-  saved[phoneDigits] = address;
+  saved[phoneDigits] = addrObj;
   localStorage.setItem('zafraan_customer_addresses', JSON.stringify(saved));
 }
 
@@ -2784,8 +2792,17 @@ function autofillFromPhone() {
 
   if (savedName) document.getElementById('checkoutName').value = savedName;
   if (savedAddress) {
-    document.getElementById('checkoutAddress').value = savedAddress;
-    document.getElementById('checkoutLocationNote').textContent = 'Welcome back! Your saved details have been filled in.';
+    if (typeof savedAddress === 'object') {
+      document.getElementById('addrDoor').value    = savedAddress.door    || '';
+      document.getElementById('addrStreet').value  = savedAddress.street  || '';
+      document.getElementById('addrArea').value    = savedAddress.area    || '';
+      document.getElementById('addrCity').value    = savedAddress.city    || '';
+      document.getElementById('addrPincode').value = savedAddress.pincode || '';
+    } else {
+      // Legacy: old plain-text address goes into door field
+      document.getElementById('addrDoor').value = savedAddress;
+    }
+    document.getElementById('checkoutLocationNote').textContent = 'Welcome back! Your saved address has been filled in.';
   }
 }
 
@@ -2829,8 +2846,12 @@ async function checkoutUPI() {
     const savedPhone = localStorage.getItem('zafraan_customer_phone') || '';
     document.getElementById('checkoutPhone').value = savedPhone;
     document.getElementById('checkoutName').value = '';
-    document.getElementById('checkoutAddress').value = '';
-    document.getElementById('checkoutLocationNote').textContent = 'Tap "Use My Location" to auto-fill your area, then add your door number.';
+    document.getElementById('addrDoor').value    = '';
+    document.getElementById('addrStreet').value  = '';
+    document.getElementById('addrArea').value    = '';
+    document.getElementById('addrCity').value    = '';
+    document.getElementById('addrPincode').value = '';
+    document.getElementById('checkoutLocationNote').textContent = 'Tap "Use My Location" to auto-fill area, city & pincode — then add your door number.';
 
     if (savedPhone) {
         autofillFromPhone();
@@ -2928,20 +2949,22 @@ async function useMyLocation() {
             const data = await res.json();
             const a = data.address || {};
 
-            const areaParts = [
-                a.road || a.pedestrian || a.footway || a.path,
-                a.neighbourhood || a.suburb || a.quarter || a.residential,
-                a.village || a.town || a.city_district || a.county,
-                a.city || a.state_district
-            ].filter(Boolean);
+            document.getElementById('addrStreet').value  =
+                a.road || a.pedestrian || a.footway || a.path || '';
+            document.getElementById('addrArea').value    =
+                a.neighbourhood || a.suburb || a.quarter || a.residential ||
+                a.village || a.town || a.city_district || '';
+            document.getElementById('addrCity').value    =
+                a.city || a.state_district || a.county || '';
+            document.getElementById('addrPincode').value =
+                a.postcode ? a.postcode.replace(/\s/g, '').slice(0, 6) : '';
 
-            const pincode = a.postcode ? a.postcode.replace(/\s/g, '').slice(0, 6) : '';
-            const fullArea = [...areaParts, pincode].filter(Boolean).join(', ');
-            document.getElementById('checkoutAddress').value = fullArea;
+            // Focus door field so user can type their flat/door number right away
+            document.getElementById('addrDoor').focus();
 
             btn.textContent = 'Location filled';
             btn.style.background = '#005c2e';
-            document.getElementById('checkoutLocationNote').textContent = 'Area filled. Please add your door / flat number at the start.';
+            document.getElementById('checkoutLocationNote').textContent = 'Area filled! Now enter your door / flat number above.';
             setCheckoutError('');
         } catch(e) {
             btn.disabled = false;
@@ -2959,7 +2982,12 @@ async function useMyLocation() {
 async function placeOrder() {
     const name = document.getElementById('checkoutName').value.trim();
     const phone = document.getElementById('checkoutPhone').value.trim();
-    const address = document.getElementById('checkoutAddress').value.trim();
+    const addrDoor    = document.getElementById('addrDoor').value.trim();
+    const addrStreet  = document.getElementById('addrStreet').value.trim();
+    const addrArea    = document.getElementById('addrArea').value.trim();
+    const addrCity    = document.getElementById('addrCity').value.trim();
+    const addrPincode = document.getElementById('addrPincode').value.trim();
+    const address = [addrDoor, addrStreet, addrArea, addrCity, addrPincode].filter(Boolean).join(', ');
     const referralInput = document.getElementById('referralCodeInput').value.trim().toUpperCase();
     const phoneDigits = phone.replace(/\D/g, '');
 
@@ -2972,7 +3000,10 @@ async function placeOrder() {
         setCheckoutError('Please enter a valid 10-digit mobile number (starting with 6, 7, 8 or 9).');
         return;
     }
-    if (address.length < 10) { setCheckoutError('Please enter your full delivery address including door number, street and area.'); return; }
+    if (!addrDoor)    { setCheckoutError('Please enter your door / flat number.'); return; }
+    if (!addrArea)    { setCheckoutError('Please enter your area / locality.'); return; }
+    if (!addrCity)    { setCheckoutError('Please enter your city.'); return; }
+    if (!addrPincode) { setCheckoutError('Please enter your pincode.'); return; }
     if (isUpi && !selectedUpiApp) { setCheckoutError('Please select a UPI app to pay with.'); return; }
     if (isRazorpay && typeof Razorpay === 'undefined') { setCheckoutError('Payment gateway not loaded. Please refresh the page and try again.'); return; }
 
@@ -2994,7 +3025,7 @@ async function placeOrder() {
     setCheckoutError('');
     localStorage.setItem('zafraan_customer_phone', phone);
     saveCustomerName(phoneDigits, name);
-    saveCustomerAddress(phoneDigits, address);
+    saveCustomerAddress(phoneDigits, { door: addrDoor, street: addrStreet, area: addrArea, city: addrCity, pincode: addrPincode });
 
     const totalCash = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
     const deliveryCharge = totalCash >= 100 ? 0 : 10;
