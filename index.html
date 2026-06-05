@@ -619,34 +619,73 @@
         }
 
         /* Category tabs */
+        /* ── Swiggy-style category cards ── */
         .category-tabs {
             display: flex;
-            gap: 12px;
-            margin-bottom: 50px;
-            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 36px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            padding-bottom: 6px;
         }
+        .category-tabs::-webkit-scrollbar { display: none; }
 
         .cat-tab {
-            padding: 10px 24px;
-            font-size: 11px;
-            font-weight: 500;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            border: 1px solid var(--border-color);
-            background: rgba(255,255,255,0.02);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            background: transparent;
+            border: none;
             cursor: pointer;
             font-family: 'Outfit', sans-serif;
-            color: var(--text-secondary);
-            transition: all 0.3s;
-            border-radius: 0px;
+            flex-shrink: 0;
+            padding: 0;
+            width: 72px;
         }
-
-        .cat-tab.active, .cat-tab:hover {
-            background: transparent;
+        .cat-img-wrap {
+            width: 68px;
+            height: 68px;
+            border-radius: 50%;
+            border: 2.5px solid rgba(255,255,255,0.1);
+            overflow: hidden;
+            background: var(--bg-card);
+            transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+        }
+        .cat-img-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        /* "All" quad-grid image */
+        .cat-img-all {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            width: 100%;
+            height: 100%;
+        }
+        .cat-img-all img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .cat-tab:hover .cat-img-wrap,
+        .cat-tab.active .cat-img-wrap {
             border-color: var(--neon-green);
-            color: var(--neon-green);
-            box-shadow: 0 0 10px var(--neon-green-glow);
+            box-shadow: 0 0 12px var(--neon-green-glow);
+            transform: scale(1.07);
         }
+        .cat-name {
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            text-align: center;
+            line-height: 1.3;
+            transition: color 0.2s;
+            max-width: 72px;
+        }
+        .cat-tab.active .cat-name,
+        .cat-tab:hover .cat-name { color: var(--neon-green); }
 
         /* Product Grid */
         .products-grid {
@@ -2508,13 +2547,42 @@ function getCatalogProductById(id) {
     return getCatalogProducts().find(p => p.id === id);
 }
 
+const categoryImages = {
+    'Fresh Prep':          './zafraan-images/01-peeled-garlic.png',
+    'Fresh Vegetables':    './zafraan-images/05-curry-leaves.png',
+    'Cut Vegetables':      './zafraan-images/03-chopped-onion.png',
+    'Spices & Seasonings': './zafraan-images/08-garlic-powder.png',
+    'Gourmet Mayonnaise':  './zafraan-images/15-mayonnaise.png',
+    'Roasted Makhana':     './zafraan-images/19-plain-makhana.png',
+    'Premium Combos':      './zafraan-images/23-pizza-combo.png',
+};
+
 function renderTabs() {
     const tabsEl = document.getElementById('categoryTabs');
     const availableCategories = ['All', ...new Set(getCatalogProducts().map(p => p.cat))];
     if (!availableCategories.includes(activeCategory)) activeCategory = 'All';
-    tabsEl.innerHTML = availableCategories.map(c => `
-        <button class="cat-tab ${c === activeCategory ? 'active' : ''}" onclick="setCategory('${c}')">${c}</button>
-    `).join('');
+
+    tabsEl.innerHTML = availableCategories.map(c => {
+        const isActive = c === activeCategory ? 'active' : '';
+        let imgHtml;
+        if (c === 'All') {
+            const imgs = [
+                './zafraan-images/01-peeled-garlic.png',
+                './zafraan-images/03-chopped-onion.png',
+                './zafraan-images/15-mayonnaise.png',
+                './zafraan-images/19-plain-makhana.png',
+            ];
+            imgHtml = `<div class="cat-img-all">${imgs.map(s => `<img src="${s}" alt="">`).join('')}</div>`;
+        } else {
+            const src = categoryImages[c] || './icon.svg';
+            imgHtml = `<img src="${src}" alt="${c}">`;
+        }
+        return `
+        <button class="cat-tab ${isActive}" onclick="setCategory('${c.replace(/'/g,"\\'")}')">
+            <div class="cat-img-wrap">${imgHtml}</div>
+            <span class="cat-name">${c}</span>
+        </button>`;
+    }).join('');
 }
 
 function setCategory(cat) {
