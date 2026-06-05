@@ -2150,12 +2150,7 @@
 
             <div class="modal-desc" id="modalDesc"></div>
 
-            <div class="modal-price-row">
-                <span class="modal-price-label">Total Price</span>
-                <span class="modal-price-val" id="modalPrice">₹0</span>
-            </div>
-
-            <button class="modal-btn" onclick="addToCart()">Add to Shopping Bag</button>
+            <button class="modal-btn" onclick="addToCart()">Add to Cart</button>
         </div>
     </div>
 </div>
@@ -2742,15 +2737,6 @@ function updateModalPrice() {
     const selectedSize = document.querySelector('input[name="size"]:checked')?.value;
     if (!p || !selectedSize) return;
 
-    const unitPrice = getSizePrice(p, selectedSize);
-    const totalPrice = unitPrice * currentQty;
-
-    const mrp = p.marketPrice && p.marketPrice > p.price ? p.marketPrice : null;
-    const mrpTotal = mrp ? Math.round(mrp / p.price * totalPrice) : null;
-    const discountPct = mrp ? Math.round((mrp - p.price) / mrp * 100) : 0;
-    document.getElementById('modalPrice').innerHTML = mrp
-        ? `<span style="font-size:13px;color:var(--text-secondary);text-decoration:line-through;margin-right:8px;">₹${mrpTotal}</span><span>₹${totalPrice}</span><span class="product-discount-badge" style="font-size:11px;padding:3px 8px;">${discountPct}% OFF</span>`
-        : `<span>₹${totalPrice}</span>`;
 }
 
 function closeModal() {
