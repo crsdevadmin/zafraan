@@ -1260,10 +1260,9 @@
                             <input type="checkbox" class="special-input" ${isSpecial ? 'checked' : ''}>
                             Today's Special
                         </label>
-                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-                            <input type="checkbox" class="out-of-stock-input" ${outOfStock ? 'checked' : ''}>
-                            Out of Stock
-                        </label>
+                        <div id="sr-${product.id}" style="font-size:12px;color:var(--text-muted);padding:4px 0;">
+                            ${stockQty > 0 ? `Stock set: ${stockQty}` : 'Unlimited'}
+                        </div>
                     </div>
                 `;
             }).join('');
@@ -1286,6 +1285,15 @@
             saveBtn.disabled = true;
             setMessage('Saving changes...');
 
+            // Compute today's sold quantities to auto-determine outOfStock
+            const _todayStart = new Date(); _todayStart.setHours(0,0,0,0);
+            const _soldToday = {};
+            ordersList.forEach(o => {
+                if (o.status === 'Cancelled') return;
+                if (new Date(o.createdAt) < _todayStart) return;
+                (o.items||[]).forEach(item => { _soldToday[item.name] = (_soldToday[item.name]||0)+(item.qty||1); });
+            });
+
             const batch = writeBatch(db);
             document.querySelectorAll('.product-row').forEach(row => {
                 const product = baseProducts.find(item => item.id === Number(row.dataset.id));
@@ -1296,7 +1304,8 @@
                 const stockQty = Number(row.querySelector('.stock-input').value) || 0;
                 const prepTime = row.querySelector('.prep-time-input').value.trim();
                 const isSpecial = row.querySelector('.special-input').checked;
-                const outOfStock = row.querySelector('.out-of-stock-input').checked;
+                // outOfStock auto-computed: true only when stock is set AND sold >= stock
+                const outOfStock = stockQty > 0 && (_soldToday[product.name] || 0) >= stockQty;
 
                 loadedSettings[String(product.id)] = {
                     name: product.name, cat: product.cat,
@@ -1320,6 +1329,40 @@
                 setMessage('Error saving catalog: ' + err.message, true);
             } finally {
                 saveBtn.disabled = false;
+            }
+        }
+
+        // Auto-write outOfStock flag to Firestore based on today's sold qty
+        async function autoUpdateOutOfStock() {
+            if (!currentUser || !db || !Object.keys(loadedSettings).length) return;
+            const todayStart = new Date(); todayStart.setHours(0,0,0,0);
+            const soldToday = {};
+            ordersList.forEach(o => {
+                if (o.status === 'Cancelled') return;
+                if (new Date(o.createdAt) < todayStart) return;
+                (o.items||[]).forEach(item => { soldToday[item.name] = (soldToday[item.name]||0)+(item.qty||1); });
+            });
+
+            const updates = [];
+            Object.entries(loadedSettings).forEach(([id, s]) => {
+                if (!s.stockQty || s.stockQty <= 0) return;
+                const sold = soldToday[s.name] || 0;
+                const shouldBeOOS = sold >= s.stockQty;
+                if (shouldBeOOS !== (s.outOfStock === true)) {
+                    updates.push({ id, shouldBeOOS });
+                }
+            });
+            if (!updates.length) return;
+
+            try {
+                const b = writeBatch(db);
+                updates.forEach(({ id, shouldBeOOS }) => {
+                    b.update(doc(db, 'productCatalog', id), { outOfStock: shouldBeOOS });
+                    if (loadedSettings[id]) loadedSettings[id].outOfStock = shouldBeOOS;
+                });
+                await b.commit();
+            } catch(e) {
+                console.warn('Auto OOS update failed:', e.message);
             }
         }
 
@@ -1370,6 +1413,7 @@
                 setOrdersMessage('');
                 renderOrders();
                 if (document.getElementById('panelReports') && document.getElementById('panelReports').style.display !== 'none') renderReports();
+                autoUpdateOutOfStock();
             }, err => {
                 setOrdersMessage('Error loading orders: ' + err.message, true);
             });
@@ -1424,11 +1468,6 @@
         }
 
         function updateStockAlerts() {
-            const outItems = Object.entries(loadedSettings)
-                .filter(([, s]) => s.outOfStock === true)
-                .map(([id, s]) => s.name || (baseProducts.find(p => String(p.id) === id) || {}).name || id);
-
-            // Compute today's sold qty per product
             const todayStart = new Date(); todayStart.setHours(0,0,0,0);
             const soldToday = {};
             ordersList.forEach(o => {
@@ -1439,29 +1478,39 @@
                 });
             });
 
-            // Find products where stockQty > 0 and sold >= stockQty (over-ordered)
-            const lowStock = [];
+            const depleted = [], low = [];
             Object.entries(loadedSettings).forEach(([id, s]) => {
                 if (!s.stockQty || s.stockQty <= 0) return;
                 const sold = soldToday[s.name] || 0;
-                const remaining = s.stockQty - sold;
-                const name = s.name || (baseProducts.find(p => String(p.id) === id) || {}).name || id;
-                if (remaining <= 0) lowStock.push(name + ' (out)');
-                else if (remaining <= 2) lowStock.push(name + ' (only ' + remaining + ' left)');
+                const remaining = Math.max(0, s.stockQty - sold);
+                const name = s.name || (baseProducts.find(p => String(p.id) === id)||{}).name || id;
+
+                // Update live remaining badge on product row
+                const srEl = document.getElementById('sr-' + id);
+                if (srEl) {
+                    if (remaining <= 0) {
+                        srEl.innerHTML = '<span style="color:#ff5252;font-weight:600;">⛔ Out of stock — update qty to restock</span>';
+                    } else if (remaining <= 2) {
+                        srEl.innerHTML = '<span style="color:#ffab40;font-weight:600;">⚠️ Only ' + remaining + ' left of ' + s.stockQty + '</span>';
+                    } else {
+                        srEl.innerHTML = '<span style="color:#00e676;">' + remaining + ' of ' + s.stockQty + ' remaining today</span>';
+                    }
+                }
+
+                if (remaining <= 0) depleted.push(name);
+                else if (remaining <= 2) low.push(name + ' (' + remaining + ' left)');
             });
 
-            const allAlerts = [...new Set([...outItems, ...lowStock])];
+            const allAlerts = [
+                ...depleted.map(n => n + ' — OUT OF STOCK'),
+                ...low
+            ];
             const banner = document.getElementById('stockAlertBanner');
             if (!banner) return;
             if (allAlerts.length === 0) { banner.style.display = 'none'; return; }
             banner.style.display = 'block';
-            banner.innerHTML = `<div class="stock-alert-banner">
-                <div class="alert-icon">⚠️</div>
-                <div class="alert-body">
-                    <div class="alert-title">Stock Alert — ${allAlerts.length} item(s) need attention</div>
-                    <div class="alert-items">${allAlerts.join(' · ')}</div>
-                </div>
-            </div>`;
+            const alertHtml = '<div class="stock-alert-banner"><div class="alert-icon">⚠️</div><div class="alert-body"><div class="alert-title">Stock Alert — update quantities to restock (' + allAlerts.length + ' item' + (allAlerts.length > 1 ? 's' : '') + ')</div><div class="alert-items">' + allAlerts.join(' · ') + '</div></div></div>';
+            banner.innerHTML = alertHtml;
         }
 
         // RENDER ORDERS TO SCREEN
