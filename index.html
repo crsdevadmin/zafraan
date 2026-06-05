@@ -619,73 +619,63 @@
         }
 
         /* Category tabs */
-        /* ── Swiggy-style category cards ── */
+        /* ── Swiggy-style category tabs (image + text, horizontal scroll) ── */
         .category-tabs {
             display: flex;
-            gap: 16px;
-            margin-bottom: 36px;
+            gap: 0;
+            margin-bottom: 32px;
             overflow-x: auto;
             scrollbar-width: none;
-            padding-bottom: 6px;
+            border-bottom: 1px solid var(--border-color);
         }
         .category-tabs::-webkit-scrollbar { display: none; }
 
         .cat-tab {
             display: flex;
-            flex-direction: column;
             align-items: center;
             gap: 8px;
             background: transparent;
             border: none;
+            border-bottom: 3px solid transparent;
+            padding: 10px 18px 10px 12px;
+            margin-bottom: -1px;
             cursor: pointer;
             font-family: 'Outfit', sans-serif;
-            flex-shrink: 0;
-            padding: 0;
-            width: 72px;
-        }
-        .cat-img-wrap {
-            width: 68px;
-            height: 68px;
-            border-radius: 50%;
-            border: 2.5px solid rgba(255,255,255,0.1);
-            overflow: hidden;
-            background: var(--bg-card);
-            transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
-        }
-        .cat-img-wrap img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        /* "All" quad-grid image */
-        .cat-img-all {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            width: 100%;
-            height: 100%;
-        }
-        .cat-img-all img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .cat-tab:hover .cat-img-wrap,
-        .cat-tab.active .cat-img-wrap {
-            border-color: var(--neon-green);
-            box-shadow: 0 0 12px var(--neon-green-glow);
-            transform: scale(1.07);
-        }
-        .cat-name {
-            font-size: 11px;
+            font-size: 13px;
             font-weight: 500;
             color: var(--text-secondary);
-            text-align: center;
-            line-height: 1.3;
-            transition: color 0.2s;
-            max-width: 72px;
+            flex-shrink: 0;
+            white-space: nowrap;
+            transition: color 0.2s, border-color 0.2s;
         }
-        .cat-tab.active .cat-name,
-        .cat-tab:hover .cat-name { color: var(--neon-green); }
+        .cat-tab img {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+        .cat-all-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .cat-all-grid img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 0;
+        }
+        .cat-tab:hover { color: var(--text-primary); }
+        .cat-tab.active {
+            color: var(--neon-green);
+            border-bottom-color: var(--neon-green);
+            font-weight: 600;
+        }
 
         /* Product Grid */
         .products-grid {
@@ -1450,15 +1440,19 @@
 
         /* ---- Min order notice ---- */
         .min-order-notice {
-            font-size: 12px;
-            color: var(--text-secondary);
-            margin-bottom: 16px;
-            padding: 8px 12px;
-            border-left: 2px solid var(--neon-green);
-            background: rgba(0,230,118,0.04);
             display: none;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--neon-green);
+            margin-bottom: 18px;
+            padding: 11px 16px;
+            background: rgba(0,230,118,0.06);
+            border: 1px solid rgba(0,230,118,0.18);
+            border-radius: 10px;
         }
-        .min-order-notice.active { display: block; }
+        .min-order-notice.active { display: flex; }
 
         .otp-btn {
             background: var(--neon-green);
@@ -2053,11 +2047,11 @@
 
 <!-- PRODUCTS -->
 <section class="products-section" id="products">
+    <div class="min-order-notice" id="minOrderNotice"></div>
+
     <div class="product-search-wrap">
         <input class="product-search" id="productSearch" type="text" placeholder="Search products..." oninput="renderProducts()">
     </div>
-
-    <div class="min-order-notice" id="minOrderNotice"></div>
 
     <div class="specials-section" id="specialsSection" style="display:none;">
         <div class="specials-label">Today's Special</div>
@@ -2572,15 +2566,13 @@ function renderTabs() {
                 './zafraan-images/15-mayonnaise.png',
                 './zafraan-images/19-plain-makhana.png',
             ];
-            imgHtml = `<div class="cat-img-all">${imgs.map(s => `<img src="${s}" alt="">`).join('')}</div>`;
+            imgHtml = `<div class="cat-all-grid">${imgs.map(s => `<img src="${s}" alt="">`).join('')}</div>`;
         } else {
             const src = categoryImages[c] || './icon.svg';
-            imgHtml = `<img src="${src}" alt="${c}">`;
+            imgHtml = `<img src="${src}" alt="">`;
         }
-        return `
-        <button class="cat-tab ${isActive}" onclick="setCategory('${c.replace(/'/g,"\\'")}')">
-            <div class="cat-img-wrap">${imgHtml}</div>
-            <span class="cat-name">${c}</span>
+        return `<button class="cat-tab ${isActive}" onclick="setCategory('${c.replace(/'/g,"\\'")}')">
+            ${imgHtml}${c}
         </button>`;
     }).join('');
 }
@@ -3476,7 +3468,7 @@ async function loadAdminCatalog() {
         }
         if (cfg.minOrder && cfg.minOrder > 0) {
             const notice = document.getElementById('minOrderNotice');
-            notice.textContent = `Minimum order ₹${cfg.minOrder} for delivery.`;
+            notice.innerHTML = `<span>🚚</span> Free delivery on orders ₹${cfg.minOrder} &amp; above &nbsp;·&nbsp; Min order ₹${cfg.minOrder}`;
             notice.classList.add('active');
         }
         if (cfg.referralDiscount && cfg.referralDiscount > 0) {
