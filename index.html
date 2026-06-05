@@ -789,6 +789,86 @@
             box-shadow: 0 0 10px var(--neon-green-glow);
         }
 
+        /* ── Inline ADD / qty control on product cards ── */
+        .product-add-btn {
+            border: 1.5px solid var(--neon-green);
+            color: var(--neon-green);
+            background: transparent;
+            padding: 5px 14px;
+            border-radius: 6px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: background 0.2s;
+            flex-shrink: 0;
+        }
+        .product-card:hover .product-add-btn { background: var(--neon-green-glow); }
+        .product-cart-qty {
+            display: none;
+            align-items: center;
+            background: var(--neon-green);
+            border-radius: 6px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .pq-btn {
+            background: none;
+            border: none;
+            color: #000;
+            font-size: 17px;
+            font-weight: 700;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+        .pq-btn:hover { background: rgba(0,0,0,0.12); }
+        .pq-val {
+            font-size: 13px;
+            font-weight: 700;
+            color: #000;
+            min-width: 18px;
+            text-align: center;
+        }
+
+        /* ── View Cart sticky bar ── */
+        #viewCartBar {
+            display: none;
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            padding: 12px 16px 20px;
+            background: linear-gradient(transparent, rgba(5,5,5,0.95) 40%);
+            z-index: 150;
+            pointer-events: none;
+        }
+        .view-cart-btn {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            background: var(--neon-green);
+            color: #000;
+            border: none;
+            border-radius: 12px;
+            padding: 14px 20px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            letter-spacing: 0.3px;
+            box-shadow: 0 4px 24px rgba(0,230,118,0.4);
+            pointer-events: all;
+        }
+        .view-cart-btn:hover { opacity: 0.9; }
+        .vcb-arrow { font-size: 17px; }
+
         /* ---- ABOUT ---- */
         .about {
             background: var(--bg-secondary);
@@ -2489,7 +2569,7 @@ function buildProductCard(p, isSpecialCard = false) {
     const clickHandler = p.outOfStock ? '' : `onclick="openModal(${p.id})"`;
 
     return `
-    <div class="product-card${outOfStockClass}${specialClass}" ${clickHandler}>
+    <div class="product-card${outOfStockClass}${specialClass}" id="pc-${p.id}" ${clickHandler}>
         <div class="product-img-wrap">
             <div class="product-badge">${p.cat}</div>
             <img src="${productImages[p.name] || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=800&q=80'}"
@@ -2511,7 +2591,13 @@ function buildProductCard(p, isSpecialCard = false) {
                         }
                     </span>
                 </div>
-                ${p.outOfStock ? '' : '<div class="product-arrow">→</div>'}
+                ${p.outOfStock ? '' : `
+                <button class="product-add-btn" id="pcadd-${p.id}" onclick="event.stopPropagation();openModal(${p.id})">ADD</button>
+                <div class="product-cart-qty" id="pcqty-${p.id}">
+                    <button class="pq-btn" onclick="event.stopPropagation();cardDecrement(${p.id})">−</button>
+                    <span class="pq-val" id="pcqtyval-${p.id}">0</span>
+                    <button class="pq-btn" onclick="event.stopPropagation();openModal(${p.id})">+</button>
+                </div>`}
             </div>
         </div>
     </div>`;
@@ -2615,8 +2701,11 @@ function closeModal() {
 let cart = JSON.parse(localStorage.getItem('zafraan_cart')) || [];
 
 function toggleCart() {
-    document.getElementById('cartDrawer').classList.toggle('open');
+    const isOpen = document.getElementById('cartDrawer').classList.toggle('open');
     document.getElementById('cartOverlay').classList.toggle('open');
+    // Hide the View Cart bar while drawer is open so they don't overlap
+    const vcb = document.getElementById('viewCartBar');
+    if (vcb) vcb.style.visibility = isOpen ? 'hidden' : 'visible';
     renderCart();
 }
 
@@ -2659,9 +2748,51 @@ function saveCart() {
 
 function updateBadge() {
     const count = cart.reduce((acc, item) => acc + item.qty, 0);
+    const total = cart.reduce((acc, item) => acc + item.qty * item.price, 0);
+
+    // Nav badge
     const badge = document.getElementById('cartBadge');
     badge.innerText = count;
     badge.style.display = count > 0 ? 'flex' : 'none';
+
+    // View Cart sticky bar
+    const vcb = document.getElementById('viewCartBar');
+    if (vcb) {
+        vcb.style.display = count > 0 ? 'block' : 'none';
+        vcb.style.visibility = 'visible';
+        const el = document.getElementById('vcbCount');
+        const et = document.getElementById('vcbTotal');
+        if (el) el.textContent = count + (count === 1 ? ' item' : ' items');
+        if (et) et.textContent = '₹' + total;
+    }
+
+    // Reset all product card add/qty controls
+    document.querySelectorAll('.product-add-btn').forEach(el => { el.style.display = ''; });
+    document.querySelectorAll('.product-cart-qty').forEach(el => { el.style.display = 'none'; });
+
+    // Show qty controls for products in cart
+    const qtyById = {};
+    cart.forEach(item => { qtyById[item.id] = (qtyById[item.id] || 0) + item.qty; });
+    Object.entries(qtyById).forEach(([id, qty]) => {
+        const addBtn  = document.getElementById('pcadd-' + id);
+        const qtyWrap = document.getElementById('pcqty-' + id);
+        const qtyVal  = document.getElementById('pcqtyval-' + id);
+        if (addBtn)  addBtn.style.display  = 'none';
+        if (qtyWrap) qtyWrap.style.display = 'flex';
+        if (qtyVal)  qtyVal.textContent    = qty;
+    });
+}
+
+function cardDecrement(productId) {
+    const entries = cart.filter(i => i.id === productId);
+    if (!entries.length) return;
+    const last = entries[entries.length - 1];
+    if (last.qty > 1) {
+        last.qty--;
+    } else {
+        cart = cart.filter(i => !(i.id === productId && i.size === last.size));
+    }
+    saveCart();
 }
 
 function updateCartQty(index, delta) {
@@ -3641,5 +3772,14 @@ window.installApp = async function() {
 </script>
 
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<!-- VIEW CART STICKY BAR -->
+<div id="viewCartBar">
+    <button class="view-cart-btn" onclick="toggleCart()">
+        <span id="vcbCount">0 items</span>
+        <span>View Cart</span>
+        <span style="display:flex;align-items:center;gap:6px;"><span id="vcbTotal">₹0</span><span class="vcb-arrow">→</span></span>
+    </button>
+</div>
 </body>
 </html>
