@@ -152,24 +152,6 @@
             gap: 24px;
         }
 
-        .install-btn {
-            display: none;
-            align-items: center;
-            gap: 6px;
-            padding: 7px 14px;
-            background: var(--neon-green);
-            color: #000;
-            border: none;
-            border-radius: 8px;
-            font-family: 'Outfit', sans-serif;
-            font-size: 12px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
-        .install-btn:hover { opacity: 0.85; }
-        .install-btn.visible { display: flex; }
 
 
 
@@ -1772,6 +1754,18 @@
 </head>
 <body>
 
+<!-- PWA INSTALL BANNER -->
+<div id="installBanner" style="display:none;align-items:center;justify-content:space-between;gap:12px;background:#00e676;color:#000;padding:10px 20px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;position:sticky;top:0;z-index:200;">
+    <div style="display:flex;align-items:center;gap:8px;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Add ZAFRAAN to your home screen for faster ordering!
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+        <button onclick="installApp()" style="background:#000;color:#00e676;border:none;padding:6px 14px;border-radius:6px;font-family:'Outfit',sans-serif;font-size:12px;font-weight:700;cursor:pointer;letter-spacing:0.5px;">Install</button>
+        <button onclick="dismissInstallBanner()" style="background:none;border:none;color:#000;font-size:18px;line-height:1;cursor:pointer;padding:0 2px;" aria-label="Dismiss">×</button>
+    </div>
+</div>
+
 <!-- NAV -->
 <nav>
     <div class="nav-logo">
@@ -1804,10 +1798,6 @@
         <li><a href="#contact">Contact</a></li>
     </ul>
     <div class="nav-actions">
-        <button class="install-btn" id="installBtn" onclick="installApp()">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Install App
-        </button>
         <button class="my-orders-btn" onclick="openOrderHistory()">My Orders</button>
         <button class="cart-toggle" onclick="toggleCart()">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
@@ -3608,20 +3598,34 @@ if ('serviceWorker' in navigator) {
     });
 }
 
-// ---- PWA Install Prompt ----
+// ---- PWA Install Banner ----
 let _installEvent = null;
+
+function _hideBanner() {
+    const b = document.getElementById('installBanner');
+    if (b) b.style.display = 'none';
+}
+function _showBanner() {
+    if (localStorage.getItem('zafraan_install_dismissed')) return;
+    const b = document.getElementById('installBanner');
+    if (b) b.style.display = 'flex';
+}
+
+window.dismissInstallBanner = function() {
+    localStorage.setItem('zafraan_install_dismissed', '1');
+    _hideBanner();
+};
 
 window.addEventListener('beforeinstallprompt', e => {
     e.preventDefault();
     _installEvent = e;
-    const btn = document.getElementById('installBtn');
-    if (btn) btn.classList.add('visible');
+    _showBanner();
 });
 
 window.addEventListener('appinstalled', () => {
     _installEvent = null;
-    const btn = document.getElementById('installBtn');
-    if (btn) btn.classList.remove('visible');
+    localStorage.setItem('zafraan_install_dismissed', '1');
+    _hideBanner();
 });
 
 window.installApp = async function() {
@@ -3630,8 +3634,8 @@ window.installApp = async function() {
     const { outcome } = await _installEvent.userChoice;
     if (outcome === 'accepted') {
         _installEvent = null;
-        const btn = document.getElementById('installBtn');
-        if (btn) btn.classList.remove('visible');
+        localStorage.setItem('zafraan_install_dismissed', '1');
+        _hideBanner();
     }
 };
 </script>
