@@ -152,6 +152,25 @@
             gap: 24px;
         }
 
+        .install-btn {
+            display: none;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 14px;
+            background: var(--neon-green);
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .install-btn:hover { opacity: 0.85; }
+        .install-btn.visible { display: flex; }
+
 
 
         .cart-toggle {
@@ -1785,6 +1804,10 @@
         <li><a href="#contact">Contact</a></li>
     </ul>
     <div class="nav-actions">
+        <button class="install-btn" id="installBtn" onclick="installApp()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Install App
+        </button>
         <button class="my-orders-btn" onclick="openOrderHistory()">My Orders</button>
         <button class="cart-toggle" onclick="toggleCart()">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
@@ -3575,6 +3598,33 @@ if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('./sw.js').catch(() => {});
     });
 }
+
+// ---- PWA Install Prompt ----
+let _installEvent = null;
+
+window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    _installEvent = e;
+    const btn = document.getElementById('installBtn');
+    if (btn) btn.classList.add('visible');
+});
+
+window.addEventListener('appinstalled', () => {
+    _installEvent = null;
+    const btn = document.getElementById('installBtn');
+    if (btn) btn.classList.remove('visible');
+});
+
+window.installApp = async function() {
+    if (!_installEvent) return;
+    _installEvent.prompt();
+    const { outcome } = await _installEvent.userChoice;
+    if (outcome === 'accepted') {
+        _installEvent = null;
+        const btn = document.getElementById('installBtn');
+        if (btn) btn.classList.remove('visible');
+    }
+};
 </script>
 
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>

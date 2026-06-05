@@ -1,4 +1,4 @@
-const CACHE = 'zafraan-v10';
+const CACHE = 'zafraan-v11';
 
 const PRECACHE = [
   './',
@@ -6,6 +6,8 @@ const PRECACHE = [
   './firebase-config.js',
   './manifest.json',
   './icon.svg',
+  './icon-192.png',
+  './icon-512.png',
   './zafraan-images/01-peeled-garlic.png',
   './zafraan-images/02-peeled-small-onion.png',
   './zafraan-images/02-peeled-ginger.png',
