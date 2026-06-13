@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git commit -m ' *)",
+      "Bash(git commit *)",
+      "PowerShell(\\(Get-Content \"c:\\\\Users\\\\mjaff\\\\Downloads\\\\zafraan-complete\\\\index.html\" | Measure-Object -Line\\).Lines)",
+      "PowerShell($lines = Get-Content \"c:\\\\Users\\\\mjaff\\\\Downloads\\\\zafraan-complete\\\\index.html\"; $total = $lines.Count; $lines[\\($total-20\\)..\\($total-1\\)] | ForEach-Object { $_ })",
+      "PowerShell(\\(Get-Content \"c:\\\\Users\\\\mjaff\\\\Downloads\\\\zafraan-complete\\\\admin.html\" | Measure-Object -Line\\).Lines)",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\mjaff\\\\Downloads\\\\zafraan-complete\" -Depth 2)",
+      "Bash(Select-Object -Property FullName, PSIsContainer)",
+      "Bash(Format-List)"
+    ]
+  }
+}

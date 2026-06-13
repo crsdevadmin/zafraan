@@ -542,7 +542,7 @@
             ).join('');
             const btn = isPending
                 ? `<button class="btn-action btn-dispatch" onclick="dispatchOrder('${s(o.orderId)}',this)">Accept &amp; Dispatch</button>`
-                : `<button class="btn-action btn-deliver"  onclick="deliverOrder('${s(o.orderId)}',this)">Mark Delivered</button>`;
+                : `<button class="btn-action btn-deliver"  onclick="promptDeliverOtp('${s(o.orderId)}',this)">Mark Delivered</button>`;
             return `
             <div class="order-card${o._new ? ' new' : ''}" id="oc-${s(o.orderId)}">
                 <div class="card-top">
@@ -596,17 +596,52 @@
         }
     };
 
-    window.deliverOrder = async function(orderId, btn) {
+    // Step 1 — ask the partner to enter the customer's OTP before delivering
+    window.promptDeliverOtp = function(orderId, btn) {
+        const order = allOrders.find(o => o.orderId === orderId);
+        // Legacy orders without an OTP can be delivered directly
+        if (!order || !order.deliveryOtp) { window.deliverOrder(orderId, btn, true); return; }
+        const wrap = btn.parentNode;
+        wrap.innerHTML = `
+            <div style="display:flex;flex-direction:column;gap:8px;width:100%;">
+                <label style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--text-secondary,#888);">Enter customer's 4-digit OTP</label>
+                <div style="display:flex;gap:8px;">
+                    <input id="otp-${s(orderId)}" type="tel" inputmode="numeric" maxlength="4" placeholder="••••"
+                        style="flex:1;min-width:0;background:#111;border:1px solid rgba(255,255,255,0.2);color:#fff;padding:10px 12px;font-family:inherit;font-size:18px;letter-spacing:6px;text-align:center;border-radius:8px;">
+                    <button class="btn-action btn-deliver" style="white-space:nowrap;" onclick="verifyAndDeliver('${s(orderId)}',this)">Verify</button>
+                </div>
+                <div id="otpErr-${s(orderId)}" style="color:var(--red,#ff5252);font-size:12px;min-height:14px;"></div>
+            </div>`;
+        const inp = document.getElementById('otp-' + orderId);
+        if (inp) inp.focus();
+    };
+
+    // Step 2 — validate the OTP, then mark delivered
+    window.verifyAndDeliver = function(orderId, btn) {
+        const order = allOrders.find(o => o.orderId === orderId);
+        const entered = (document.getElementById('otp-' + orderId) || {}).value || '';
+        const errEl = document.getElementById('otpErr-' + orderId);
+        if (entered.replace(/\D/g, '') !== String(order.deliveryOtp)) {
+            if (errEl) errEl.textContent = 'Incorrect OTP. Ask the customer for the code shown in their order.';
+            return;
+        }
+        window.deliverOrder(orderId, btn, true);
+    };
+
+    window.deliverOrder = async function(orderId, btn, otpVerified) {
         btn.disabled = true; btn.textContent = 'Marking…';
         try {
             await updateDoc(doc(db, 'orders', orderId), {
                 status: 'Delivered',
+                otpVerified: !!otpVerified,
+                deliveredAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
                 updatedBy: currentUser.email
             });
+            showStatus('Order ' + orderId + ' marked delivered.');
         } catch (e) {
             showStatus('Error: ' + e.message, true);
-            btn.disabled = false; btn.textContent = 'Mark Delivered';
+            btn.disabled = false; btn.textContent = 'Verify';
         }
     };
 

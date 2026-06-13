@@ -1863,9 +1863,184 @@
             .pillar { border-right: none; border-bottom: 1px solid var(--border-color); }
             .pillar:last-child { border-bottom: none; }
         }
+
+        /* ---- AUTH / LOGIN GATE ---- */
+        #authGate {
+            position: fixed; inset: 0; z-index: 5000;
+            background: var(--bg-primary);
+            display: flex; align-items: center; justify-content: center;
+            padding: 24px; overflow-y: auto;
+        }
+        #authGate.hidden { display: none; }
+        .auth-card {
+            width: 100%; max-width: 400px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 14px; padding: 32px 26px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+        }
+        .auth-logo-name { font-family: 'Cormorant Garamond', serif; font-size: 30px; letter-spacing: 6px; color: var(--neon-green); text-align: center; }
+        .auth-sub { text-align: center; color: var(--text-secondary); font-size: 12px; letter-spacing: 1px; margin-bottom: 24px; text-transform: uppercase; }
+        .auth-tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+        .auth-tab { flex: 1; background: none; border: 1px solid var(--border-color); color: var(--text-secondary); padding: 10px; font-family: inherit; font-size: 13px; letter-spacing: 1px; cursor: pointer; border-radius: 8px; text-transform: uppercase; }
+        .auth-tab.active { border-color: var(--neon-green); color: var(--neon-green); background: rgba(0,230,118,0.06); }
+        .auth-field { margin-bottom: 14px; }
+        .auth-field label { display: block; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 6px; }
+        .auth-field input { width: 100%; box-sizing: border-box; background: #111; border: 1px solid rgba(255,255,255,0.12); color: #fff; padding: 12px 14px; font-family: inherit; font-size: 15px; border-radius: 8px; }
+        .auth-field input:focus { outline: none; border-color: var(--neon-green); }
+        .auth-btn { width: 100%; background: var(--neon-green); color: #000; border: none; padding: 14px; font-family: inherit; font-size: 14px; font-weight: 700; letter-spacing: 1px; cursor: pointer; border-radius: 8px; text-transform: uppercase; }
+        .auth-btn:disabled { opacity: 0.6; cursor: default; }
+        .auth-google { width: 100%; background: #fff; color: #1a1a1a; border: none; padding: 13px; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .auth-divider { display: flex; align-items: center; gap: 12px; color: var(--text-secondary); font-size: 11px; margin: 18px 0; }
+        .auth-divider::before, .auth-divider::after { content: ''; flex: 1; height: 1px; background: var(--border-color); }
+        .auth-error { color: #ff5252; font-size: 13px; margin-top: 12px; min-height: 16px; text-align: center; }
+        .auth-note { color: var(--text-secondary); font-size: 11px; text-align: center; margin-top: 14px; line-height: 1.5; }
+
+        /* ---- ACCOUNT / ADDRESSES ---- */
+        .account-stat { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; background: #141414; border: 1px solid var(--border-color); border-radius: 10px; margin-bottom: 12px; }
+        .account-stat .label { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-secondary); }
+        .account-stat .val { font-size: 18px; font-weight: 700; color: var(--neon-green); }
+        .addr-card { border: 1px solid var(--border-color); border-radius: 10px; padding: 14px; margin-bottom: 10px; cursor: pointer; position: relative; transition: border-color .15s; }
+        .addr-card.selected { border-color: var(--neon-green); background: rgba(0,230,118,0.05); }
+        .addr-card .addr-label { font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--neon-green); margin-bottom: 4px; }
+        .addr-card .addr-text { font-size: 13px; color: var(--text-primary); line-height: 1.5; padding-right: 60px; }
+        .addr-card .addr-actions { position: absolute; bottom: 10px; right: 10px; display: flex; gap: 8px; }
+        .addr-card .addr-actions button { background: none; border: 1px solid var(--border-color); color: var(--text-secondary); cursor: pointer; font-size: 11px; padding: 4px 8px; border-radius: 6px; }
+        .addr-card .addr-radio { position: absolute; top: 14px; right: 12px; width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--text-secondary); }
+        .addr-card.selected .addr-radio { border-color: var(--neon-green); background: radial-gradient(var(--neon-green) 40%, transparent 45%); }
+        .coins-redeem-box { background: #141414; border: 1px solid var(--border-color); border-radius: 10px; padding: 14px; margin: 14px 0; }
+        .coins-redeem-box .crb-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; font-size:13px; }
+        .coins-redeem-box .crb-row { display: flex; align-items: center; gap: 10px; }
+        .coins-redeem-box input { flex: 1; background: #111; border: 1px solid rgba(255,255,255,0.12); color: #fff; padding: 10px 12px; font-family: inherit; font-size: 14px; border-radius: 8px; box-sizing: border-box; min-width:0; }
+        .coins-redeem-box .crb-max { background: transparent; border: 1px solid var(--neon-green); color: var(--neon-green); padding: 10px 14px; font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer; border-radius: 8px; white-space: nowrap; }
+        .otp-display { background: linear-gradient(135deg, rgba(0,230,118,0.12), rgba(0,176,255,0.08)); border: 1px dashed var(--neon-green); border-radius: 12px; padding: 18px; text-align: center; margin: 16px 0; }
+        .otp-display .otp-title { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--neon-green); margin-bottom: 8px; }
+        .otp-display .otp-code { font-size: 38px; font-weight: 700; letter-spacing: 12px; color: #fff; padding-left: 12px; }
+        .otp-display .otp-desc { font-size: 11px; color: var(--text-secondary); margin-top: 8px; }
+        .addr-confirm-banner { background: rgba(0,230,118,0.06); border: 1px solid rgba(0,230,118,0.25); border-radius: 8px; padding: 12px 14px; font-size: 13px; color: var(--text-primary); margin-bottom: 14px; line-height: 1.5; }
     </style>
 </head>
 <body>
+
+<!-- ===== LOGIN / SIGNUP GATE ===== -->
+<div id="authGate">
+    <div class="auth-card">
+        <svg class="auth-flower" viewBox="0 0 80 90" xmlns="http://www.w3.org/2000/svg" style="width:64px;height:72px;display:block;margin:0 auto 6px;">
+            <g fill="none" stroke="var(--neon-green)" stroke-width="1.2">
+                <path d="M40 45 C 32 38, 28 28, 34 18 C 38 12, 42 12, 46 18 C 52 28, 48 38, 40 45" stroke-width="1" fill="rgba(0, 230, 118, 0.05)"/>
+                <path d="M40 45 C 26 42, 18 34, 20 22 C 22 16, 28 14, 32 20 C 38 30, 36 40, 40 45" stroke-width="1" fill="rgba(0, 230, 118, 0.05)"/>
+                <path d="M40 45 C 52 42, 60 34, 58 22 C 56 16, 50 14, 48 20 C 42 30, 42 40, 40 45" stroke-width="1" fill="rgba(0, 230, 118, 0.05)"/>
+                <line x1="40" y1="44" x2="36" y2="28" stroke="var(--gold)" stroke-width="0.8"/>
+                <line x1="40" y1="44" x2="40" y2="26" stroke="var(--gold)" stroke-width="0.8"/>
+                <line x1="40" y1="44" x2="44" y2="28" stroke="var(--gold)" stroke-width="0.8"/>
+                <circle cx="36" cy="27" r="1.5" fill="var(--gold)"/>
+                <circle cx="40" cy="25" r="1.5" fill="var(--gold)"/>
+                <circle cx="44" cy="27" r="1.5" fill="var(--gold)"/>
+                <path d="M40 45 Q 42 60, 38 78" stroke-width="1"/>
+            </g>
+        </svg>
+        <div class="auth-logo-name">ZAFRAAN</div>
+        <div class="auth-sub">Fresh · Pure · Ready</div>
+
+        <div class="auth-tabs">
+            <button type="button" class="auth-tab active" id="authTabLogin" onclick="switchAuthMode('login')">Login</button>
+            <button type="button" class="auth-tab" id="authTabSignup" onclick="switchAuthMode('signup')">Sign Up</button>
+        </div>
+
+        <button type="button" class="auth-google" id="googleSignInBtn">
+            <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.5 6.5 29.5 4.5 24 4.5 13.2 4.5 4.5 13.2 4.5 24S13.2 43.5 24 43.5 43.5 34.8 43.5 24c0-1.2-.1-2.3-.3-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.5 6.5 29.5 4.5 24 4.5 16.3 4.5 9.7 8.9 6.3 14.7z"/><path fill="#4CAF50" d="M24 43.5c5.4 0 10.3-2.1 14-5.4l-6.5-5.5c-2 1.5-4.6 2.4-7.5 2.4-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.6 39 16.2 43.5 24 43.5z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.1-4.1 5.5l6.5 5.5C42.6 35.6 43.5 30.2 43.5 24c0-1.2-.1-2.3.1-3.5z"/></svg>
+            Continue with Google
+        </button>
+
+        <div class="auth-divider">OR</div>
+
+        <!-- Login fields -->
+        <div id="authLoginFields">
+            <div class="auth-field"><label>Email</label><input type="email" id="loginEmail" autocomplete="email" placeholder="you@example.com"></div>
+            <div class="auth-field"><label>Password</label><input type="password" id="loginPassword" autocomplete="current-password" placeholder="Your password"></div>
+            <button type="button" class="auth-btn" id="loginEmailBtn">Login</button>
+        </div>
+
+        <!-- Signup fields -->
+        <div id="authSignupFields" style="display:none;">
+            <div class="auth-field"><label>Full Name</label><input type="text" id="signupName" autocomplete="name" placeholder="Your full name"></div>
+            <div class="auth-field"><label>Mobile Number</label><input type="tel" id="signupPhone" inputmode="numeric" maxlength="10" autocomplete="tel" placeholder="10-digit mobile number"></div>
+            <div class="auth-field"><label>Email</label><input type="email" id="signupEmail" autocomplete="email" placeholder="you@example.com"></div>
+            <div class="auth-field"><label>Password</label><input type="password" id="signupPassword" autocomplete="new-password" placeholder="Create a password (min 6 chars)"></div>
+            <div class="auth-field"><label>Referral Code <span style="text-transform:none;letter-spacing:0;">(optional)</span></label><input type="text" id="signupReferral" placeholder="Friend's code" style="text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()"></div>
+            <button type="button" class="auth-btn" id="signupEmailBtn">Create Account</button>
+        </div>
+
+        <div class="auth-error" id="authError"></div>
+        <div class="auth-note">Sign in to browse and order. By continuing you agree to ZAFRAAN's terms.</div>
+    </div>
+</div>
+
+<!-- ===== PHONE CAPTURE (after Google login) ===== -->
+<div id="phoneGate" style="position:fixed;inset:0;z-index:5001;background:var(--bg-primary);display:none;align-items:center;justify-content:center;padding:24px;overflow-y:auto;">
+    <div class="auth-card">
+        <svg viewBox="0 0 80 90" xmlns="http://www.w3.org/2000/svg" style="width:56px;height:63px;display:block;margin:0 auto 6px;">
+            <g fill="none" stroke="var(--neon-green)" stroke-width="1.2">
+                <path d="M40 45 C 32 38, 28 28, 34 18 C 38 12, 42 12, 46 18 C 52 28, 48 38, 40 45" stroke-width="1" fill="rgba(0, 230, 118, 0.05)"/>
+                <path d="M40 45 C 26 42, 18 34, 20 22 C 22 16, 28 14, 32 20 C 38 30, 36 40, 40 45" stroke-width="1" fill="rgba(0, 230, 118, 0.05)"/>
+                <path d="M40 45 C 52 42, 60 34, 58 22 C 56 16, 50 14, 48 20 C 42 30, 42 40, 40 45" stroke-width="1" fill="rgba(0, 230, 118, 0.05)"/>
+                <path d="M40 45 Q 42 60, 38 78" stroke-width="1"/>
+            </g>
+        </svg>
+        <div class="auth-logo-name">Almost there</div>
+        <div class="auth-sub">Just one more detail</div>
+        <div class="auth-field"><label>Full Name</label><input type="text" id="pgName" autocomplete="name" placeholder="Your full name"></div>
+        <div class="auth-field"><label>Mobile Number</label><input type="tel" id="pgPhone" inputmode="numeric" maxlength="10" autocomplete="tel" placeholder="10-digit mobile number"></div>
+        <div class="auth-field"><label>Referral Code <span style="text-transform:none;letter-spacing:0;">(optional)</span></label><input type="text" id="pgReferral" placeholder="Friend's code" style="text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()"></div>
+        <button type="button" class="auth-btn" id="pgSaveBtn">Continue</button>
+        <div class="auth-error" id="pgError"></div>
+    </div>
+</div>
+
+<!-- ===== ACCOUNT MODAL ===== -->
+<div class="modal-overlay" id="accountModalOverlay" onclick="closeAccount()" style="display:none;">
+    <div class="modal-box" style="max-width:460px;" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <div class="modal-eyebrow">Zafraan</div>
+            <div class="modal-title" style="font-size:22px;">My Account</div>
+            <button class="modal-close" onclick="closeAccount()">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="account-stat"><span class="label">Signed in as</span><span class="val" id="acctName" style="color:#fff;font-size:14px;"></span></div>
+            <div class="account-stat"><span class="label">ZAFRAAN Coins</span><span class="val" id="acctCoins">🪙 0</span></div>
+            <div class="account-stat" style="cursor:pointer;" onclick="shareReferralCode(zafProfile && zafProfile.myReferralCode)">
+                <span class="label">Your Referral Code</span><span class="val" id="acctRefCode" style="letter-spacing:2px;">—</span>
+            </div>
+            <div style="font-size:11px;color:var(--text-secondary);margin:-4px 0 18px;line-height:1.5;">Share your code — friends get coins when they sign up, and so do you. Tap the code above to share.</div>
+
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                <div style="font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--text-secondary);">Saved Addresses</div>
+                <button type="button" onclick="openAddressForm()" style="background:transparent;border:1px solid var(--neon-green);color:var(--neon-green);padding:6px 12px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;border-radius:6px;">+ Add</button>
+            </div>
+            <div id="acctAddressList"></div>
+
+            <!-- inline address form -->
+            <div id="addressFormBox" style="display:none;border:1px solid var(--border-color);border-radius:10px;padding:14px;margin-top:10px;">
+                <input type="hidden" id="addrFormIndex" value="-1">
+                <div class="auth-field"><label>Label (e.g. Home, Office)</label><input type="text" id="afLabel" placeholder="Home"></div>
+                <input id="afDoor"  type="text" placeholder="Door / Flat / Building No *" style="width:100%;box-sizing:border-box;background:#111;border:1px solid rgba(255,255,255,0.12);color:#fff;padding:11px 13px;font-family:inherit;font-size:14px;border-radius:8px;margin-bottom:8px;">
+                <input id="afStreet" type="text" placeholder="Street / Landmark" style="width:100%;box-sizing:border-box;background:#111;border:1px solid rgba(255,255,255,0.12);color:#fff;padding:11px 13px;font-family:inherit;font-size:14px;border-radius:8px;margin-bottom:8px;">
+                <input id="afArea"   type="text" placeholder="Area / Locality *" style="width:100%;box-sizing:border-box;background:#111;border:1px solid rgba(255,255,255,0.12);color:#fff;padding:11px 13px;font-family:inherit;font-size:14px;border-radius:8px;margin-bottom:8px;">
+                <div style="display:flex;gap:8px;">
+                    <input id="afCity"    type="text" placeholder="City *" style="flex:1;min-width:0;box-sizing:border-box;background:#111;border:1px solid rgba(255,255,255,0.12);color:#fff;padding:11px 13px;font-family:inherit;font-size:14px;border-radius:8px;">
+                    <input id="afPincode" type="text" inputmode="numeric" maxlength="6" placeholder="Pincode *" style="flex:1;min-width:0;box-sizing:border-box;background:#111;border:1px solid rgba(255,255,255,0.12);color:#fff;padding:11px 13px;font-family:inherit;font-size:14px;border-radius:8px;">
+                </div>
+                <div style="display:flex;gap:8px;margin-top:12px;">
+                    <button type="button" class="auth-btn" style="flex:1;" id="afSaveBtn" onclick="saveAddressFromForm()">Save Address</button>
+                    <button type="button" onclick="closeAddressForm()" style="background:none;border:1px solid var(--border-color);color:var(--text-secondary);padding:0 18px;font-family:inherit;font-size:13px;cursor:pointer;border-radius:8px;">Cancel</button>
+                </div>
+                <div id="afError" style="color:#ff5252;font-size:12px;margin-top:8px;"></div>
+            </div>
+
+            <button type="button" onclick="zafLogout()" style="width:100%;background:none;border:1px solid var(--border-color);color:var(--text-secondary);padding:12px;font-family:inherit;font-size:13px;cursor:pointer;border-radius:8px;margin-top:20px;">Log Out</button>
+        </div>
+    </div>
+</div>
 
 <!-- PWA INSTALL BANNER -->
 <div id="installBanner" style="display:none;align-items:center;justify-content:space-between;gap:12px;background:#00e676;color:#000;padding:10px 20px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;position:sticky;top:0;z-index:200;">
@@ -1911,6 +2086,7 @@
         <li><a href="#contact">Contact</a></li>
     </ul>
     <div class="nav-actions">
+        <button class="my-orders-btn" onclick="openAccount()">My Account</button>
         <button class="my-orders-btn" onclick="openOrderHistory()">My Orders</button>
         <button class="cart-toggle" onclick="toggleCart()">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
@@ -2264,31 +2440,52 @@
             <div class="checkout-form">
                 <div class="checkout-field">
                     <label for="checkoutName">Full Name</label>
-                    <input id="checkoutName" type="text" autocomplete="name" placeholder="Enter your full name">
+                    <input id="checkoutName" type="text" autocomplete="name" placeholder="Your name" readonly style="opacity:.85;">
                 </div>
                 <div class="checkout-field">
                     <label for="checkoutPhone">Mobile Number</label>
-                    <input id="checkoutPhone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="10-digit mobile number" oninput="autofillFromPhone()">
+                    <input id="checkoutPhone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="Your mobile" readonly style="opacity:.85;">
                 </div>
+
+                <!-- Saved address selector -->
                 <div class="checkout-field">
-                    <label>Delivery Address</label>
+                    <label>Delivery Address — pick one &amp; confirm</label>
+                    <div id="checkoutAddressList"></div>
+                    <button type="button" id="toggleNewAddrBtn" onclick="toggleNewAddress()" style="width:100%;background:transparent;border:1px dashed var(--neon-green);color:var(--neon-green);padding:11px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;border-radius:8px;margin-top:6px;">+ Deliver to a new address</button>
+                </div>
+
+                <!-- New / manual address block -->
+                <div class="checkout-field" id="checkoutNewAddrBlock" style="display:none;">
                     <button type="button" class="otp-btn" id="locationBtn" onclick="useMyLocation()" style="width:100%;margin-bottom:10px;font-size:12px;letter-spacing:1px;">📍 Use My Location</button>
-                    <input id="addrDoor"    type="text"    autocomplete="address-line1" placeholder="Door / Flat / Building No *">
-                    <input id="addrStreet"  type="text"    autocomplete="address-line2" placeholder="Street / Landmark" style="margin-top:8px;">
-                    <input id="addrArea"    type="text"    autocomplete="address-level3" placeholder="Area / Locality *" style="margin-top:8px;">
+                    <input id="addrDoor"    type="text"    autocomplete="address-line1" placeholder="Door / Flat / Building No *" oninput="updateConfirmText()">
+                    <input id="addrStreet"  type="text"    autocomplete="address-line2" placeholder="Street / Landmark" style="margin-top:8px;" oninput="updateConfirmText()">
+                    <input id="addrArea"    type="text"    autocomplete="address-level3" placeholder="Area / Locality *" style="margin-top:8px;" oninput="updateConfirmText()">
                     <div class="addr-row">
-                        <input id="addrCity"    type="text"    autocomplete="address-level2" placeholder="City *">
-                        <input id="addrPincode" type="text"    inputmode="numeric" maxlength="6" autocomplete="postal-code" placeholder="Pincode *">
+                        <input id="addrCity"    type="text"    autocomplete="address-level2" placeholder="City *" oninput="updateConfirmText()">
+                        <input id="addrPincode" type="text"    inputmode="numeric" maxlength="6" autocomplete="postal-code" placeholder="Pincode *" oninput="updateConfirmText()">
                     </div>
+                    <label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:12px;color:var(--text-secondary);">
+                        <input type="checkbox" id="saveNewAddrCheck" checked style="width:15px;height:15px;"> Save this address to my account
+                    </label>
+                    <div class="checkout-note" id="checkoutLocationNote">Tap "Use My Location" to auto-fill area, city &amp; pincode — then add your door number.</div>
                 </div>
-                <div class="checkout-note" id="checkoutLocationNote">Tap "Use My Location" to auto-fill area, city &amp; pincode — then add your door number.</div>
 
-                <div id="creditNotice" class="credit-notice" style="display:none;"></div>
+                <!-- Address confirmation (feature 3) -->
+                <label class="addr-confirm-banner" style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;">
+                    <input type="checkbox" id="confirmAddressCheck" style="width:16px;height:16px;margin-top:1px;flex-shrink:0;">
+                    <span id="confirmAddressText">Please select a delivery address above, then tick to confirm it's correct.</span>
+                </label>
 
-                <div class="checkout-field">
-                    <label for="referralCodeInput">Referral Code <span style="color:var(--text-secondary);font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></label>
-                    <input id="referralCodeInput" type="text" placeholder="Enter friend's referral code" style="text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()">
-                    <div class="checkout-note" id="referralStatus"></div>
+                <!-- Coins redemption (feature 6) -->
+                <div class="coins-redeem-box" id="coinsRedeemBox" style="display:none;">
+                    <div class="crb-head">
+                        <span>🪙 ZAFRAAN Coins available: <strong id="coinsAvailable">0</strong></span>
+                    </div>
+                    <div class="crb-row">
+                        <input id="coinsRedeemInput" type="number" min="0" step="1" value="0" inputmode="numeric" placeholder="Coins to use" oninput="onCoinsInput()">
+                        <button type="button" class="crb-max" onclick="useMaxCoins()">Use Max</button>
+                    </div>
+                    <div class="checkout-note" id="coinsNote" style="margin-top:8px;">1 coin = ₹1 off. Choose how many to redeem.</div>
                 </div>
 
                 <!-- Payment Method -->
@@ -2351,6 +2548,281 @@
 </div>
 
 <script src="./firebase-config.js"></script>
+
+<!-- ===== AUTH / PROFILE / COINS / ADDRESSES MODULE ===== -->
+<script type="module">
+(async function () {
+  const config = window.ZAFRAAN_FIREBASE_CONFIG;
+  function configured(c) { return c && c.apiKey && !String(c.apiKey).includes('YOUR_') && c.projectId; }
+
+  // Globals shared with the main (non-module) script
+  window.zafProfile = null;
+  window.zafAuthReady = false;
+
+  if (!configured(config)) {
+    // No backend — let the site work without login (degraded mode)
+    document.getElementById('authGate').classList.add('hidden');
+    document.getElementById('authError').textContent = '';
+    console.warn('Firebase not configured — login disabled.');
+    return;
+  }
+
+  const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js');
+  const { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword,
+          createUserWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile }
+        = await import('https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js');
+  const { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, query, where, getDocs }
+        = await import('https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js');
+
+  const app  = getApps().length ? getApps()[0] : initializeApp(config);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+  window.zafDb = db;
+
+  // ---- referral code generation ----
+  function genCode() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let code = 'ZAF';
+    for (let i = 0; i < 7; i++) code += chars[Math.floor(Math.random() * chars.length)];
+    return code;
+  }
+
+  async function getSiteReferralAmounts() {
+    try {
+      const snap = await getDoc(doc(db, 'siteSettings', 'config'));
+      const cfg = snap.exists() ? snap.data() : {};
+      return {
+        newUser:  Number(cfg.referredUserReward) || 0,   // coins to the new user who signs up with a code
+        referrer: Number(cfg.referrerReward)     || 0    // coins to the person who shared the code
+      };
+    } catch (e) { return { newUser: 0, referrer: 0 }; }
+  }
+
+  // ---- apply a referral code to a brand-new user (one time) ----
+  async function applyReferralOnSignup(uid, code) {
+    code = (code || '').trim().toUpperCase();
+    if (!code) return { applied: false };
+    try {
+      const refSnap = await getDoc(doc(db, 'referralCodes', code));
+      if (!refSnap.exists()) return { applied: false, reason: 'invalid' };
+      const owner = refSnap.data();
+      if (owner.uid === uid) return { applied: false, reason: 'self' };
+      const amts = await getSiteReferralAmounts();
+      // credit the new user
+      if (amts.newUser > 0) await updateDoc(doc(db, 'users', uid), { coins: increment(amts.newUser) });
+      // credit the referrer (owner)
+      if (owner.uid && amts.referrer > 0) await updateDoc(doc(db, 'users', owner.uid), { coins: increment(amts.referrer) });
+      return { applied: true, newUserCoins: amts.newUser, referrerCoins: amts.referrer, ownerUid: owner.uid };
+    } catch (e) { return { applied: false, reason: 'error' }; }
+  }
+
+  // ---- create the user doc + their unique referral code ----
+  async function ensureUserDoc(user, extra) {
+    extra = extra || {};
+    const ref = doc(db, 'users', user.uid);
+    const snap = await getDoc(ref);
+    if (snap.exists()) {
+      const data = snap.data();
+      // backfill phone/name if newly provided
+      const patch = {};
+      if (extra.phone && !data.phone) patch.phone = extra.phone;
+      if (extra.name && !data.name)   patch.name  = extra.name;
+      if (Object.keys(patch).length) { await updateDoc(ref, patch); Object.assign(data, patch); }
+      return { data: { uid: user.uid, ...data }, isNew: false };
+    }
+    // new user
+    const code = genCode();
+    const phone = (extra.phone || '').replace(/\D/g, '');
+    const profile = {
+      uid: user.uid,
+      name: extra.name || user.displayName || '',
+      email: user.email || '',
+      phone: phone,
+      coins: 0,
+      myReferralCode: code,
+      referredBy: (extra.referral || '').trim().toUpperCase() || '',
+      addresses: [],
+      createdAt: new Date().toISOString()
+    };
+    await setDoc(ref, profile);
+    // register the referral code -> uid mapping
+    await setDoc(doc(db, 'referralCodes', code), { uid: user.uid, phone, name: profile.name, createdAt: profile.createdAt });
+    // apply referral bonus
+    if (profile.referredBy) {
+      const res = await applyReferralOnSignup(user.uid, profile.referredBy);
+      if (res.applied && res.newUserCoins) profile.coins += res.newUserCoins;
+    }
+    return { data: profile, isNew: true };
+  }
+
+  // ---- finalize: profile loaded, reveal app ----
+  function finalize(profile) {
+    window.zafProfile = profile;
+    window.zafAuthReady = true;
+    document.getElementById('authGate').classList.add('hidden');
+    document.getElementById('phoneGate').style.display = 'none';
+    // keep phone in localStorage so existing order-history code keeps working
+    if (profile.phone) localStorage.setItem('zafraan_customer_phone', profile.phone);
+    if (typeof window.zafOnProfileReady === 'function') window.zafOnProfileReady(profile);
+  }
+
+  function showError(id, msg) { const el = document.getElementById(id); if (el) el.textContent = msg || ''; }
+
+  // ---- onAuthStateChanged ----
+  let pendingGoogleUser = null;
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      window.zafProfile = null;
+      document.getElementById('authGate').classList.remove('hidden');
+      document.getElementById('phoneGate').style.display = 'none';
+      return;
+    }
+    try {
+      const ref = doc(db, 'users', user.uid);
+      const snap = await getDoc(ref);
+      if (snap.exists() && snap.data().phone) {
+        finalize({ uid: user.uid, ...snap.data() });
+      } else if (snap.exists() && !snap.data().phone) {
+        // existing doc missing phone -> ask for it
+        pendingGoogleUser = user;
+        document.getElementById('pgName').value = snap.data().name || user.displayName || '';
+        document.getElementById('authGate').classList.add('hidden');
+        document.getElementById('phoneGate').style.display = 'flex';
+      } else {
+        // brand new Google user -> collect phone before creating doc
+        pendingGoogleUser = user;
+        document.getElementById('pgName').value = user.displayName || '';
+        const pendRef = sessionStorage.getItem('zafraan_pending_ref') || '';
+        document.getElementById('pgReferral').value = pendRef;
+        document.getElementById('authGate').classList.add('hidden');
+        document.getElementById('phoneGate').style.display = 'flex';
+      }
+    } catch (e) {
+      showError('authError', 'Could not load your account. Please retry.');
+    }
+  });
+
+  // ---- UI wiring ----
+  window.switchAuthMode = function (mode) {
+    const login = mode === 'login';
+    document.getElementById('authTabLogin').classList.toggle('active', login);
+    document.getElementById('authTabSignup').classList.toggle('active', !login);
+    document.getElementById('authLoginFields').style.display = login ? 'block' : 'none';
+    document.getElementById('authSignupFields').style.display = login ? 'none' : 'block';
+    showError('authError', '');
+    // prefill referral from deep link
+    const pendRef = sessionStorage.getItem('zafraan_pending_ref') || '';
+    if (!login && pendRef && !document.getElementById('signupReferral').value) document.getElementById('signupReferral').value = pendRef;
+  };
+
+  document.getElementById('googleSignInBtn').addEventListener('click', async () => {
+    showError('authError', '');
+    try { await signInWithPopup(auth, new GoogleAuthProvider()); }
+    catch (e) { showError('authError', e.code === 'auth/popup-closed-by-user' ? 'Sign-in cancelled.' : (e.message || 'Google sign-in failed.')); }
+  });
+
+  document.getElementById('loginEmailBtn').addEventListener('click', async () => {
+    const email = document.getElementById('loginEmail').value.trim();
+    const pass  = document.getElementById('loginPassword').value;
+    if (!email || !pass) { showError('authError', 'Enter your email and password.'); return; }
+    showError('authError', 'Signing in…');
+    try { await signInWithEmailAndPassword(auth, email, pass); showError('authError', ''); }
+    catch (e) {
+      const m = { 'auth/invalid-credential': 'Wrong email or password.', 'auth/user-not-found': 'No account found — please sign up.', 'auth/wrong-password': 'Wrong password.', 'auth/invalid-email': 'Invalid email.' };
+      showError('authError', m[e.code] || e.message);
+    }
+  });
+
+  document.getElementById('signupEmailBtn').addEventListener('click', async () => {
+    const name  = document.getElementById('signupName').value.trim();
+    const phone = document.getElementById('signupPhone').value.replace(/\D/g, '');
+    const email = document.getElementById('signupEmail').value.trim();
+    const pass  = document.getElementById('signupPassword').value;
+    const refer = document.getElementById('signupReferral').value.trim().toUpperCase();
+    if (!name)  { showError('authError', 'Please enter your full name.'); return; }
+    if (phone.length !== 10 || !/^[6-9]/.test(phone)) { showError('authError', 'Enter a valid 10-digit mobile number.'); return; }
+    if (!email) { showError('authError', 'Please enter your email.'); return; }
+    if (pass.length < 6) { showError('authError', 'Password must be at least 6 characters.'); return; }
+    showError('authError', 'Creating your account…');
+    try {
+      const cred = await createUserWithEmailAndPassword(auth, email, pass);
+      try { await updateProfile(cred.user, { displayName: name }); } catch (e) {}
+      const { data } = await ensureUserDoc(cred.user, { name, phone, referral: refer });
+      sessionStorage.removeItem('zafraan_pending_ref');
+      finalize(data);
+    } catch (e) {
+      const m = { 'auth/email-already-in-use': 'That email already has an account — please log in.', 'auth/invalid-email': 'Invalid email.', 'auth/weak-password': 'Password too weak.' };
+      showError('authError', m[e.code] || e.message);
+    }
+  });
+
+  // ---- phone gate (Google users) ----
+  document.getElementById('pgSaveBtn').addEventListener('click', async () => {
+    if (!pendingGoogleUser) return;
+    const name  = document.getElementById('pgName').value.trim();
+    const phone = document.getElementById('pgPhone').value.replace(/\D/g, '');
+    const refer = document.getElementById('pgReferral').value.trim().toUpperCase();
+    if (!name) { showError('pgError', 'Please enter your name.'); return; }
+    if (phone.length !== 10 || !/^[6-9]/.test(phone)) { showError('pgError', 'Enter a valid 10-digit mobile number.'); return; }
+    showError('pgError', 'Saving…');
+    try {
+      const { data } = await ensureUserDoc(pendingGoogleUser, { name, phone, referral: refer });
+      sessionStorage.removeItem('zafraan_pending_ref');
+      pendingGoogleUser = null;
+      finalize(data);
+    } catch (e) { showError('pgError', e.message || 'Could not save. Please retry.'); }
+  });
+
+  // ---- logout ----
+  window.zafLogout = async function () {
+    try { await signOut(auth); } catch (e) {}
+    window.zafProfile = null;
+    if (typeof window.closeAccount === 'function') window.closeAccount();
+    document.getElementById('authGate').classList.remove('hidden');
+    switchAuthMode('login');
+  };
+
+  // ---- profile reload (after coin changes) ----
+  window.zafReloadProfile = async function () {
+    if (!window.zafProfile) return null;
+    try {
+      const snap = await getDoc(doc(db, 'users', window.zafProfile.uid));
+      if (snap.exists()) { window.zafProfile = { uid: window.zafProfile.uid, ...snap.data() }; }
+    } catch (e) {}
+    return window.zafProfile;
+  };
+
+  // ---- deduct coins (when redeemed in an order) ----
+  window.zafDeductCoins = async function (amount) {
+    if (!window.zafProfile || amount <= 0) return;
+    try {
+      await updateDoc(doc(db, 'users', window.zafProfile.uid), { coins: increment(-amount) });
+      window.zafProfile.coins = Math.max(0, (window.zafProfile.coins || 0) - amount);
+    } catch (e) {}
+  };
+
+  // ---- save the whole addresses array ----
+  window.zafSaveAddresses = async function (addresses) {
+    if (!window.zafProfile) return;
+    window.zafProfile.addresses = addresses;
+    try { await updateDoc(doc(db, 'users', window.zafProfile.uid), { addresses }); } catch (e) {}
+  };
+
+  // ---- validate a referral code (used elsewhere if needed) ----
+  window.zafValidateReferral = async function (code) {
+    code = (code || '').trim().toUpperCase();
+    if (!code) return null;
+    try {
+      const snap = await getDoc(doc(db, 'referralCodes', code));
+      if (!snap.exists()) return null;
+      const d = snap.data();
+      if (window.zafProfile && d.uid === window.zafProfile.uid) return null;
+      return d;
+    } catch (e) { return null; }
+  };
+})();
+</script>
+
 <script>
 const categories = ['All', 'Fresh Vegetables', 'Fresh Prep', 'Cut Vegetables', 'Spices & Seasonings', 'Gourmet Mayonnaise', 'Roasted Makhana', 'Premium Combos'];
 
@@ -2963,6 +3435,94 @@ function setCheckoutError(message) {
   errorEl.style.display = message ? 'block' : 'none';
 }
 
+// ===== ACCOUNT & SAVED ADDRESSES =====
+function addrToText(a) {
+  if (!a) return '';
+  return [a.door, a.street, a.area, a.city, a.pincode].filter(Boolean).join(', ');
+}
+
+function openAccount() {
+  if (!window.zafProfile) { return; }
+  const p = window.zafProfile;
+  document.getElementById('acctName').textContent = (p.name || '') + (p.email ? ' · ' + p.email : '');
+  document.getElementById('acctCoins').textContent = '🪙 ' + (p.coins || 0);
+  document.getElementById('acctRefCode').textContent = p.myReferralCode || '—';
+  closeAddressForm();
+  renderAccountAddresses();
+  document.getElementById('accountModalOverlay').style.display = 'flex';
+}
+function closeAccount() {
+  document.getElementById('accountModalOverlay').style.display = 'none';
+}
+
+function renderAccountAddresses() {
+  const el = document.getElementById('acctAddressList');
+  const list = (window.zafProfile && window.zafProfile.addresses) || [];
+  if (!list.length) {
+    el.innerHTML = '<div style="color:var(--text-secondary);font-size:13px;padding:8px 0;">No saved addresses yet. Add one so checkout is faster.</div>';
+    return;
+  }
+  el.innerHTML = list.map((a, i) => `
+    <div class="addr-card">
+      <div class="addr-label">${a.label ? a.label : 'Address ' + (i + 1)}</div>
+      <div class="addr-text">${addrToText(a)}</div>
+      <div class="addr-actions">
+        <button onclick="editAddress(${i})">Edit</button>
+        <button onclick="deleteAddress(${i})">Delete</button>
+      </div>
+    </div>`).join('');
+}
+
+function openAddressForm(index) {
+  index = (typeof index === 'number') ? index : -1;
+  document.getElementById('addrFormIndex').value = index;
+  const list = (window.zafProfile && window.zafProfile.addresses) || [];
+  const a = index >= 0 ? list[index] : {};
+  document.getElementById('afLabel').value   = a.label   || '';
+  document.getElementById('afDoor').value    = a.door    || '';
+  document.getElementById('afStreet').value  = a.street  || '';
+  document.getElementById('afArea').value    = a.area    || '';
+  document.getElementById('afCity').value    = a.city    || '';
+  document.getElementById('afPincode').value = a.pincode || '';
+  document.getElementById('afError').textContent = '';
+  document.getElementById('afSaveBtn').textContent = index >= 0 ? 'Update Address' : 'Save Address';
+  document.getElementById('addressFormBox').style.display = 'block';
+}
+function closeAddressForm() {
+  document.getElementById('addressFormBox').style.display = 'none';
+}
+
+async function saveAddressFromForm() {
+  const index = parseInt(document.getElementById('addrFormIndex').value, 10);
+  const a = {
+    label:   document.getElementById('afLabel').value.trim() || 'Home',
+    door:    document.getElementById('afDoor').value.trim(),
+    street:  document.getElementById('afStreet').value.trim(),
+    area:    document.getElementById('afArea').value.trim(),
+    city:    document.getElementById('afCity').value.trim(),
+    pincode: document.getElementById('afPincode').value.trim()
+  };
+  if (!a.door)  { document.getElementById('afError').textContent = 'Door / flat number is required.'; return; }
+  if (!a.area)  { document.getElementById('afError').textContent = 'Area / locality is required.'; return; }
+  if (!a.city)  { document.getElementById('afError').textContent = 'City is required.'; return; }
+  if (!/^\d{6}$/.test(a.pincode)) { document.getElementById('afError').textContent = 'Enter a valid 6-digit pincode.'; return; }
+  const list = ((window.zafProfile && window.zafProfile.addresses) || []).slice();
+  if (index >= 0) list[index] = a; else list.push(a);
+  document.getElementById('afSaveBtn').disabled = true;
+  await window.zafSaveAddresses(list);
+  document.getElementById('afSaveBtn').disabled = false;
+  closeAddressForm();
+  renderAccountAddresses();
+}
+
+async function deleteAddress(i) {
+  const list = ((window.zafProfile && window.zafProfile.addresses) || []).slice();
+  list.splice(i, 1);
+  await window.zafSaveAddresses(list);
+  renderAccountAddresses();
+}
+function editAddress(i) { openAddressForm(i); }
+
 function getSavedCustomerAddress(phoneDigits) {
   const saved = JSON.parse(localStorage.getItem('zafraan_customer_addresses') || '{}');
   return saved[phoneDigits] || null;
@@ -3009,63 +3569,151 @@ function autofillFromPhone() {
 }
 
 
-async function checkoutUPI() {
-    if (cart.length === 0) return alert('Your bag is empty');
+// ===== CHECKOUT ADDRESS + COINS STATE =====
+let selectedCheckoutAddrIndex = -1; // -1 = new/manual address
+let checkoutCoinsUsed = 0;
 
-    // Close cart drawer before opening checkout
-    document.getElementById('cartDrawer').classList.remove('open');
+function renderCheckoutAddresses() {
+    const el = document.getElementById('checkoutAddressList');
+    const list = (window.zafProfile && window.zafProfile.addresses) || [];
+    if (!list.length) {
+        el.innerHTML = '<div style="color:var(--text-secondary);font-size:13px;padding:4px 0 8px;">No saved addresses — add one below.</div>';
+        return;
+    }
+    el.innerHTML = list.map((a, i) => `
+        <div class="addr-card ${i === selectedCheckoutAddrIndex ? 'selected' : ''}" onclick="selectCheckoutAddress(${i})">
+            <div class="addr-radio"></div>
+            <div class="addr-label">${a.label ? a.label : 'Address ' + (i + 1)}</div>
+            <div class="addr-text">${addrToText(a)}</div>
+        </div>`).join('');
+}
 
-    appliedReferralCode = null;
-    appliedReferralDiscount = 0;
-    myReferralCredit = 0;
+function selectCheckoutAddress(i) {
+    selectedCheckoutAddrIndex = i;
+    document.getElementById('checkoutNewAddrBlock').style.display = 'none';
+    document.getElementById('toggleNewAddrBtn').textContent = '+ Deliver to a new address';
+    // selecting a different address invalidates prior confirmation
+    document.getElementById('confirmAddressCheck').checked = false;
+    renderCheckoutAddresses();
+    updateConfirmText();
+}
 
-    const summaryEl = document.getElementById('checkoutOrderSummary');
+function toggleNewAddress() {
+    const block = document.getElementById('checkoutNewAddrBlock');
+    const showing = block.style.display !== 'none';
+    if (showing) {
+        block.style.display = 'none';
+        document.getElementById('toggleNewAddrBtn').textContent = '+ Deliver to a new address';
+    } else {
+        block.style.display = 'block';
+        selectedCheckoutAddrIndex = -1;
+        document.getElementById('toggleNewAddrBtn').textContent = '− Use a saved address instead';
+        document.getElementById('confirmAddressCheck').checked = false;
+        renderCheckoutAddresses();
+        updateConfirmText();
+    }
+}
+
+function getCheckoutAddressObj() {
+    const list = (window.zafProfile && window.zafProfile.addresses) || [];
+    if (selectedCheckoutAddrIndex >= 0 && list[selectedCheckoutAddrIndex]) return list[selectedCheckoutAddrIndex];
+    // manual entry
+    return {
+        label: 'New',
+        door:    document.getElementById('addrDoor').value.trim(),
+        street:  document.getElementById('addrStreet').value.trim(),
+        area:    document.getElementById('addrArea').value.trim(),
+        city:    document.getElementById('addrCity').value.trim(),
+        pincode: document.getElementById('addrPincode').value.trim()
+    };
+}
+
+function updateConfirmText() {
+    const a = getCheckoutAddressObj();
+    const txt = addrToText(a);
+    document.getElementById('confirmAddressText').textContent = txt
+        ? 'I confirm delivery to: ' + txt
+        : 'Please select or enter a delivery address above, then tick to confirm.';
+}
+
+function checkoutTotals() {
     const totalCash = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
     const deliveryCharge = totalCash >= 100 ? 0 : 10;
-    const grandTotal = totalCash + deliveryCharge;
+    const payable = totalCash + deliveryCharge;
+    const coins = (window.zafProfile && window.zafProfile.coins) || 0;
+    const maxRedeem = Math.min(coins, payable);
+    const coinsUsed = Math.max(0, Math.min(checkoutCoinsUsed, maxRedeem));
+    const grandTotal = Math.max(0, payable - coinsUsed);
+    return { totalCash, deliveryCharge, payable, coins, maxRedeem, coinsUsed, grandTotal };
+}
 
-    const deliveryRow = deliveryCharge > 0
-        ? `<div class="summary-row"><span>Delivery Charge</span><span>₹${deliveryCharge}</span></div>`
+function renderCheckoutSummary() {
+    const t = checkoutTotals();
+    const summaryEl = document.getElementById('checkoutOrderSummary');
+    const deliveryRow = t.deliveryCharge > 0
+        ? `<div class="summary-row"><span>Delivery Charge</span><span>₹${t.deliveryCharge}</span></div>`
         : `<div class="summary-row" style="color:#00e676;"><span>Delivery</span><span>Free</span></div>`;
-
+    const coinsRow = t.coinsUsed > 0
+        ? `<div class="summary-row" style="color:#00e676;"><span>🪙 Coins Redeemed</span><span>-₹${t.coinsUsed}</span></div>`
+        : '';
     summaryEl.innerHTML = cart.map(item => `
         <div class="summary-row">
             <span>${item.name} <span style="color:var(--text-secondary);font-size:12px;">(${item.size}) ×${item.qty}</span></span>
             <span>₹${item.price * item.qty}</span>
         </div>
-    `).join('') + deliveryRow + `<div class="summary-total"><span>Total</span><span>₹${grandTotal}</span></div>`;
+    `).join('') + deliveryRow + coinsRow + `<div class="summary-total"><span>Total</span><span>₹${t.grandTotal}</span></div>`;
+}
 
-    setCheckoutError('');
-    const pendingRef = sessionStorage.getItem('zafraan_pending_ref') || '';
-    document.getElementById('referralCodeInput').value = pendingRef;
-    document.getElementById('referralStatus').textContent = pendingRef
-        ? `Referral code from your friend applied${siteReferralDiscount > 0 ? ' — ₹' + siteReferralDiscount + ' off!' : '!'}`
-        : '';
-    document.getElementById('creditNotice').style.display = 'none';
+function onCoinsInput() {
+    const t = checkoutTotals();
+    let v = parseInt(document.getElementById('coinsRedeemInput').value, 10);
+    if (isNaN(v) || v < 0) v = 0;
+    if (v > t.maxRedeem) { v = t.maxRedeem; document.getElementById('coinsRedeemInput').value = v; }
+    checkoutCoinsUsed = v;
+    renderCheckoutSummary();
+}
+
+function useMaxCoins() {
+    const t = checkoutTotals();
+    document.getElementById('coinsRedeemInput').value = t.maxRedeem;
+    checkoutCoinsUsed = t.maxRedeem;
+    renderCheckoutSummary();
+}
+
+async function checkoutUPI() {
+    if (cart.length === 0) return alert('Your bag is empty');
+    if (!window.zafProfile) { alert('Please sign in first.'); return; }
+
+    // Close cart drawer before opening checkout
+    document.getElementById('cartDrawer').classList.remove('open');
+
+    // Profile-driven identity
+    document.getElementById('checkoutName').value  = window.zafProfile.name  || '';
+    document.getElementById('checkoutPhone').value = window.zafProfile.phone || '';
+
+    // Reset coins + address selection
+    checkoutCoinsUsed = 0;
+    document.getElementById('coinsRedeemInput').value = 0;
+    const coins = window.zafProfile.coins || 0;
+    document.getElementById('coinsAvailable').textContent = coins;
+    document.getElementById('coinsRedeemBox').style.display = coins > 0 ? 'block' : 'none';
+
+    // Default address selection: first saved, else manual
+    const list = window.zafProfile.addresses || [];
+    selectedCheckoutAddrIndex = list.length ? 0 : -1;
+    document.getElementById('checkoutNewAddrBlock').style.display = list.length ? 'none' : 'block';
+    document.getElementById('toggleNewAddrBtn').textContent = list.length ? '+ Deliver to a new address' : '− Use a saved address instead';
+    ['addrDoor','addrStreet','addrArea','addrCity','addrPincode'].forEach(id => { document.getElementById(id).value = ''; });
+    document.getElementById('confirmAddressCheck').checked = false;
+    document.getElementById('checkoutLocationNote').textContent = 'Tap "Use My Location" to auto-fill area, city & pincode — then add your door number.';
+    renderCheckoutAddresses();
+    updateConfirmText();
+
     const locBtn = document.getElementById('locationBtn');
     if (locBtn) { locBtn.disabled = false; locBtn.textContent = 'Use My Location'; locBtn.style.background = ''; }
 
-    const savedPhone = localStorage.getItem('zafraan_customer_phone') || '';
-    document.getElementById('checkoutPhone').value = savedPhone;
-    document.getElementById('checkoutName').value = '';
-    document.getElementById('addrDoor').value    = '';
-    document.getElementById('addrStreet').value  = '';
-    document.getElementById('addrArea').value    = '';
-    document.getElementById('addrCity').value    = '';
-    document.getElementById('addrPincode').value = '';
-    document.getElementById('checkoutLocationNote').textContent = 'Tap "Use My Location" to auto-fill area, city & pincode — then add your door number.';
-
-    if (savedPhone) {
-        autofillFromPhone();
-        const phoneDigits = savedPhone.replace(/\D/g, '');
-        myReferralCredit = await loadMyCredit(phoneDigits);
-        if (myReferralCredit > 0) {
-            const creditEl = document.getElementById('creditNotice');
-            creditEl.textContent = `You have ₹${myReferralCredit} referral credit — will be applied to this order!`;
-            creditEl.style.display = 'block';
-        }
-    }
-
+    setCheckoutError('');
+    renderCheckoutSummary();
     document.getElementById('upiModalOverlay').style.display = 'flex';
 }
 
@@ -3167,6 +3815,7 @@ async function useMyLocation() {
             btn.textContent = 'Location filled';
             btn.style.background = '#005c2e';
             document.getElementById('checkoutLocationNote').textContent = 'Area filled! Now enter your door / flat number above.';
+            if (typeof updateConfirmText === 'function') updateConfirmText();
             setCheckoutError('');
         } catch(e) {
             btn.disabled = false;
@@ -3182,76 +3831,80 @@ async function useMyLocation() {
 }
 
 async function placeOrder() {
-    const name = document.getElementById('checkoutName').value.trim();
-    const phone = document.getElementById('checkoutPhone').value.trim();
-    const addrDoor    = document.getElementById('addrDoor').value.trim();
-    const addrStreet  = document.getElementById('addrStreet').value.trim();
-    const addrArea    = document.getElementById('addrArea').value.trim();
-    const addrCity    = document.getElementById('addrCity').value.trim();
-    const addrPincode = document.getElementById('addrPincode').value.trim();
-    const address = [addrDoor, addrStreet, addrArea, addrCity, addrPincode].filter(Boolean).join(', ');
-    const referralInput = document.getElementById('referralCodeInput').value.trim().toUpperCase();
-    const phoneDigits = phone.replace(/\D/g, '');
+    if (!window.zafProfile) { setCheckoutError('Please sign in to place an order.'); return; }
+    const name  = window.zafProfile.name  || document.getElementById('checkoutName').value.trim();
+    const phone = window.zafProfile.phone || document.getElementById('checkoutPhone').value.trim();
+    const phoneDigits = (phone || '').replace(/\D/g, '');
 
     const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'cod';
     const isUpi = paymentMethod === 'upi';
     const isRazorpay = paymentMethod === 'razorpay';
 
-    if (!name) { setCheckoutError('Please enter your full name.'); return; }
+    if (!name) { setCheckoutError('Your account name is missing — please update it in My Account.'); return; }
     if (phoneDigits.length !== 10 || !/^[6-9]/.test(phoneDigits)) {
-        setCheckoutError('Please enter a valid 10-digit mobile number (starting with 6, 7, 8 or 9).');
+        setCheckoutError('Your account mobile number is invalid — please update it in My Account.');
         return;
     }
-    if (!addrDoor)    { setCheckoutError('Please enter your door / flat number.'); return; }
-    if (!addrArea)    { setCheckoutError('Please enter your area / locality.'); return; }
-    if (!addrCity)    { setCheckoutError('Please enter your city.'); return; }
-    if (!addrPincode) { setCheckoutError('Please enter your pincode.'); return; }
+
+    // Resolve delivery address: saved selection or manual entry
+    const usingManual = selectedCheckoutAddrIndex < 0;
+    const addrObj = getCheckoutAddressObj();
+    if (!addrObj.door)    { setCheckoutError('Please enter your door / flat number.'); return; }
+    if (!addrObj.area)    { setCheckoutError('Please enter your area / locality.'); return; }
+    if (!addrObj.city)    { setCheckoutError('Please enter your city.'); return; }
+    if (!/^\d{6}$/.test(addrObj.pincode || '')) { setCheckoutError('Please enter a valid 6-digit pincode.'); return; }
+    const address = addrToText(addrObj);
+
+    // Address confirmation (feature 3)
+    if (!document.getElementById('confirmAddressCheck').checked) {
+        setCheckoutError('Please tick the box to confirm your delivery address.');
+        return;
+    }
+
     if (isUpi && !selectedUpiApp) { setCheckoutError('Please select a UPI app to pay with.'); return; }
     if (isRazorpay && typeof Razorpay === 'undefined') { setCheckoutError('Payment gateway not loaded. Please refresh the page and try again.'); return; }
 
-    // Validate referral code if entered
-    let referralData = null;
-    if (referralInput) {
-        document.getElementById('referralStatus').textContent = 'Checking code...';
-        referralData = await validateReferralCode(referralInput, phoneDigits);
-        if (!referralData) {
-            document.getElementById('referralStatus').textContent = 'Invalid or your own referral code.';
-            setCheckoutError('Please check the referral code and try again.');
-            return;
+    setCheckoutError('');
+
+    // Save a brand-new manual address to the profile if requested
+    if (usingManual) {
+        const saveChk = document.getElementById('saveNewAddrCheck');
+        if (saveChk && saveChk.checked && typeof window.zafSaveAddresses === 'function') {
+            const list = ((window.zafProfile.addresses) || []).slice();
+            list.push({ label: addrObj.label || 'Home', door: addrObj.door, street: addrObj.street, area: addrObj.area, city: addrObj.city, pincode: addrObj.pincode });
+            window.zafSaveAddresses(list);
         }
-        appliedReferralCode = referralInput;
-        appliedReferralDiscount = siteReferralDiscount;
-        document.getElementById('referralStatus').textContent = `Code applied! ₹${appliedReferralDiscount} off.`;
     }
 
-    setCheckoutError('');
     localStorage.setItem('zafraan_customer_phone', phone);
-    saveCustomerName(phoneDigits, name);
-    saveCustomerAddress(phoneDigits, { door: addrDoor, street: addrStreet, area: addrArea, city: addrCity, pincode: addrPincode });
 
-    const totalCash = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-    const deliveryCharge = totalCash >= 100 ? 0 : 10;
-    const creditUsed = Math.min(myReferralCredit, totalCash + deliveryCharge);
-    const referralDiscount = appliedReferralDiscount;
-    const grandTotal = Math.max(0, totalCash + deliveryCharge - creditUsed - referralDiscount);
+    const t = checkoutTotals();
+    const totalCash = t.totalCash;
+    const deliveryCharge = t.deliveryCharge;
+    const coinsUsed = t.coinsUsed;
+    const grandTotal = t.grandTotal;
+
+    // Delivery OTP (feature 4) — shown to customer, verified by delivery partner
+    const deliveryOtp = String(Math.floor(1000 + Math.random() * 9000));
 
     const createdAt = new Date().toISOString();
     const orderId = 'ZAF-' + Date.now();
     const orderData = {
         orderId, customerName: name, customerPhone: phone, deliveryAddress: address,
         items: cart.map(item => ({ name: item.name, size: item.size, qty: item.qty, price: item.price })),
-        totalPrice: grandTotal, deliveryCharge, creditUsed, referralDiscount,
-        referralCode: appliedReferralCode || '',
+        totalPrice: grandTotal, deliveryCharge, coinsUsed,
+        userId: window.zafProfile.uid || '',
+        referralCodeUsed: window.zafProfile.referredBy || '',
+        deliveryOtp,
         paymentMethod: isUpi ? UPI_NAMES[selectedUpiApp] + ' (UPI)' : isRazorpay ? 'Razorpay (Online)' : 'Cash on Delivery',
         status: isUpi ? 'Pending Payment' : isRazorpay ? 'Pending Payment' : 'Confirmed', createdAt
     };
 
-    // Firestore save + credits happen immediately for COD/UPI; Razorpay handler does it after payment
+    // Firestore save + coin deduction happen immediately for COD/UPI; Razorpay handler does it after payment
     if (!isRazorpay) {
         saveOrderToFirestore(orderData);
         saveOrderToHistory(phoneDigits, orderData);
-        if (appliedReferralCode && referralDiscount > 0) creditReferrer(appliedReferralCode, siteReferrerReward > 0 ? siteReferrerReward : referralDiscount);
-        if (creditUsed > 0) deductMyCredit(phoneDigits, creditUsed);
+        if (coinsUsed > 0 && typeof window.zafDeductCoins === 'function') await window.zafDeductCoins(coinsUsed);
     }
 
     const cartLines = cart.map((item, i) =>
@@ -3261,8 +3914,7 @@ async function placeOrder() {
     const discountLines = [];
     if (deliveryCharge > 0) discountLines.push(`Delivery Charge: ₹${deliveryCharge}`);
     else discountLines.push('Delivery: Free');
-    if (creditUsed > 0) discountLines.push(`Referral Credit Applied: -₹${creditUsed}`);
-    if (referralDiscount > 0) discountLines.push(`Referral Code Discount: -₹${referralDiscount}`);
+    if (coinsUsed > 0) discountLines.push(`Coins Redeemed: -₹${coinsUsed}`);
 
     const message = [
         'Hi Zafraan! I would like to place an order:',
@@ -3297,10 +3949,9 @@ async function placeOrder() {
                 const paidOrder = { ...orderData, status: 'Payment Received', razorpayPaymentId: paymentId };
                 saveOrderToFirestore(paidOrder);
                 saveOrderToHistory(phoneDigits, paidOrder);
-                if (appliedReferralCode && referralDiscount > 0) creditReferrer(appliedReferralCode, siteReferrerReward > 0 ? siteReferrerReward : referralDiscount);
-                if (creditUsed > 0) deductMyCredit(phoneDigits, creditUsed);
+                if (coinsUsed > 0 && typeof window.zafDeductCoins === 'function') window.zafDeductCoins(coinsUsed);
                 cart = []; saveCart(); updateBadge();
-                selectedUpiApp = null; appliedReferralCode = null; appliedReferralDiscount = 0;
+                selectedUpiApp = null;
                 const codR = document.querySelector('input[name="paymentMethod"][value="cod"]');
                 if (codR) codR.checked = true;
                 onPaymentMethodChange();
@@ -3308,15 +3959,10 @@ async function placeOrder() {
                 // Show dedicated thank-you screen — solid background beats any Razorpay z-index remnants
                 document.getElementById('rzpThankOrderId').textContent = orderId;
                 document.getElementById('rzpThankPayId').textContent   = paymentId;
-                document.getElementById('rzpThankReferral').innerHTML  = '';
+                const myCode = (window.zafProfile && window.zafProfile.myReferralCode) || '';
+                document.getElementById('rzpThankReferral').innerHTML  = otpBlockHtml(deliveryOtp) + (myCode ? referralBoxHtml(myCode) : '');
                 document.getElementById('rzpThankYou').style.display   = 'block';
                 window.scrollTo(0, 0);
-
-                getOrCreateMyReferralCode(phoneDigits, name).then(myCode => {
-                    if (!myCode) return;
-                    const ref = document.getElementById('rzpThankReferral');
-                    if (ref) ref.innerHTML = `<div class="referral-code-box"><div class="referral-code-title">Your Referral Code</div><div class="referral-code-val">${myCode}</div><div class="referral-code-desc">Share with friends — they get ₹${siteReferralDiscount} off!</div><div style="display:flex;gap:8px;margin-top:12px;"><button onclick="shareReferralCode('${myCode}')" style="flex:1;background:#25D366;color:#fff;border:none;padding:10px 16px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;border-radius:6px;">Share on WhatsApp</button><button onclick="navigator.clipboard.writeText('${myCode}').then(()=>this.textContent='Copied!')" style="background:transparent;color:var(--neon-green);border:1px solid var(--neon-green);padding:10px 16px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;border-radius:6px;">Copy</button></div></div>`;
-                }).catch(() => {});
             },
             modal: {
                 ondismiss: function() {
@@ -3380,8 +4026,7 @@ async function placeOrder() {
     // Now close checkout modal and reset state
     document.getElementById('upiModalOverlay').style.display = 'none';
     selectedUpiApp = null;
-    appliedReferralCode = null;
-    appliedReferralDiscount = 0;
+    checkoutCoinsUsed = 0;
     document.querySelectorAll('.upi-app-btn').forEach(b => b.classList.remove('selected'));
     const upiSel = document.getElementById('upiAppSelector');
     if (upiSel) upiSel.style.display = 'none';
@@ -3390,20 +4035,29 @@ async function placeOrder() {
     const pob = document.getElementById('placeOrderBtn');
     if (pob) pob.textContent = 'Place Order';
 
-    // Load referral code in background and update overlay when ready
-    getOrCreateMyReferralCode(phoneDigits, name).then(myCode => {
-        if (!myCode) return;
-        document.getElementById('postOrderReferral').innerHTML = `
-        <div class="referral-code-box" style="text-align:left;">
-            <div class="referral-code-title">Your Referral Code</div>
-            <div class="referral-code-val">${myCode}</div>
-            <div class="referral-code-desc">Share with friends — they get ₹${siteReferralDiscount} off${siteReferrerReward > 0 ? ', you earn ₹' + siteReferrerReward + ' credit' : ''} every time someone orders using your code!</div>
-            <div style="display:flex;gap:8px;margin-top:12px;">
-                <button onclick="shareReferralCode('${myCode}')" style="flex:1;background:#25D366;color:#fff;border:none;padding:10px 16px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:0.5px;border-radius:6px;">Share on WhatsApp</button>
-                <button onclick="navigator.clipboard.writeText('${myCode}').then(()=>this.textContent='Copied!')" style="background:transparent;color:var(--neon-green);border:1px solid var(--neon-green);padding:10px 16px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;letter-spacing:1px;border-radius:6px;">Copy</button>
-            </div>
-        </div>`;
-    }).catch(() => {});
+    // Show delivery OTP + the customer's own referral code
+    const myCode = (window.zafProfile && window.zafProfile.myReferralCode) || '';
+    document.getElementById('postOrderReferral').innerHTML = otpBlockHtml(deliveryOtp) + (myCode ? referralBoxHtml(myCode) : '');
+}
+
+// ---- shared post-order HTML helpers ----
+function otpBlockHtml(otp) {
+    return `<div class="otp-display">
+        <div class="otp-title">Delivery OTP</div>
+        <div class="otp-code">${otp}</div>
+        <div class="otp-desc">Share this OTP with the delivery partner <strong>only</strong> when your order arrives. It confirms your delivery.</div>
+    </div>`;
+}
+function referralBoxHtml(myCode) {
+    return `<div class="referral-code-box" style="text-align:left;">
+        <div class="referral-code-title">Your Referral Code</div>
+        <div class="referral-code-val">${myCode}</div>
+        <div class="referral-code-desc">Share with friends — when they sign up with your code, you both earn ZAFRAAN coins!</div>
+        <div style="display:flex;gap:8px;margin-top:12px;">
+            <button onclick="shareReferralCode('${myCode}')" style="flex:1;background:#25D366;color:#fff;border:none;padding:10px 16px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:0.5px;border-radius:6px;">Share on WhatsApp</button>
+            <button onclick="navigator.clipboard.writeText('${myCode}').then(()=>this.textContent='Copied!')" style="background:transparent;color:var(--neon-green);border:1px solid var(--neon-green);padding:10px 16px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;letter-spacing:1px;border-radius:6px;">Copy</button>
+        </div>
+    </div>`;
 }
 
 let firestoreDb = null;
@@ -3687,12 +4341,16 @@ function renderTrackingOrders(orders) {
     el.innerHTML = orders.map(order => {
         const date = new Date(order.createdAt).toLocaleString('en-IN', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
         const itemsSummary = (order.items || []).map(i => `${i.name} (${i.size}) ×${i.qty}`).join(', ');
+        const otpRow = (order.deliveryOtp && order.status !== 'Delivered' && order.status !== 'Cancelled')
+            ? `<div style="margin-top:12px;background:rgba(0,230,118,0.08);border:1px dashed var(--neon-green);border-radius:8px;padding:10px 12px;text-align:center;"><span style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--neon-green);">Delivery OTP</span><div style="font-size:24px;font-weight:700;letter-spacing:8px;color:#fff;padding-left:8px;">${order.deliveryOtp}</div><div style="font-size:10px;color:var(--text-secondary);margin-top:4px;">Give to the delivery partner on arrival</div></div>`
+            : '';
         return `<div class="track-order-card">
             <div class="track-order-id">${order.orderId}</div>
             <div class="track-order-date">${date}</div>
             ${renderStatusStepper(order.status)}
             <div class="track-order-items" style="margin-top:14px;">${itemsSummary}</div>
             <div class="track-order-total">Total: ₹${order.totalPrice}</div>
+            ${otpRow}
         </div>`;
     }).join('');
 }
