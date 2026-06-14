@@ -1,4 +1,4 @@
-const CACHE = 'zafraan-v11';
+const CACHE = 'zafraan-v12';
 
 const PRECACHE = [
   './',
@@ -99,7 +99,11 @@ self.addEventListener('fetch', event => {
   if (event.request.headers.get('accept')?.includes('text/html')) {
     event.respondWith(
       fetch(event.request)
-        .then(res => { caches.open(CACHE).then(c => c.put(event.request, res.clone())); return res; })
+        .then(res => {
+          const copy = res.clone();                       // clone BEFORE the body is read
+          if (res.ok) caches.open(CACHE).then(c => c.put(event.request, copy));
+          return res;
+        })
         .catch(() => caches.match(event.request))
     );
     return;
@@ -110,7 +114,8 @@ self.addEventListener('fetch', event => {
     caches.match(event.request).then(cached => {
       if (cached) return cached;
       return fetch(event.request).then(res => {
-        caches.open(CACHE).then(c => c.put(event.request, res.clone()));
+        const copy = res.clone();                          // clone synchronously, before returning
+        if (res.ok) caches.open(CACHE).then(c => c.put(event.request, copy));
         return res;
       });
     })
