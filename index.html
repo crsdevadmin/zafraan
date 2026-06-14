@@ -2570,8 +2570,8 @@
   }
 
   const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js');
-  const { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword,
-          createUserWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile }
+  const { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult,
+          signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile }
         = await import('https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js');
   const { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, query, where, getDocs }
         = await import('https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js');
@@ -2719,8 +2719,27 @@
 
   document.getElementById('googleSignInBtn').addEventListener('click', async () => {
     showError('authError', '');
-    try { await signInWithPopup(auth, new GoogleAuthProvider()); }
-    catch (e) { showError('authError', e.code === 'auth/popup-closed-by-user' ? 'Sign-in cancelled.' : (e.message || 'Google sign-in failed.')); }
+    const provider = new GoogleAuthProvider();
+    try {
+      await signInWithPopup(auth, provider);
+    } catch (e) {
+      if (e.code === 'auth/popup-closed-by-user' || e.code === 'auth/cancelled-popup-request') {
+        showError('authError', 'Sign-in cancelled.');
+        return;
+      }
+      // Popup blocked or COOP issue — fall back to a full-page redirect, which always works
+      if (e.code === 'auth/popup-blocked' || e.code === 'auth/operation-not-supported-in-this-environment' || e.code === 'auth/web-storage-unsupported' || e.code === 'auth/internal-error') {
+        showError('authError', 'Opening Google sign-in…');
+        try { await signInWithRedirect(auth, provider); return; }
+        catch (e2) { showError('authError', e2.message || 'Google sign-in failed.'); return; }
+      }
+      showError('authError', e.message || 'Google sign-in failed.');
+    }
+  });
+
+  // Surface any error returned from a redirect-based sign-in (success flows through onAuthStateChanged)
+  getRedirectResult(auth).catch(e => {
+    if (e && e.code && e.code !== 'auth/no-auth-event') showError('authError', e.message || 'Google sign-in failed.');
   });
 
   document.getElementById('loginEmailBtn').addEventListener('click', async () => {
