@@ -2718,22 +2718,25 @@
   };
 
   document.getElementById('googleSignInBtn').addEventListener('click', async () => {
-    showError('authError', '');
+    showError('authError', 'Opening Google sign-in…');
     const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
     try {
-      await signInWithPopup(auth, provider);
+      // Use a full-page redirect as the primary flow. On static hosts (GitHub Pages) we can't
+      // set a Cross-Origin-Opener-Policy header, so signInWithPopup's popup gets cut off from
+      // this page and hangs without ever resolving. Redirect doesn't rely on the popup channel.
+      await signInWithRedirect(auth, provider);
     } catch (e) {
-      if (e.code === 'auth/popup-closed-by-user' || e.code === 'auth/cancelled-popup-request') {
-        showError('authError', 'Sign-in cancelled.');
-        return;
+      // Last resort: try the popup (e.g. environments where redirect isn't supported)
+      try {
+        await signInWithPopup(auth, provider);
+      } catch (e2) {
+        if (e2.code === 'auth/popup-closed-by-user' || e2.code === 'auth/cancelled-popup-request') {
+          showError('authError', 'Sign-in cancelled.');
+          return;
+        }
+        showError('authError', e2.message || 'Google sign-in failed.');
       }
-      // Popup blocked or COOP issue — fall back to a full-page redirect, which always works
-      if (e.code === 'auth/popup-blocked' || e.code === 'auth/operation-not-supported-in-this-environment' || e.code === 'auth/web-storage-unsupported' || e.code === 'auth/internal-error') {
-        showError('authError', 'Opening Google sign-in…');
-        try { await signInWithRedirect(auth, provider); return; }
-        catch (e2) { showError('authError', e2.message || 'Google sign-in failed.'); return; }
-      }
-      showError('authError', e.message || 'Google sign-in failed.');
     }
   });
 
