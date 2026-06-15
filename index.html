@@ -2046,14 +2046,32 @@
             </div>
             <div style="font-size:11px;color:var(--text-secondary);margin:-4px 0 18px;line-height:1.5;">Share your code — friends get coins when they sign up, and so do you. Tap the code above to share.</div>
 
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-                <div style="font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--text-secondary);">Saved Addresses</div>
-                <button type="button" onclick="openAddressForm()" style="background:transparent;border:1px solid var(--neon-green);color:var(--neon-green);padding:6px 12px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;border-radius:6px;">+ Add</button>
-            </div>
+            <button type="button" onclick="closeAccount(); openAddressBook();" style="width:100%;display:flex;justify-content:space-between;align-items:center;background:#141414;border:1px solid var(--border-color);color:var(--text-primary);padding:14px 16px;font-family:inherit;font-size:14px;cursor:pointer;border-radius:10px;margin-bottom:12px;">
+                <span>Manage Saved Addresses</span>
+                <span style="color:var(--neon-green);">→</span>
+            </button>
+
+            <button type="button" onclick="zafLogout()" style="width:100%;background:none;border:1px solid var(--border-color);color:var(--text-secondary);padding:12px;font-family:inherit;font-size:13px;cursor:pointer;border-radius:8px;margin-top:8px;">Log Out</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== ADDRESS BOOK MODAL ===== -->
+<div class="modal-overlay" id="addressModalOverlay" onclick="closeAddressBook()" style="display:none;">
+    <div class="modal-box" style="max-width:460px;" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <div class="modal-eyebrow">Zafraan</div>
+            <div class="modal-title" style="font-size:22px;">Saved Addresses</div>
+            <button class="modal-close" onclick="closeAddressBook()">×</button>
+        </div>
+        <div class="modal-body">
+            <button type="button" id="addrAddBtn" onclick="openAddressForm()" style="width:100%;background:transparent;border:1px dashed var(--neon-green);color:var(--neon-green);padding:12px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;border-radius:8px;margin-bottom:14px;">+ Add a new address</button>
+
             <div id="acctAddressList"></div>
 
-            <!-- inline address form -->
+            <!-- inline address form (add / edit) -->
             <div id="addressFormBox" style="display:none;border:1px solid var(--border-color);border-radius:10px;padding:14px;margin-top:10px;">
+                <div id="addrFormTitle" style="font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--neon-green);margin-bottom:12px;">New Address</div>
                 <input type="hidden" id="addrFormIndex" value="-1">
                 <div class="auth-field"><label>Label (e.g. Home, Office)</label><input type="text" id="afLabel" placeholder="Home"></div>
                 <input id="afDoor"  type="text" placeholder="Door / Flat / Building No *" style="width:100%;box-sizing:border-box;background:#111;border:1px solid rgba(255,255,255,0.12);color:#fff;padding:11px 13px;font-family:inherit;font-size:14px;border-radius:8px;margin-bottom:8px;">
@@ -2069,8 +2087,6 @@
                 </div>
                 <div id="afError" style="color:#ff5252;font-size:12px;margin-top:8px;"></div>
             </div>
-
-            <button type="button" onclick="zafLogout()" style="width:100%;background:none;border:1px solid var(--border-color);color:var(--text-secondary);padding:12px;font-family:inherit;font-size:13px;cursor:pointer;border-radius:8px;margin-top:20px;">Log Out</button>
         </div>
     </div>
 </div>
@@ -2555,13 +2571,6 @@
                             <div class="payment-method-card">
                                 <span class="pm-icon">💵</span>
                                 <span>Cash on Delivery</span>
-                            </div>
-                        </label>
-                        <label class="payment-method-option">
-                            <input type="radio" name="paymentMethod" value="upi" onchange="onPaymentMethodChange()">
-                            <div class="payment-method-card">
-                                <span class="pm-icon">📱</span>
-                                <span>UPI (Direct)</span>
                             </div>
                         </label>
                         <label class="payment-method-option">
@@ -3537,18 +3546,24 @@ function openAccount(section) {
   document.getElementById('acctName').textContent = (p.name || '') + (p.email ? ' · ' + p.email : '');
   document.getElementById('acctCoins').textContent = '🪙 ' + (p.coins || 0);
   document.getElementById('acctRefCode').textContent = p.myReferralCode || '—';
-  closeAddressForm();
-  renderAccountAddresses();
   document.getElementById('accountModalOverlay').style.display = 'flex';
-  // optionally focus a section
-  if (section === 'address') {
-    setTimeout(() => { const el = document.getElementById('acctAddressList'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 120);
-  } else if (section === 'coins') {
+  if (section === 'coins') {
     setTimeout(() => { const el = document.getElementById('acctCoins'); if (el && el.closest('.account-stat')) el.closest('.account-stat').scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 120);
   }
 }
 function closeAccount() {
   document.getElementById('accountModalOverlay').style.display = 'none';
+}
+
+// ---- ADDRESS BOOK (dedicated modal) ----
+function openAddressBook() {
+  if (!window.zafProfile) { return; }
+  closeAddressForm();
+  renderAccountAddresses();
+  document.getElementById('addressModalOverlay').style.display = 'flex';
+}
+function closeAddressBook() {
+  document.getElementById('addressModalOverlay').style.display = 'none';
 }
 
 // ---- USER MENU (nav dropdown) ----
@@ -3572,7 +3587,7 @@ function userMenuGo(where) {
   closeUserMenu();
   if (where === 'orders')       openOrderHistory();
   else if (where === 'account') openAccount();
-  else if (where === 'address') openAccount('address');
+  else if (where === 'address') openAddressBook();
   else if (where === 'coins')   openAccount('coins');
   else if (where === 'logout')  { if (typeof window.zafLogout === 'function') window.zafLogout(); }
 }
@@ -3613,10 +3628,18 @@ function openAddressForm(index) {
   document.getElementById('afPincode').value = a.pincode || '';
   document.getElementById('afError').textContent = '';
   document.getElementById('afSaveBtn').textContent = index >= 0 ? 'Update Address' : 'Save Address';
-  document.getElementById('addressFormBox').style.display = 'block';
+  const titleEl = document.getElementById('addrFormTitle');
+  if (titleEl) titleEl.textContent = index >= 0 ? 'Edit Address' : 'New Address';
+  const addBtn = document.getElementById('addrAddBtn');
+  if (addBtn) addBtn.style.display = 'none';
+  const box = document.getElementById('addressFormBox');
+  box.style.display = 'block';
+  setTimeout(() => box.scrollIntoView({ behavior: 'smooth', block: 'center' }), 80);
 }
 function closeAddressForm() {
   document.getElementById('addressFormBox').style.display = 'none';
+  const addBtn = document.getElementById('addrAddBtn');
+  if (addBtn) addBtn.style.display = 'block';
 }
 
 async function saveAddressFromForm() {
@@ -3643,6 +3666,7 @@ async function saveAddressFromForm() {
 }
 
 async function deleteAddress(i) {
+  if (!confirm('Remove this saved address?')) return;
   const list = ((window.zafProfile && window.zafProfile.addresses) || []).slice();
   list.splice(i, 1);
   await window.zafSaveAddresses(list);
@@ -3811,8 +3835,11 @@ async function checkoutUPI() {
     if (cart.length === 0) return alert('Your bag is empty');
     if (!window.zafProfile) { alert('Please sign in first.'); return; }
 
-    // Close cart drawer before opening checkout
+    // Close cart drawer AND its backdrop before opening checkout
     document.getElementById('cartDrawer').classList.remove('open');
+    document.getElementById('cartOverlay').classList.remove('open');
+    const vcb0 = document.getElementById('viewCartBar');
+    if (vcb0) vcb0.style.visibility = 'visible';
 
     // Profile-driven identity
     document.getElementById('checkoutName').value  = window.zafProfile.name  || '';
