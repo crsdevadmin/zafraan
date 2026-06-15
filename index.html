@@ -1920,6 +1920,37 @@
         .otp-display .otp-code { font-size: 38px; font-weight: 700; letter-spacing: 12px; color: #fff; padding-left: 12px; }
         .otp-display .otp-desc { font-size: 11px; color: var(--text-secondary); margin-top: 8px; }
         .addr-confirm-banner { background: rgba(0,230,118,0.06); border: 1px solid rgba(0,230,118,0.25); border-radius: 8px; padding: 12px 14px; font-size: 13px; color: var(--text-primary); margin-bottom: 14px; line-height: 1.5; }
+
+        /* ---- USER MENU (nav) ---- */
+        .user-menu-wrap { position: relative; display: inline-block; }
+        .user-icon-btn {
+            background: none; border: 1px solid var(--border-color); color: var(--text-primary);
+            width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: border-color .15s, color .15s;
+        }
+        .user-icon-btn:hover { border-color: var(--neon-green); color: var(--neon-green); }
+        .user-dropdown {
+            position: absolute; top: 48px; right: 0; min-width: 220px;
+            background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px;
+            box-shadow: 0 18px 50px rgba(0,0,0,0.55); padding: 8px; z-index: 400;
+            opacity: 0; visibility: hidden; transform: translateY(-6px); transition: opacity .15s, transform .15s, visibility .15s;
+        }
+        .user-dropdown.open { opacity: 1; visibility: visible; transform: translateY(0); }
+        .user-dropdown-head {
+            font-family: 'Cormorant Garamond', serif; font-size: 16px; color: var(--text-primary);
+            padding: 8px 12px 10px; border-bottom: 1px solid var(--border-color); margin-bottom: 6px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .user-dropdown-item {
+            width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+            background: none; border: none; color: var(--text-primary); font-family: inherit; font-size: 14px;
+            padding: 11px 12px; cursor: pointer; border-radius: 8px; text-align: left;
+        }
+        .user-dropdown-item:hover { background: rgba(255,255,255,0.05); color: var(--neon-green); }
+        .user-dropdown-item svg { stroke: currentColor; flex-shrink: 0; }
+        .user-menu-coins { color: var(--neon-green); font-weight: 700; font-size: 13px; }
+        .user-dropdown-logout { color: var(--text-secondary); border-top: 1px solid var(--border-color); margin-top: 6px; border-radius: 0 0 8px 8px; }
+        .user-dropdown-logout:hover { color: #ff5252; background: rgba(255,82,82,0.06); }
     </style>
 </head>
 <body>
@@ -2088,8 +2119,33 @@
         <li><a href="#contact">Contact</a></li>
     </ul>
     <div class="nav-actions">
-        <button class="my-orders-btn" onclick="openAccount()">My Account</button>
-        <button class="my-orders-btn" onclick="openOrderHistory()">My Orders</button>
+        <div class="user-menu-wrap">
+            <button class="user-icon-btn" id="userIconBtn" onclick="toggleUserMenu(event)" aria-label="Account menu">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"></path></svg>
+            </button>
+            <div class="user-dropdown" id="userDropdown">
+                <div class="user-dropdown-head" id="userDropdownName">My Account</div>
+                <button type="button" class="user-dropdown-item" onclick="userMenuGo('orders')">
+                    <span>My Orders</span>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 5h6M9 9h6M9 13h4"/><rect x="4" y="2" width="16" height="20" rx="2"/></svg>
+                </button>
+                <button type="button" class="user-dropdown-item" onclick="userMenuGo('account')">
+                    <span>My Account</span>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="3.2"/><path d="M5 21c0-3.3 3-6 7-6s7 2.7 7 6"/></svg>
+                </button>
+                <button type="button" class="user-dropdown-item" onclick="userMenuGo('address')">
+                    <span>Address</span>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 21s7-6 7-11a7 7 0 1 0-14 0c0 5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+                </button>
+                <button type="button" class="user-dropdown-item" onclick="userMenuGo('coins')">
+                    <span>Coins</span>
+                    <span class="user-menu-coins" id="userMenuCoins">🪙 0</span>
+                </button>
+                <button type="button" class="user-dropdown-item user-dropdown-logout" onclick="userMenuGo('logout')">
+                    <span>Log out</span>
+                </button>
+            </div>
+        </div>
         <button class="cart-toggle" onclick="toggleCart()">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
             <span class="cart-badge" id="cartBadge">0</span>
@@ -2700,7 +2756,17 @@
         document.getElementById('phoneGate').style.display = 'flex';
       }
     } catch (e) {
-      showError('authError', 'Could not load your account. Please retry.');
+      const code = (e && e.code) ? e.code : '';
+      let msg = 'Could not load your account.';
+      if (code.includes('permission') || /insufficient permissions/i.test(e && e.message || '')) {
+        msg = 'Account blocked by database rules. (Firestore permission denied — update your Firestore rules.)';
+      } else if (code) {
+        msg = 'Could not load your account: ' + code;
+      } else if (e && e.message) {
+        msg = 'Could not load your account: ' + e.message;
+      }
+      console.error('[ZAFRAAN] profile load failed:', e);
+      showError('authError', msg);
     }
   });
 
@@ -3465,7 +3531,7 @@ function addrToText(a) {
   return [a.door, a.street, a.area, a.city, a.pincode].filter(Boolean).join(', ');
 }
 
-function openAccount() {
+function openAccount(section) {
   if (!window.zafProfile) { return; }
   const p = window.zafProfile;
   document.getElementById('acctName').textContent = (p.name || '') + (p.email ? ' · ' + p.email : '');
@@ -3474,10 +3540,47 @@ function openAccount() {
   closeAddressForm();
   renderAccountAddresses();
   document.getElementById('accountModalOverlay').style.display = 'flex';
+  // optionally focus a section
+  if (section === 'address') {
+    setTimeout(() => { const el = document.getElementById('acctAddressList'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 120);
+  } else if (section === 'coins') {
+    setTimeout(() => { const el = document.getElementById('acctCoins'); if (el && el.closest('.account-stat')) el.closest('.account-stat').scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 120);
+  }
 }
 function closeAccount() {
   document.getElementById('accountModalOverlay').style.display = 'none';
 }
+
+// ---- USER MENU (nav dropdown) ----
+function toggleUserMenu(e) {
+  if (e) e.stopPropagation();
+  const dd = document.getElementById('userDropdown');
+  if (!dd) return;
+  const opening = !dd.classList.contains('open');
+  if (opening) {
+    const p = window.zafProfile;
+    document.getElementById('userDropdownName').textContent = (p && p.name) ? ('Hi, ' + p.name.split(' ')[0]) : 'My Account';
+    document.getElementById('userMenuCoins').textContent = '🪙 ' + ((p && p.coins) || 0);
+  }
+  dd.classList.toggle('open', opening);
+}
+function closeUserMenu() {
+  const dd = document.getElementById('userDropdown');
+  if (dd) dd.classList.remove('open');
+}
+function userMenuGo(where) {
+  closeUserMenu();
+  if (where === 'orders')       openOrderHistory();
+  else if (where === 'account') openAccount();
+  else if (where === 'address') openAccount('address');
+  else if (where === 'coins')   openAccount('coins');
+  else if (where === 'logout')  { if (typeof window.zafLogout === 'function') window.zafLogout(); }
+}
+// close the dropdown when clicking anywhere outside it
+document.addEventListener('click', (ev) => {
+  const wrap = ev.target.closest && ev.target.closest('.user-menu-wrap');
+  if (!wrap) closeUserMenu();
+});
 
 function renderAccountAddresses() {
   const el = document.getElementById('acctAddressList');
