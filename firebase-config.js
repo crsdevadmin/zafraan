@@ -7,6 +7,9 @@ window.ZAFRAAN_FIREBASE_CONFIG = {
   appId: "1:502276631276:web:c70b57be9c7a1de7fed3c9"
 };
 
+// Public browser key restricted to zafraanfood.com and only Maps JavaScript + Places APIs.
+window.ZAFRAAN_GOOGLE_MAPS_BROWSER_KEY = "YOUR_RESTRICTED_BROWSER_KEY_HERE";
+
 window.ZAFRAAN_ADMIN_EMAILS = [
   "padhomjs@gmail.com"
 ];

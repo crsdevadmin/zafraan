@@ -2539,7 +2539,13 @@
 
                 <!-- New / manual address block -->
                 <div class="checkout-field" id="checkoutNewAddrBlock" style="display:none;">
+                    <div style="display:flex;gap:8px;margin-bottom:10px;">
+                        <input id="addrSearch" type="search" placeholder="Search area, street or landmark" style="flex:1;min-width:0;">
+                        <button type="button" onclick="searchCustomerAddress()" style="border:0;border-radius:8px;background:var(--neon-green);color:#000;padding:0 14px;font-family:inherit;font-weight:700;cursor:pointer;">Search</button>
+                    </div>
                     <button type="button" class="otp-btn" id="locationBtn" onclick="useMyLocation()" style="width:100%;margin-bottom:10px;font-size:12px;letter-spacing:1px;">📍 Use My Location</button>
+                    <div id="customerAddressMap" style="display:none;width:100%;height:240px;border:1px solid rgba(0,230,118,.45);border-radius:12px;margin-bottom:10px;overflow:hidden;"></div>
+                    <div id="mapAddressStatus" style="display:none;color:var(--text-secondary);font-size:12px;line-height:1.5;margin:-2px 0 10px;"></div>
                     <input id="addrDoor"    type="text"    autocomplete="address-line1" placeholder="Door / Flat / Building No *" oninput="updateConfirmText()">
                     <input id="addrStreet"  type="text"    autocomplete="address-line2" placeholder="Street / Landmark" style="margin-top:8px;" oninput="updateConfirmText()">
                     <input id="addrArea"    type="text"    autocomplete="address-level3" placeholder="Area / Locality *" style="margin-top:8px;" oninput="updateConfirmText()">
@@ -3852,6 +3858,11 @@ function autofillFromPhone() {
 // ===== CHECKOUT ADDRESS + COINS STATE =====
 let selectedCheckoutAddrIndex = -1; // -1 = new/manual address
 let checkoutCoinsUsed = 0;
+let checkoutMapLocation = null;
+let customerAddressMap = null;
+let customerAddressMarker = null;
+let customerAddressAutocomplete = null;
+let googleMapsLoadPromise = null;
 
 function renderCheckoutAddresses() {
     const el = document.getElementById('checkoutAddressList');
@@ -3870,6 +3881,10 @@ function renderCheckoutAddresses() {
 
 function selectCheckoutAddress(i) {
     selectedCheckoutAddrIndex = i;
+    const selected = ((window.zafProfile && window.zafProfile.addresses) || [])[i];
+    checkoutMapLocation = selected && Number.isFinite(Number(selected.lat)) && Number.isFinite(Number(selected.lng))
+        ? { lat: Number(selected.lat), lng: Number(selected.lng) }
+        : null;
     document.getElementById('checkoutNewAddrBlock').style.display = 'none';
     document.getElementById('toggleNewAddrBtn').textContent = '+ Deliver to a new address';
     // selecting a different address invalidates prior confirmation
@@ -3891,6 +3906,7 @@ function toggleNewAddress() {
         document.getElementById('confirmAddressCheck').checked = false;
         renderCheckoutAddresses();
         updateConfirmText();
+        setTimeout(initCustomerAddressPicker, 50);
     }
 }
 
@@ -3904,8 +3920,113 @@ function getCheckoutAddressObj() {
         street:  document.getElementById('addrStreet').value.trim(),
         area:    document.getElementById('addrArea').value.trim(),
         city:    document.getElementById('addrCity').value.trim(),
-        pincode: document.getElementById('addrPincode').value.trim()
+        pincode: document.getElementById('addrPincode').value.trim(),
+        lat: checkoutMapLocation ? checkoutMapLocation.lat : null,
+        lng: checkoutMapLocation ? checkoutMapLocation.lng : null
     };
+}
+
+function loadCustomerGoogleMaps() {
+    const key = window.ZAFRAAN_GOOGLE_MAPS_BROWSER_KEY;
+    if (!key || key === 'YOUR_RESTRICTED_BROWSER_KEY_HERE') return Promise.resolve(false);
+    if (window.google && window.google.maps) return Promise.resolve(true);
+    if (googleMapsLoadPromise) return googleMapsLoadPromise;
+    googleMapsLoadPromise = new Promise((resolve, reject) => {
+        window.zafGoogleMapsReady = () => resolve(true);
+        const script = document.createElement('script');
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&libraries=places&callback=zafGoogleMapsReady`;
+        script.async = true;
+        script.onerror = () => reject(new Error('Google Maps could not be loaded.'));
+        document.head.appendChild(script);
+    });
+    return googleMapsLoadPromise;
+}
+
+async function initCustomerAddressPicker() {
+    const status = document.getElementById('mapAddressStatus');
+    try {
+        const loaded = await loadCustomerGoogleMaps();
+        if (!loaded) {
+            status.style.display = 'block';
+            status.textContent = 'Map search will be available after the restricted Google Maps browser key is added. Current location and manual address still work.';
+            return;
+        }
+        const mapEl = document.getElementById('customerAddressMap');
+        mapEl.style.display = 'block';
+        status.style.display = 'block';
+        status.textContent = 'Search above or tap the map to place the delivery pin.';
+        const center = checkoutMapLocation || { lat: 12.9216, lng: 80.1587 };
+        customerAddressMap = new google.maps.Map(mapEl, { center, zoom: checkoutMapLocation ? 17 : 13, mapTypeControl: false, streetViewControl: false });
+        customerAddressMarker = new google.maps.Marker({ map: customerAddressMap, position: center, draggable: true });
+        const applyPosition = pos => setCustomerMapLocation(pos.lat(), pos.lng(), true);
+        customerAddressMap.addListener('click', e => applyPosition(e.latLng));
+        customerAddressMarker.addListener('dragend', e => applyPosition(e.latLng));
+        const input = document.getElementById('addrSearch');
+        customerAddressAutocomplete = new google.maps.places.Autocomplete(input, { componentRestrictions: { country: 'in' }, fields: ['formatted_address', 'geometry', 'address_components'] });
+        customerAddressAutocomplete.addListener('place_changed', () => {
+            const place = customerAddressAutocomplete.getPlace();
+            if (!place.geometry || !place.geometry.location) return;
+            const loc = place.geometry.location;
+            customerAddressMap.setCenter(loc);
+            customerAddressMap.setZoom(17);
+            customerAddressMarker.setPosition(loc);
+            checkoutMapLocation = { lat: loc.lat(), lng: loc.lng() };
+            fillAddressFromGoogleResult(place);
+        });
+    } catch (error) {
+        status.style.display = 'block';
+        status.textContent = 'Map search is temporarily unavailable. Please use current location or type the address.';
+    }
+}
+
+function fillAddressFromGoogleResult(result) {
+    const components = {};
+    (result.address_components || []).forEach(c => c.types.forEach(t => { if (!components[t]) components[t] = c.long_name; }));
+    document.getElementById('addrStreet').value = components.route || components.premise || '';
+    document.getElementById('addrArea').value = components.sublocality_level_1 || components.sublocality || components.neighborhood || '';
+    document.getElementById('addrCity').value = components.locality || components.administrative_area_level_2 || 'Chennai';
+    document.getElementById('addrPincode').value = (components.postal_code || '').replace(/\D/g, '').slice(0, 6);
+    document.getElementById('mapAddressStatus').textContent = 'Pin selected. Add your door number and landmark, then confirm the address.';
+    updateConfirmText();
+}
+
+async function setCustomerMapLocation(lat, lng, reverseGeocode) {
+    checkoutMapLocation = { lat: Number(lat), lng: Number(lng) };
+    if (customerAddressMap && customerAddressMarker) {
+        const pos = checkoutMapLocation;
+        customerAddressMarker.setPosition(pos);
+        customerAddressMap.setCenter(pos);
+        customerAddressMap.setZoom(17);
+    }
+    if (reverseGeocode && window.google && google.maps) {
+        const results = await new google.maps.Geocoder().geocode({ location: checkoutMapLocation });
+        if (results.results && results.results[0]) fillAddressFromGoogleResult(results.results[0]);
+    }
+}
+
+async function searchCustomerAddress() {
+    const query = document.getElementById('addrSearch').value.trim();
+    if (!query) return;
+    const loaded = await loadCustomerGoogleMaps();
+    if (!loaded) {
+        document.getElementById('mapAddressStatus').style.display = 'block';
+        document.getElementById('mapAddressStatus').textContent = 'Google Maps browser key is required for address search.';
+        return;
+    }
+    if (!customerAddressMap) await initCustomerAddressPicker();
+    try {
+        const response = await new google.maps.Geocoder().geocode({ address: `${query}, Chennai, Tamil Nadu, India`, region: 'IN' });
+        if (!response.results.length) throw new Error('No address found');
+        const result = response.results[0];
+        const loc = result.geometry.location;
+        checkoutMapLocation = { lat: loc.lat(), lng: loc.lng() };
+        customerAddressMap.setCenter(loc);
+        customerAddressMap.setZoom(17);
+        customerAddressMarker.setPosition(loc);
+        fillAddressFromGoogleResult(result);
+    } catch (error) {
+        document.getElementById('mapAddressStatus').textContent = 'Address not found. Try including the area or pincode.';
+    }
 }
 
 function updateConfirmText() {
@@ -3984,6 +4105,9 @@ async function checkoutUPI() {
     // Default address selection: first saved, else manual
     const list = window.zafProfile.addresses || [];
     selectedCheckoutAddrIndex = list.length ? 0 : -1;
+    checkoutMapLocation = list.length && Number.isFinite(Number(list[0].lat)) && Number.isFinite(Number(list[0].lng))
+        ? { lat: Number(list[0].lat), lng: Number(list[0].lng) }
+        : null;
     document.getElementById('checkoutNewAddrBlock').style.display = list.length ? 'none' : 'block';
     document.getElementById('toggleNewAddrBtn').textContent = list.length ? '+ Deliver to a new address' : '− Use a saved address instead';
     ['addrDoor','addrStreet','addrArea','addrCity','addrPincode'].forEach(id => { document.getElementById(id).value = ''; });
@@ -3998,6 +4122,7 @@ async function checkoutUPI() {
     setCheckoutError('');
     renderCheckoutSummary();
     document.getElementById('upiModalOverlay').style.display = 'flex';
+    if (!list.length) setTimeout(initCustomerAddressPicker, 50);
 }
 
 function closeUpiModal() {
@@ -4074,6 +4199,8 @@ async function useMyLocation() {
 
     navigator.geolocation.getCurrentPosition(async (position) => {
         const { latitude, longitude } = position.coords;
+        checkoutMapLocation = { lat: latitude, lng: longitude };
+        if (window.google && window.google.maps) await setCustomerMapLocation(latitude, longitude, false);
         try {
             const res = await fetch(
                 `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`,
@@ -4156,7 +4283,7 @@ async function placeOrder() {
         const saveChk = document.getElementById('saveNewAddrCheck');
         if (saveChk && saveChk.checked && typeof window.zafSaveAddresses === 'function') {
             const list = ((window.zafProfile.addresses) || []).slice();
-            list.push({ label: addrObj.label || 'Home', door: addrObj.door, street: addrObj.street, area: addrObj.area, city: addrObj.city, pincode: addrObj.pincode });
+            list.push({ label: addrObj.label || 'Home', door: addrObj.door, street: addrObj.street, area: addrObj.area, city: addrObj.city, pincode: addrObj.pincode, lat: addrObj.lat, lng: addrObj.lng });
             window.zafSaveAddresses(list);
         }
     }
@@ -4181,6 +4308,7 @@ async function placeOrder() {
     const orderId = 'ZAF-' + Date.now();
     const orderData = {
         orderId, customerName: name, customerPhone: phone, deliveryAddress: address,
+        deliveryLocation: Number.isFinite(Number(addrObj.lat)) && Number.isFinite(Number(addrObj.lng)) ? { lat: Number(addrObj.lat), lng: Number(addrObj.lng) } : null,
         items: cart.map(item => ({ name: item.name, size: item.size, qty: item.qty, price: item.price })),
         totalPrice: grandTotal, deliveryCharge, coinsUsed,
         userId: window.zafProfile.uid || '',
@@ -4288,7 +4416,7 @@ async function placeOrder() {
     document.getElementById('postOrderReferral').innerHTML = otpBlockHtml(deliveryOtp) + (myCode ? referralBoxHtml(myCode) : '');
 }
 
-async function startSecureRazorpayCheckout({ address, phoneDigits, coinsUsed }) {
+async function startSecureRazorpayCheckout({ address, addrObj, phoneDigits, coinsUsed }) {
     const placeOrderBtn = document.getElementById('placeOrderBtn');
     placeOrderBtn.disabled = true;
     placeOrderBtn.textContent = 'Preparing Secure Payment…';
@@ -4297,6 +4425,7 @@ async function startSecureRazorpayCheckout({ address, phoneDigits, coinsUsed }) 
         const paymentOrder = await window.zafCreateRazorpayOrder({
             items: cart.map(item => ({ id: item.id, size: item.size, qty: item.qty })),
             deliveryAddress: address,
+            deliveryLocation: Number.isFinite(Number(addrObj?.lat)) && Number.isFinite(Number(addrObj?.lng)) ? { lat: Number(addrObj.lat), lng: Number(addrObj.lng) } : null,
             coinsRequested: coinsUsed
         });
 

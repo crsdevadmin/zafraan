@@ -1,4 +1,4 @@
-const CACHE = 'zafraan-v22';
+const CACHE = 'zafraan-v23';
 
 const PRECACHE = [
   './',

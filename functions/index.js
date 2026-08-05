@@ -115,6 +115,12 @@ exports.createRazorpayOrder = onCall(
       if (deliveryAddress.length < 8) {
         throw new HttpsError("invalid-argument", "A valid delivery address is required.");
       }
+      const rawLocation = request.data?.deliveryLocation;
+      const deliveryLocation = rawLocation &&
+        Number.isFinite(Number(rawLocation.lat)) &&
+        Number.isFinite(Number(rawLocation.lng)) ?
+        {lat: Number(rawLocation.lat), lng: Number(rawLocation.lng)} :
+        null;
 
       const userSnapshot = await db.collection("users").doc(uid).get();
       if (!userSnapshot.exists) {
@@ -150,6 +156,7 @@ exports.createRazorpayOrder = onCall(
         customerName: String(user.name || "").slice(0, 120),
         customerPhone: String(user.phone || "").slice(0, 30),
         deliveryAddress,
+        deliveryLocation,
         referralCodeUsed: String(user.referredBy || "").slice(0, 40),
         amountPaise: razorpayOrder.amount,
         currency: "INR",
@@ -219,6 +226,7 @@ exports.verifyRazorpayPayment = onCall(
         customerName: intent.customerName,
         customerPhone: intent.customerPhone,
         deliveryAddress: intent.deliveryAddress,
+        deliveryLocation: intent.deliveryLocation || null,
         items: intent.items,
         totalPrice: intent.totalPrice,
         deliveryCharge: intent.deliveryCharge,
