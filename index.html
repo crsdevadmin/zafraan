@@ -2352,7 +2352,7 @@
         <div>
             <div class="footer-col-title">Collections</div>
             <ul class="footer-links">
-                <li><a href="#products">Fresh Prep</a></li>
+                <li><a href="#products">Peeled Veg</a></li>
                 <li><a href="#products">Cut Vegetables</a></li>
                 <li><a href="#products">Spices & Seasonings</a></li>
                 <li><a href="#products">Gourmet Mayonnaise</a></li>
@@ -2941,10 +2941,10 @@
 </script>
 
 <script>
-const categories = ['All', 'Fresh Vegetables', 'Fresh Prep', 'Cut Vegetables', 'Spices & Seasonings', 'Gourmet Mayonnaise', 'Roasted Makhana', 'Premium Combos'];
+const categories = ['All', 'Fresh Vegetables', 'Peeled Veg', 'Cut Vegetables', 'Spices & Seasonings', 'Gourmet Mayonnaise', 'Roasted Makhana', 'Premium Combos'];
 
 const bgColors = {
-    'Fresh Prep': ['#121212', '#181818'],
+    'Peeled Veg': ['#121212', '#181818'],
     'Cut Vegetables': ['#121212', '#181818'],
     'Spices & Seasonings': ['#121212', '#181818'],
     'Gourmet Mayonnaise': ['#121212', '#181818'],
@@ -2953,7 +2953,7 @@ const bgColors = {
 };
 
 const iconColors = {
-    'Fresh Prep': '#00e676',
+    'Peeled Veg': '#00e676',
     'Cut Vegetables': '#00e676',
     'Spices & Seasonings': '#00e676',
     'Gourmet Mayonnaise': '#00e676',
@@ -2962,14 +2962,14 @@ const iconColors = {
 };
 
 const products = [
-    // Category: Fresh Prep
-    { id: 1,  name: 'Peeled Garlic',              cat: 'Fresh Prep',          sizes: '100g / 250g / 500g / 1kg', price: '₹40', storage: 'Refrigerated', desc: 'Fresh garlic cloves, peeled and ready to cook.' },
-    { id: 2,  name: 'Peeled Small Onion',         cat: 'Fresh Prep',          sizes: '250g / 500g / 1kg',        price: '₹35', storage: 'Refrigerated', desc: 'Small onions peeled and ready for everyday cooking.' },
-    { id: 3,  name: 'Peeled Ginger',              cat: 'Fresh Prep',          sizes: '100g / 250g / 500g',       price: '₹50', storage: 'Refrigerated', desc: 'Fresh ginger root, peeled and ready to slice or grate.' },
-    { id: 4,  name: 'Chopped Onion',              cat: 'Fresh Prep',          sizes: '250g / 500g / 1kg',        price: '₹30', storage: 'Refrigerated', desc: 'Finely chopped red onions, packed fresh daily.' },
-    { id: 5,  name: 'Curry Leaves',               cat: 'Fresh Prep',          sizes: '50g / 100g',               price: '₹25', storage: 'Refrigerated', desc: 'Fresh, aromatic organic curry leaves, sorted and washed.' },
-    { id: 6,  name: 'Coriander Leaves',           cat: 'Fresh Prep',          sizes: '50g / 100g',               price: '₹30', storage: 'Refrigerated', desc: 'Fresh coriander leaves, washed and prepared.' },
-    { id: 7,  name: 'Mint Leaves',                cat: 'Fresh Prep',          sizes: '50g / 100g',               price: '₹35', storage: 'Refrigerated', desc: 'Fresh organic mint leaves, sorted and cleaned.' },
+    // Category: Peeled Veg
+    { id: 1,  name: 'Peeled Garlic',              cat: 'Peeled Veg',          sizes: '100g / 250g / 500g / 1kg', price: '₹40', storage: 'Refrigerated', desc: 'Fresh garlic cloves, peeled and ready to cook.' },
+    { id: 2,  name: 'Peeled Small Onion',         cat: 'Peeled Veg',          sizes: '250g / 500g / 1kg',        price: '₹35', storage: 'Refrigerated', desc: 'Small onions peeled and ready for everyday cooking.' },
+    { id: 3,  name: 'Peeled Ginger',              cat: 'Peeled Veg',          sizes: '100g / 250g / 500g',       price: '₹50', storage: 'Refrigerated', desc: 'Fresh ginger root, peeled and ready to slice or grate.' },
+    { id: 4,  name: 'Chopped Onion',              cat: 'Cut Vegetables',      sizes: '250g / 500g / 1kg',        price: '₹30', storage: 'Refrigerated', desc: 'Finely chopped red onions, packed fresh daily.' },
+    { id: 5,  name: 'Curry Leaves',               cat: 'Fresh Vegetables',    sizes: '50g / 100g',               price: '₹25', storage: 'Refrigerated', desc: 'Fresh, aromatic organic curry leaves, sorted and washed.' },
+    { id: 6,  name: 'Coriander Leaves',           cat: 'Fresh Vegetables',    sizes: '50g / 100g',               price: '₹30', storage: 'Refrigerated', desc: 'Fresh coriander leaves, washed and prepared.' },
+    { id: 7,  name: 'Mint Leaves',                cat: 'Fresh Vegetables',    sizes: '50g / 100g',               price: '₹35', storage: 'Refrigerated', desc: 'Fresh organic mint leaves, sorted and cleaned.' },
     // Category: Fresh Vegetables
     { id: 51, name: 'Tomato',                     cat: 'Fresh Vegetables',    sizes: '250g / 500g / 1kg',        price: '₹30', storage: 'Fresh', desc: 'Fresh ripe red tomatoes, a daily kitchen essential.' },
     { id: 52, name: 'Raw Ginger',                 cat: 'Fresh Vegetables',    sizes: '100g / 250g / 500g',       price: '₹60', storage: 'Fresh', desc: 'Fresh ginger root, whole and unwashed for maximum shelf life.' },
@@ -3001,9 +3001,9 @@ const products = [
     { id: 78, name: 'Banana Flower',              cat: 'Fresh Vegetables',    sizes: 'Per piece',                price: '₹40', storage: 'Fresh', desc: 'Vaazhapoo — packed with iron, used in classic South Indian dishes.' },
     { id: 79, name: 'Beetroot',                   cat: 'Fresh Vegetables',    sizes: '250g / 500g / 1kg',        price: '₹30', storage: 'Fresh', desc: 'Deep red beetroot — great for poriyal, juice, and salads.' },
     { id: 80, name: 'Sweet Potato',               cat: 'Fresh Vegetables',    sizes: '250g / 500g / 1kg',        price: '₹35', storage: 'Fresh', desc: 'Naturally sweet and healthy — boil, bake, or make into curry.' },
-    { id: 43, name: 'Peeled Potato',              cat: 'Fresh Prep',          sizes: '250g / 500g / 1kg',        price: '₹30', storage: 'Refrigerated', desc: 'Fresh potatoes peeled and ready to cut or boil.' },
-    { id: 44, name: 'Chopped Tomato',             cat: 'Fresh Prep',          sizes: '250g / 500g',              price: '₹30', storage: 'Refrigerated', desc: 'Ripe tomatoes freshly chopped and ready to cook.' },
-    { id: 45, name: 'Chopped Capsicum',           cat: 'Fresh Prep',          sizes: '100g / 250g',              price: '₹50', storage: 'Refrigerated', desc: 'Fresh capsicum chopped and ready for stir-fry or salads.' },
+    { id: 43, name: 'Peeled Potato',              cat: 'Peeled Veg',          sizes: '250g / 500g / 1kg',        price: '₹30', storage: 'Refrigerated', desc: 'Fresh potatoes peeled and ready to cut or boil.' },
+    { id: 44, name: 'Chopped Tomato',             cat: 'Cut Vegetables',      sizes: '250g / 500g',              price: '₹30', storage: 'Refrigerated', desc: 'Ripe tomatoes freshly chopped and ready to cook.' },
+    { id: 45, name: 'Chopped Capsicum',           cat: 'Cut Vegetables',      sizes: '100g / 250g',              price: '₹50', storage: 'Refrigerated', desc: 'Fresh capsicum chopped and ready for stir-fry or salads.' },
 
     // Category: Cut Vegetables
     { id: 8,  name: 'Cut Carrot',                 cat: 'Cut Vegetables',      sizes: '250g / 500g / 1kg',        price: '₹35', storage: 'Refrigerated', desc: 'Sweet orange carrots, washed, peeled, and diced.' },
@@ -3126,7 +3126,7 @@ function getCatalogProductById(id) {
 }
 
 const categoryImages = {
-    'Fresh Prep':          './zafraan-images/prep-peeled-potato.png?v=3',
+    'Peeled Veg':          './zafraan-images/prep-peeled-potato.png?v=3',
     'Fresh Vegetables':    './zafraan-images/veg-tomato.png?v=3',
     'Cut Vegetables':      './zafraan-images/cut-tomato.png?v=3',
     'Spices & Seasonings': './zafraan-images/08-garlic-powder.png',
@@ -3199,7 +3199,7 @@ const productImages = {
   'Pizza Combo': './zafraan-images/23-pizza-combo.png',
   'Burger Combo': './zafraan-images/24-burger-combo.png',
 
-  // ---- Fresh Prep (additional) ----
+  // ---- Peeled Veg (additional) ----
   'Peeled Potato': './zafraan-images/prep-peeled-potato.png',
   'Chopped Tomato': './zafraan-images/prep-chopped-tomato.png',
   'Chopped Capsicum': './zafraan-images/prep-chopped-capsicum.png',
