@@ -2574,10 +2574,18 @@
                             </div>
                         </label>
                         <label class="payment-method-option">
+                            <input type="radio" name="paymentMethod" value="upi" onchange="onPaymentMethodChange()">
+                            <div class="payment-method-card">
+                                <span class="pm-icon">📱</span>
+                                <span>Pay via UPI</span>
+                                <div style="font-size:10px;color:var(--text-secondary);margin-top:2px;">Google Pay · PhonePe · Paytm · CRED</div>
+                            </div>
+                        </label>
+                        <label class="payment-method-option">
                             <input type="radio" name="paymentMethod" value="razorpay" onchange="onPaymentMethodChange()">
                             <div class="payment-method-card">
                                 <span class="pm-icon">💳</span>
-                                <span>Pay Online</span>
+                                <span>Razorpay</span>
                                 <div style="font-size:10px;color:var(--text-secondary);margin-top:2px;">UPI · Cards · NetBanking</div>
                             </div>
                         </label>
@@ -2640,11 +2648,18 @@
         = await import('https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js');
   const { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, query, where, getDocs }
         = await import('https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js');
+  const { getFunctions, httpsCallable }
+        = await import('https://www.gstatic.com/firebasejs/10.12.4/firebase-functions.js');
 
   const app  = getApps().length ? getApps()[0] : initializeApp(config);
   const auth = getAuth(app);
   const db   = getFirestore(app);
+  const functions = getFunctions(app, 'asia-south1');
   window.zafDb = db;
+  window.zafCreateRazorpayOrder = async payload =>
+    (await httpsCallable(functions, 'createRazorpayOrder')(payload)).data;
+  window.zafVerifyRazorpayPayment = async payload =>
+    (await httpsCallable(functions, 'verifyRazorpayPayment')(payload)).data;
 
   // ---- referral code generation ----
   function genCode() {
@@ -2797,21 +2812,24 @@
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
     try {
-      // Use a full-page redirect as the primary flow. On static hosts (GitHub Pages) we can't
-      // set a Cross-Origin-Opener-Policy header, so signInWithPopup's popup gets cut off from
-      // this page and hangs without ever resolving. Redirect doesn't rely on the popup channel.
-      await signInWithRedirect(auth, provider);
+      // Popup is the primary flow. signInWithRedirect silently fails on this site because
+      // the auth handler lives on zafraan-666ea.firebaseapp.com (a different domain than
+      // zafraanfood.com), and modern browsers partition its third-party storage — the
+      // redirect completes but the sign-in result is lost. GitHub Pages sends no COOP
+      // header, so the popup channel works fine here.
+      await signInWithPopup(auth, provider);
     } catch (e) {
-      // Last resort: try the popup (e.g. environments where redirect isn't supported)
-      try {
-        await signInWithPopup(auth, provider);
-      } catch (e2) {
-        if (e2.code === 'auth/popup-closed-by-user' || e2.code === 'auth/cancelled-popup-request') {
-          showError('authError', 'Sign-in cancelled.');
-          return;
-        }
-        showError('authError', e2.message || 'Google sign-in failed.');
+      if (e.code === 'auth/popup-closed-by-user' || e.code === 'auth/cancelled-popup-request') {
+        showError('authError', 'Sign-in cancelled.');
+        return;
       }
+      if (e.code === 'auth/popup-blocked') {
+        // Popup blocked (e.g. some in-app browsers) — fall back to full-page redirect
+        try { await signInWithRedirect(auth, provider); }
+        catch (e2) { showError('authError', e2.message || 'Google sign-in failed.'); }
+        return;
+      }
+      showError('authError', e.message || 'Google sign-in failed.');
     }
   });
 
@@ -3179,7 +3197,58 @@ const productImages = {
   'Salt & Pepper Makhana': './zafraan-images/21-salt-pepper-makhana.png',
   'Mint Makhana': './zafraan-images/22-mint-makhana.png',
   'Pizza Combo': './zafraan-images/23-pizza-combo.png',
-  'Burger Combo': './zafraan-images/24-burger-combo.png'
+  'Burger Combo': './zafraan-images/24-burger-combo.png',
+
+  // ---- Fresh Prep (additional) ----
+  'Peeled Potato': './zafraan-images/prep-peeled-potato.png',
+  'Chopped Tomato': './zafraan-images/prep-chopped-tomato.png',
+  'Chopped Capsicum': './zafraan-images/prep-chopped-capsicum.png',
+
+  // ---- Fresh Vegetables ----
+  'Tomato': './zafraan-images/veg-tomato.png',
+  'Raw Ginger': './zafraan-images/veg-raw-ginger.png',
+  'Potato': './zafraan-images/veg-potato.png',
+  'Big Onion': './zafraan-images/veg-big-onion.png',
+  'Brinjal': './zafraan-images/veg-brinjal.png',
+  'Ladies Finger': './zafraan-images/veg-ladies-finger.png',
+  'Carrot': './zafraan-images/veg-carrot.png',
+  'Bitter Gourd': './zafraan-images/veg-bitter-gourd.png',
+  'Capsicum': './zafraan-images/veg-capsicum.png',
+  'Cauliflower': './zafraan-images/veg-cauliflower.png',
+  'Cabbage': './zafraan-images/veg-cabbage.png',
+  'Beans': './zafraan-images/veg-beans.png',
+  'Drumstick': './zafraan-images/veg-drumstick.png',
+  'Raw Banana': './zafraan-images/veg-raw-banana.png',
+  'Pumpkin': './zafraan-images/veg-pumpkin.png',
+  'Bottle Gourd': './zafraan-images/veg-bottle-gourd.png',
+  'Ridge Gourd': './zafraan-images/veg-ridge-gourd.png',
+  'Snake Gourd': './zafraan-images/veg-snake-gourd.png',
+  'Cluster Beans': './zafraan-images/veg-cluster-beans.png',
+  'Broad Beans': './zafraan-images/veg-broad-beans.png',
+  'Yam': './zafraan-images/veg-yam.png',
+  'Taro Root': './zafraan-images/veg-taro-root.png',
+  'Corn': './zafraan-images/veg-corn.png',
+  'Green Chilies': './zafraan-images/veg-green-chilies.png',
+  'Cucumber': './zafraan-images/veg-cucumber.png',
+  'Radish': './zafraan-images/veg-radish.png',
+  'Ash Gourd': './zafraan-images/veg-ash-gourd.png',
+  'Banana Flower': './zafraan-images/veg-banana-flower.png',
+  'Beetroot': './zafraan-images/veg-beetroot.png',
+  'Sweet Potato': './zafraan-images/veg-sweet-potato.png',
+
+  // ---- Cut Vegetables (additional) ----
+  'Cut Tomato': './zafraan-images/cut-tomato.png',
+  'Cut Brinjal': './zafraan-images/cut-brinjal.png',
+  'Cut Bitter Gourd': './zafraan-images/cut-bitter-gourd.png',
+  'Cut Ridge Gourd': './zafraan-images/cut-ridge-gourd.png',
+  'Cut Capsicum': './zafraan-images/cut-capsicum.png',
+  'Cut Cluster Beans': './zafraan-images/cut-cluster-beans.png',
+  'Cut Cabbage': './zafraan-images/cut-cabbage.png',
+  'Cut Cauliflower': './zafraan-images/cut-cauliflower.png',
+  'Cut Raw Banana': './zafraan-images/cut-raw-banana.png',
+  'Cut Snake Gourd': './zafraan-images/cut-snake-gourd.png',
+  'Cut Ash Gourd': './zafraan-images/cut-ash-gourd.png',
+  'Cut Broad Beans': './zafraan-images/cut-broad-beans.png'
 };
 
 function buildProductCard(p, isSpecialCard = false) {
@@ -3200,6 +3269,7 @@ function buildProductCard(p, isSpecialCard = false) {
             <div class="product-badge">${p.cat}</div>
             <img src="${productImages[p.name] || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=800&q=80'}"
                 alt="${p.name}"
+                onerror="this.onerror=null;this.src='./icon.svg'"
                 style="width:100%;height:100%;object-fit:cover;">
         </div>
         <div class="product-body">
@@ -3274,6 +3344,7 @@ function openModal(id) {
         <button class="modal-close" onclick="closeModal()">×</button>
         <img src="${productImages[p.name] || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=800&q=80'}" 
              alt="${p.name}" 
+             onerror="this.onerror=null;this.src='./icon.svg'"
              style="width:100%;height:100%;object-fit:cover;">
     `;
     
@@ -3492,6 +3563,16 @@ const whatsappNumber = "917904788173";
 // ---- Payment method ----
 let selectedUpiApp = null;
 
+function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, char => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+    })[char]);
+}
+
 const UPI_SCHEMES = {
     gpay:    amt => `tez://upi/pay?pa=${window.ZAFRAAN_UPI_ID}&pn=ZAFRAAN+Foods&am=${amt}&cu=INR`,
     phonepe: amt => `phonepe://pay?pa=${window.ZAFRAAN_UPI_ID}&pn=ZAFRAAN+Foods&am=${amt}&cu=INR`,
@@ -3514,7 +3595,7 @@ function onPaymentMethodChange() {
         document.querySelectorAll('.upi-app-btn').forEach(b => b.classList.remove('selected'));
     }
     if (isRazorpay) {
-        document.getElementById('placeOrderBtn').textContent = 'Pay Online via Razorpay';
+        document.getElementById('placeOrderBtn').textContent = 'Pay Securely with Razorpay';
     } else if (isUpi) {
         document.getElementById('placeOrderBtn').textContent = 'Pay & Place Order';
     } else {
@@ -4016,8 +4097,10 @@ async function placeOrder() {
     }
 
     if (isUpi && !selectedUpiApp) { setCheckoutError('Please select a UPI app to pay with.'); return; }
-    if (isRazorpay && typeof Razorpay === 'undefined') { setCheckoutError('Payment gateway not loaded. Please refresh the page and try again.'); return; }
-
+    if (isRazorpay && (typeof Razorpay === 'undefined' || typeof window.zafCreateRazorpayOrder !== 'function')) {
+        setCheckoutError('Secure payment service is not ready. Please refresh and try again.');
+        return;
+    }
     setCheckoutError('');
 
     // Save a brand-new manual address to the profile if requested
@@ -4038,6 +4121,11 @@ async function placeOrder() {
     const coinsUsed = t.coinsUsed;
     const grandTotal = t.grandTotal;
 
+    if (isRazorpay) {
+        await startSecureRazorpayCheckout({ address, addrObj, phoneDigits, coinsUsed });
+        return;
+    }
+
     // Delivery OTP (feature 4) — shown to customer, verified by delivery partner
     const deliveryOtp = String(Math.floor(1000 + Math.random() * 9000));
 
@@ -4050,15 +4138,23 @@ async function placeOrder() {
         userId: window.zafProfile.uid || '',
         referralCodeUsed: window.zafProfile.referredBy || '',
         deliveryOtp,
-        paymentMethod: isUpi ? UPI_NAMES[selectedUpiApp] + ' (UPI)' : isRazorpay ? 'Razorpay (Online)' : 'Cash on Delivery',
-        status: isUpi ? 'Pending Payment' : isRazorpay ? 'Pending Payment' : 'Confirmed', createdAt
+        paymentMethod: isUpi ? UPI_NAMES[selectedUpiApp] + ' (UPI)' : 'Cash on Delivery',
+        status: isUpi ? 'Pending Payment' : 'Confirmed', createdAt
     };
 
-    // Firestore save + coin deduction happen immediately for COD/UPI; Razorpay handler does it after payment
-    if (!isRazorpay) {
-        saveOrderToFirestore(orderData);
+    const placeOrderBtn = document.getElementById('placeOrderBtn');
+    placeOrderBtn.disabled = true;
+    placeOrderBtn.textContent = 'Saving Order…';
+    try {
+        await saveOrderToFirestore(orderData);
         saveOrderToHistory(phoneDigits, orderData);
         if (coinsUsed > 0 && typeof window.zafDeductCoins === 'function') await window.zafDeductCoins(coinsUsed);
+    } catch (error) {
+        console.error('Order placement failed:', error);
+        setCheckoutError('Your order could not be saved. Nothing was charged or cleared—please try again.');
+        placeOrderBtn.disabled = false;
+        placeOrderBtn.textContent = isUpi ? 'Pay & Place Order' : 'Place Order';
+        return;
     }
 
     const cartLines = cart.map((item, i) =>
@@ -4078,63 +4174,10 @@ async function placeOrder() {
         `Total: ₹${grandTotal}`,
         '',
         `Name: ${name}`, `Mobile: ${phone}`, `Address: ${address}`,
-        '', `Payment: ${isUpi ? UPI_NAMES[selectedUpiApp] + ' (UPI)' : isRazorpay ? 'Razorpay (Online)' : 'Cash on Delivery'}`
+        '', `Payment: ${isUpi ? UPI_NAMES[selectedUpiApp] + ' (UPI)' : 'Cash on Delivery'}`
     ].join('\n');
 
     const chosenUpiApp = selectedUpiApp; // capture before state reset
-
-    // ---- RAZORPAY FLOW ----
-    if (isRazorpay) {
-        // Hide checkout modal NOW so its backdrop-filter stacking context doesn't block Razorpay's iframe
-        document.getElementById('upiModalOverlay').style.display = 'none';
-
-        const rzpOptions = {
-            key: window.ZAFRAAN_RAZORPAY_KEY_ID,
-            amount: Math.round(grandTotal * 100), // integer paise — no floating-point drift
-            currency: 'INR',
-            name: 'ZAFRAAN Foods',
-            description: 'Fresh Vegetables & Foods — ' + orderId,
-            image: './icon.svg',
-            prefill: { name: name, contact: '+91' + phoneDigits },
-            notes: { address: address, order_ref: orderId },
-            theme: { color: '#00e676' },
-            handler: function(response) {
-                const paymentId = response.razorpay_payment_id;
-                const paidOrder = { ...orderData, status: 'Payment Received', razorpayPaymentId: paymentId };
-                saveOrderToFirestore(paidOrder);
-                saveOrderToHistory(phoneDigits, paidOrder);
-                if (coinsUsed > 0 && typeof window.zafDeductCoins === 'function') window.zafDeductCoins(coinsUsed);
-                cart = []; saveCart(); updateBadge();
-                selectedUpiApp = null;
-                const codR = document.querySelector('input[name="paymentMethod"][value="cod"]');
-                if (codR) codR.checked = true;
-                onPaymentMethodChange();
-
-                // Show dedicated thank-you screen — solid background beats any Razorpay z-index remnants
-                document.getElementById('rzpThankOrderId').textContent = orderId;
-                document.getElementById('rzpThankPayId').textContent   = paymentId;
-                const myCode = (window.zafProfile && window.zafProfile.myReferralCode) || '';
-                document.getElementById('rzpThankReferral').innerHTML  = otpBlockHtml(deliveryOtp) + (myCode ? referralBoxHtml(myCode) : '');
-                document.getElementById('rzpThankYou').style.display   = 'block';
-                window.scrollTo(0, 0);
-            },
-            modal: {
-                ondismiss: function() {
-                    // Re-open the checkout modal so user can try again
-                    document.getElementById('upiModalOverlay').style.display = 'flex';
-                    setCheckoutError('Payment was cancelled. Your order has not been placed.');
-                }
-            }
-        };
-        const rzpInstance = new Razorpay(rzpOptions);
-        rzpInstance.on('payment.failed', function(resp) {
-            document.getElementById('upiModalOverlay').style.display = 'flex';
-            setCheckoutError('Payment failed: ' + (resp.error.description || 'Please try again.'));
-        });
-        rzpInstance.open();
-        return;
-    }
-    // ---- END RAZORPAY ----
 
     cart = [];
     saveCart();
@@ -4187,11 +4230,94 @@ async function placeOrder() {
     const codR = document.querySelector('input[name="paymentMethod"][value="cod"]');
     if (codR) codR.checked = true;
     const pob = document.getElementById('placeOrderBtn');
-    if (pob) pob.textContent = 'Place Order';
+    if (pob) {
+        pob.disabled = false;
+        pob.textContent = 'Place Order';
+    }
 
     // Show delivery OTP + the customer's own referral code
     const myCode = (window.zafProfile && window.zafProfile.myReferralCode) || '';
     document.getElementById('postOrderReferral').innerHTML = otpBlockHtml(deliveryOtp) + (myCode ? referralBoxHtml(myCode) : '');
+}
+
+async function startSecureRazorpayCheckout({ address, phoneDigits, coinsUsed }) {
+    const placeOrderBtn = document.getElementById('placeOrderBtn');
+    placeOrderBtn.disabled = true;
+    placeOrderBtn.textContent = 'Preparing Secure Payment…';
+
+    try {
+        const paymentOrder = await window.zafCreateRazorpayOrder({
+            items: cart.map(item => ({ id: item.id, size: item.size, qty: item.qty })),
+            deliveryAddress: address,
+            coinsRequested: coinsUsed
+        });
+
+        const razorpay = new Razorpay({
+            key: paymentOrder.keyId,
+            amount: paymentOrder.amount,
+            currency: 'INR',
+            order_id: paymentOrder.razorpayOrderId,
+            name: 'ZAFRAAN Foods',
+            description: 'Fresh Vegetables & Foods',
+            image: './icon.svg',
+            prefill: {
+                name: window.zafProfile.name || '',
+                contact: '+91' + phoneDigits,
+                email: window.zafProfile.email || ''
+            },
+            notes: { order_ref: paymentOrder.receipt },
+            theme: { color: '#00e676' },
+            handler: async response => {
+                try {
+                    placeOrderBtn.textContent = 'Verifying Payment…';
+                    const result = await window.zafVerifyRazorpayPayment({
+                        razorpayOrderId: response.razorpay_order_id,
+                        razorpayPaymentId: response.razorpay_payment_id,
+                        razorpaySignature: response.razorpay_signature
+                    });
+                    const paidOrder = result.order;
+                    saveOrderToHistory(phoneDigits, paidOrder);
+                    cart = [];
+                    saveCart();
+                    updateBadge();
+                    document.getElementById('upiModalOverlay').style.display = 'none';
+                    document.getElementById('rzpThankOrderId').textContent = paidOrder.orderId;
+                    document.getElementById('rzpThankPayId').textContent = response.razorpay_payment_id;
+                    document.getElementById('rzpThankReferral').innerHTML =
+                        otpBlockHtml(paidOrder.deliveryOtp) +
+                        (window.zafProfile.myReferralCode ? referralBoxHtml(window.zafProfile.myReferralCode) : '');
+                    document.getElementById('rzpThankYou').style.display = 'block';
+                    if (typeof window.zafReloadProfile === 'function') await window.zafReloadProfile();
+                } catch (error) {
+                    console.error('Payment verification failed:', error);
+                    document.getElementById('upiModalOverlay').style.display = 'flex';
+                    setCheckoutError('Payment verification is pending. Keep your Razorpay payment ID and contact support—do not pay again.');
+                } finally {
+                    placeOrderBtn.disabled = false;
+                    placeOrderBtn.textContent = 'Pay Securely with Razorpay';
+                }
+            },
+            modal: {
+                ondismiss: () => {
+                    placeOrderBtn.disabled = false;
+                    placeOrderBtn.textContent = 'Pay Securely with Razorpay';
+                    setCheckoutError('Payment was cancelled. Your order has not been placed.');
+                }
+            }
+        });
+
+        razorpay.on('payment.failed', response => {
+            placeOrderBtn.disabled = false;
+            placeOrderBtn.textContent = 'Pay Securely with Razorpay';
+            setCheckoutError('Payment failed: ' + (response.error?.description || 'Please try again.'));
+        });
+        razorpay.open();
+    } catch (error) {
+        console.error('Could not create Razorpay order:', error);
+        placeOrderBtn.disabled = false;
+        placeOrderBtn.textContent = 'Pay Securely with Razorpay';
+        setCheckoutError('Could not start secure payment. Please try again.');
+    }
 }
 
 // ---- shared post-order HTML helpers ----
@@ -4286,15 +4412,10 @@ async function loadAdminCatalog() {
 
 async function saveOrderToFirestore(orderData) {
     if (!firestoreDb || !firestoreSetDoc || !firestoreDocFn) {
-        console.warn('Firestore not initialized, order not saved to cloud.');
-        return;
+        throw new Error('Firestore is not initialized.');
     }
-    try {
-        await firestoreSetDoc(firestoreDocFn(firestoreDb, 'orders', orderData.orderId), orderData);
-        console.log('Order saved to Firestore:', orderData.orderId);
-    } catch (err) {
-        console.error('Failed to save order:', err);
-    }
+    await firestoreSetDoc(firestoreDocFn(firestoreDb, 'orders', orderData.orderId), orderData);
+    console.log('Order saved to Firestore:', orderData.orderId);
 }
 
 // ---- ORDER HISTORY ----
@@ -4494,16 +4615,18 @@ function renderTrackingOrders(orders) {
     }
     el.innerHTML = orders.map(order => {
         const date = new Date(order.createdAt).toLocaleString('en-IN', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
-        const itemsSummary = (order.items || []).map(i => `${i.name} (${i.size}) ×${i.qty}`).join(', ');
+        const itemsSummary = (order.items || []).map(i =>
+            `${escapeHtml(i.name)} (${escapeHtml(i.size)}) ×${escapeHtml(i.qty)}`
+        ).join(', ');
         const otpRow = (order.deliveryOtp && order.status !== 'Delivered' && order.status !== 'Cancelled')
-            ? `<div style="margin-top:12px;background:rgba(0,230,118,0.08);border:1px dashed var(--neon-green);border-radius:8px;padding:10px 12px;text-align:center;"><span style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--neon-green);">Delivery OTP</span><div style="font-size:24px;font-weight:700;letter-spacing:8px;color:#fff;padding-left:8px;">${order.deliveryOtp}</div><div style="font-size:10px;color:var(--text-secondary);margin-top:4px;">Give to the delivery partner on arrival</div></div>`
+            ? `<div style="margin-top:12px;background:rgba(0,230,118,0.08);border:1px dashed var(--neon-green);border-radius:8px;padding:10px 12px;text-align:center;"><span style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--neon-green);">Delivery OTP</span><div style="font-size:24px;font-weight:700;letter-spacing:8px;color:#fff;padding-left:8px;">${escapeHtml(order.deliveryOtp)}</div><div style="font-size:10px;color:var(--text-secondary);margin-top:4px;">Give to the delivery partner on arrival</div></div>`
             : '';
         return `<div class="track-order-card">
-            <div class="track-order-id">${order.orderId}</div>
+            <div class="track-order-id">${escapeHtml(order.orderId)}</div>
             <div class="track-order-date">${date}</div>
-            ${renderStatusStepper(order.status)}
+            ${renderStatusStepper(String(order.status || ''))}
             <div class="track-order-items" style="margin-top:14px;">${itemsSummary}</div>
-            <div class="track-order-total">Total: ₹${order.totalPrice}</div>
+            <div class="track-order-total">Total: ₹${escapeHtml(order.totalPrice)}</div>
             ${otpRow}
         </div>`;
     }).join('');
