@@ -277,6 +277,20 @@
         .info-cell p { font-size: 14px; line-height: 1.5; }
         .phone-link { color: var(--neon-green); text-decoration: none; }
         .phone-link:hover { text-decoration: underline; }
+        .map-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 8px;
+            padding: 8px 12px;
+            border: 1px solid rgba(0,230,118,0.4);
+            border-radius: 8px;
+            color: var(--neon-green);
+            font-size: 12px;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .map-link:hover { background: rgba(0,230,118,0.08); }
 
         .items-wrap {
             border-top: 1px solid var(--border-color);
@@ -416,6 +430,10 @@
         const d = document.createElement('div');
         d.textContent = String(str ?? '');
         return d.innerHTML;
+    }
+
+    function googleMapsUrl(address) {
+        return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(String(address || ''))}`;
     }
 
     function showStatus(msg, isErr = false) {
@@ -564,6 +582,7 @@
                     <div class="info-cell wide">
                         <label>Delivery Address</label>
                         <p>${s(o.deliveryAddress)}</p>
+                        <a class="map-link" href="${googleMapsUrl(o.deliveryAddress)}" target="_blank" rel="noopener noreferrer">📍 Open in Google Maps</a>
                     </div>
                 </div>
                 <div class="items-wrap">
