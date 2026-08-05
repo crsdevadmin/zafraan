@@ -637,18 +637,19 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            background: rgba(255,255,255,0.025);
-            border: 1px solid var(--border-color);
+            background: #171717;
+            border: 1px solid rgba(255,255,255,0.24);
             border-radius: 999px;
             padding: 7px 17px 7px 8px;
             cursor: pointer;
             font-family: 'Outfit', sans-serif;
             font-size: 13px;
             font-weight: 500;
-            color: var(--text-secondary);
+            color: #ededed;
             flex-shrink: 0;
             white-space: nowrap;
             scroll-snap-align: start;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.3);
             transition: color 0.2s, border-color 0.2s, background 0.2s, box-shadow 0.2s, transform 0.2s;
         }
         .cat-tab img {
@@ -674,8 +675,9 @@
             border-radius: 0;
         }
         .cat-tab:hover {
-            color: var(--text-primary);
-            border-color: rgba(0,230,118,0.45);
+            color: #fff;
+            background: #202020;
+            border-color: rgba(0,230,118,0.65);
             transform: translateY(-1px);
         }
         .cat-tab.active {
