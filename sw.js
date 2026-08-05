@@ -1,4 +1,4 @@
-const CACHE = 'zafraan-v16';
+const CACHE = 'zafraan-v17';
 
 const PRECACHE = [
   './',
@@ -37,7 +37,11 @@ const PRECACHE = [
   './zafraan-images/21-salt-pepper-makhana.png',
   './zafraan-images/22-mint-makhana.png',
   './zafraan-images/23-pizza-combo.png',
-  './zafraan-images/24-burger-combo.png'
+  './zafraan-images/24-burger-combo.png',
+  './zafraan-images/pack-sambar-veggies.png',
+  './zafraan-images/pack-poriyal-veggies.png',
+  './zafraan-images/pack-kootu-veggies.png',
+  './zafraan-images/veg-sambar-onion.png'
 ];
 
 // Install: pre-cache all static assets

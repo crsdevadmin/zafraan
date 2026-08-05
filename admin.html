@@ -930,6 +930,7 @@
             { id: 78, name: 'Banana Flower',              cat: 'Fresh Vegetables',    sizes: 'Per piece',                price: 40 },
             { id: 79, name: 'Beetroot',                   cat: 'Fresh Vegetables',    sizes: '250g / 500g / 1kg',        price: 30 },
             { id: 80, name: 'Sweet Potato',               cat: 'Fresh Vegetables',    sizes: '250g / 500g / 1kg',        price: 35 },
+            { id: 83, name: 'Sambar Onion',                cat: 'Fresh Vegetables',    sizes: '250g / 500g / 1kg',        price: 40, visible: true },
 
             { id: 43, name: 'Peeled Potato',              cat: 'Peeled Veg',          sizes: '250g / 500g / 1kg',        price: 30 },
             { id: 44, name: 'Chopped Tomato',             cat: 'Cut Vegetables',      sizes: '250g / 500g',              price: 30 },
@@ -942,6 +943,8 @@
             { id: 11, name: 'Cut Drumstick',              cat: 'Cut Vegetables',      sizes: '250g / 500g / 1kg',        price: 45 },
             { id: 12, name: 'Cut Beans',                  cat: 'Cut Vegetables',      sizes: '250g / 500g / 1kg',        price: 40 },
             { id: 13, name: 'Sambar Veggies Pack',        cat: 'Cut Vegetables',      sizes: 'Pack',                     price: 60 },
+            { id: 81, name: 'Poriyal Veggies Pack',       cat: 'Cut Vegetables',      sizes: 'Pack',                     price: 60, visible: true },
+            { id: 82, name: 'Kootu Veggies Pack',         cat: 'Cut Vegetables',      sizes: 'Pack',                     price: 60, visible: true },
             { id: 31, name: 'Cut Tomato',                 cat: 'Cut Vegetables',      sizes: '250g / 500g / 1kg',        price: 25 },
             { id: 32, name: 'Cut Brinjal',                cat: 'Cut Vegetables',      sizes: '250g / 500g / 1kg',        price: 30 },
             { id: 33, name: 'Cut Bitter Gourd',           cat: 'Cut Vegetables',      sizes: '250g / 500g / 1kg',        price: 45 },
@@ -994,7 +997,9 @@
             'Cut Pumpkin': './zafraan-images/06-cut-pumpkin.png',
             'Cut Drumstick': './zafraan-images/07-cut-drumstick.png',
             'Cut Beans': './zafraan-images/08-cut-beans.png',
-            'Sambar Veggies Pack': './zafraan-images/04-veg-pack.png',
+            'Sambar Veggies Pack': './zafraan-images/pack-sambar-veggies.png',
+            'Poriyal Veggies Pack': './zafraan-images/pack-poriyal-veggies.png',
+            'Kootu Veggies Pack': './zafraan-images/pack-kootu-veggies.png',
             'Garlic Powder': './zafraan-images/08-garlic-powder.png',
             'Onion Powder': './zafraan-images/09-onion-powder.png',
             'Ginger Powder': './zafraan-images/10-ginger-powder.png',
@@ -1045,6 +1050,7 @@
             'Banana Flower': './zafraan-images/veg-banana-flower.png',
             'Beetroot': './zafraan-images/veg-beetroot.png',
             'Sweet Potato': './zafraan-images/veg-sweet-potato.png',
+            'Sambar Onion': './zafraan-images/veg-sambar-onion.png',
             'Cut Tomato': './zafraan-images/cut-tomato.png',
             'Cut Brinjal': './zafraan-images/cut-brinjal.png',
             'Cut Bitter Gourd': './zafraan-images/cut-bitter-gourd.png',
@@ -1255,7 +1261,7 @@
         function renderProducts(settings = {}) {
             productGrid.innerHTML = baseProducts.map(product => {
                 const saved = settings[String(product.id)] || {};
-                const visible = saved.visible === true;
+                const visible = saved.visible === undefined ? product.visible === true : saved.visible === true;
                 const price = Number(saved.price) || product.price;
                 const marketPrice = Number(saved.marketPrice) || 0;
                 const sizes = typeof saved.sizes === 'string' && saved.sizes.trim() ? saved.sizes.trim() : product.sizes;
