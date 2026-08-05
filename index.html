@@ -624,11 +624,12 @@
         /* ── Swiggy-style category tabs (image + text, horizontal scroll) ── */
         .category-tabs {
             display: flex;
-            gap: 0;
+            gap: 10px;
             margin-bottom: 32px;
+            padding: 2px 2px 8px;
             overflow-x: auto;
             scrollbar-width: none;
-            border-bottom: 1px solid var(--border-color);
+            scroll-snap-type: x proximity;
         }
         .category-tabs::-webkit-scrollbar { display: none; }
 
@@ -636,11 +637,10 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            background: transparent;
-            border: none;
-            border-bottom: 3px solid transparent;
-            padding: 10px 18px 10px 12px;
-            margin-bottom: -1px;
+            background: rgba(255,255,255,0.025);
+            border: 1px solid var(--border-color);
+            border-radius: 999px;
+            padding: 7px 17px 7px 8px;
             cursor: pointer;
             font-family: 'Outfit', sans-serif;
             font-size: 13px;
@@ -648,12 +648,13 @@
             color: var(--text-secondary);
             flex-shrink: 0;
             white-space: nowrap;
-            transition: color 0.2s, border-color 0.2s;
+            scroll-snap-align: start;
+            transition: color 0.2s, border-color 0.2s, background 0.2s, box-shadow 0.2s, transform 0.2s;
         }
         .cat-tab img {
             width: 34px;
             height: 34px;
-            border-radius: 8px;
+            border-radius: 50%;
             object-fit: cover;
             flex-shrink: 0;
         }
@@ -662,7 +663,7 @@
             grid-template-columns: 1fr 1fr;
             width: 34px;
             height: 34px;
-            border-radius: 8px;
+            border-radius: 50%;
             overflow: hidden;
             flex-shrink: 0;
         }
@@ -672,10 +673,16 @@
             object-fit: cover;
             border-radius: 0;
         }
-        .cat-tab:hover { color: var(--text-primary); }
+        .cat-tab:hover {
+            color: var(--text-primary);
+            border-color: rgba(0,230,118,0.45);
+            transform: translateY(-1px);
+        }
         .cat-tab.active {
             color: var(--neon-green);
-            border-bottom-color: var(--neon-green);
+            background: rgba(0,230,118,0.1);
+            border-color: var(--neon-green);
+            box-shadow: 0 0 14px rgba(0,230,118,0.12);
             font-weight: 600;
         }
 
