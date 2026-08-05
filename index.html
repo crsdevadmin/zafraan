@@ -3126,9 +3126,9 @@ function getCatalogProductById(id) {
 }
 
 const categoryImages = {
-    'Fresh Prep':          './zafraan-images/01-peeled-garlic.png',
-    'Fresh Vegetables':    './zafraan-images/05-curry-leaves.png',
-    'Cut Vegetables':      './zafraan-images/03-chopped-onion.png',
+    'Fresh Prep':          './zafraan-images/prep-peeled-potato.png?v=3',
+    'Fresh Vegetables':    './zafraan-images/veg-tomato.png?v=3',
+    'Cut Vegetables':      './zafraan-images/cut-tomato.png?v=3',
     'Spices & Seasonings': './zafraan-images/08-garlic-powder.png',
     'Gourmet Mayonnaise':  './zafraan-images/15-mayonnaise.png',
     'Roasted Makhana':     './zafraan-images/19-plain-makhana.png',
@@ -3145,10 +3145,10 @@ function renderTabs() {
         let imgHtml;
         if (c === 'All') {
             const imgs = [
-                './zafraan-images/01-peeled-garlic.png',
-                './zafraan-images/03-chopped-onion.png',
-                './zafraan-images/15-mayonnaise.png',
-                './zafraan-images/19-plain-makhana.png',
+                './zafraan-images/prep-peeled-potato.png?v=3',
+                './zafraan-images/veg-tomato.png?v=3',
+                './zafraan-images/cut-tomato.png?v=3',
+                './zafraan-images/15-mayonnaise.png?v=3',
             ];
             imgHtml = `<div class="cat-all-grid">${imgs.map(s => `<img src="${s}" alt="">`).join('')}</div>`;
         } else {
