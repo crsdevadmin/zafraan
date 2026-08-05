@@ -2941,12 +2941,12 @@
 </script>
 
 <script>
-const categories = ['All', 'Fresh Vegetables', 'Peeled Veg', 'Cut Vegetables', 'Poriyal & Sambar Packs', 'Spices & Seasonings', 'Gourmet Mayonnaise', 'Roasted Makhana', 'Premium Combos'];
+const categories = ['All', 'Fresh Vegetables', 'Peeled Veg', 'Cut Vegetables', 'Packs', 'Spices & Seasonings', 'Gourmet Mayonnaise', 'Roasted Makhana', 'Premium Combos'];
 
 const bgColors = {
     'Peeled Veg': ['#121212', '#181818'],
     'Cut Vegetables': ['#121212', '#181818'],
-    'Poriyal & Sambar Packs': ['#121212', '#181818'],
+    'Packs': ['#121212', '#181818'],
     'Spices & Seasonings': ['#121212', '#181818'],
     'Gourmet Mayonnaise': ['#121212', '#181818'],
     'Roasted Makhana': ['#121212', '#181818'],
@@ -2956,7 +2956,7 @@ const bgColors = {
 const iconColors = {
     'Peeled Veg': '#00e676',
     'Cut Vegetables': '#00e676',
-    'Poriyal & Sambar Packs': '#00e676',
+    'Packs': '#00e676',
     'Spices & Seasonings': '#00e676',
     'Gourmet Mayonnaise': '#00e676',
     'Roasted Makhana': '#00e676',
@@ -3027,24 +3027,24 @@ const products = [
     { id: 41, name: 'Cut Ash Gourd',              cat: 'Cut Vegetables',      sizes: '250g / 500g / 1kg',        price: '₹25', storage: 'Refrigerated', desc: 'Poosani cut fresh for sambar, kootu, and curries.' },
     { id: 42, name: 'Cut Broad Beans',            cat: 'Cut Vegetables',      sizes: '250g / 500g / 1kg',        price: '₹40', storage: 'Refrigerated', desc: 'Avarakkai cut and ready for poriyal or sambar.' },
 
-    // Category: Poriyal & Sambar Packs
-    { id: 13, name: 'Sambar Mixed Vegetable Pack', cat: 'Poriyal & Sambar Packs', sizes: 'Pack', price: '₹60', storage: 'Refrigerated', visible: true, desc: 'A ready-to-cook mix of freshly cut vegetables for sambar.' },
-    { id: 84, name: 'Drumstick & Brinjal Sambar Pack', cat: 'Poriyal & Sambar Packs', sizes: 'Pack', price: '₹60', storage: 'Refrigerated', visible: true, desc: 'Fresh drumstick, brinjal, tomato and shallots cut for sambar.' },
-    { id: 85, name: 'Pumpkin Sambar Pack',         cat: 'Poriyal & Sambar Packs', sizes: 'Pack', price: '₹60', storage: 'Refrigerated', visible: true, desc: 'Fresh pumpkin and supporting vegetables prepared for sambar.' },
-    { id: 86, name: 'Radish Sambar Pack',          cat: 'Poriyal & Sambar Packs', sizes: 'Pack', price: '₹60', storage: 'Refrigerated', visible: true, desc: 'Fresh radish, tomato, shallots and drumstick prepared for sambar.' },
-    { id: 87, name: 'Sambar Onion Pack',           cat: 'Poriyal & Sambar Packs', sizes: 'Pack', price: '₹60', storage: 'Refrigerated', visible: true, desc: 'Peeled small onions with tomato and curry leaves for sambar.' },
-    { id: 81, name: 'Mixed Poriyal Veggies Pack', cat: 'Poriyal & Sambar Packs', sizes: 'Pack', price: '₹60', storage: 'Refrigerated', visible: true, desc: 'Finely cut mixed vegetables prepared for a quick fresh poriyal.' },
-    { id: 88, name: 'Beans Poriyal Pack',          cat: 'Poriyal & Sambar Packs', sizes: 'Pack', price: '₹60', storage: 'Refrigerated', visible: true, desc: 'Fresh beans evenly chopped and ready for poriyal.' },
-    { id: 89, name: 'Cabbage Poriyal Pack',        cat: 'Poriyal & Sambar Packs', sizes: 'Pack', price: '₹60', storage: 'Refrigerated', visible: true, desc: 'Fresh cabbage finely cut and ready for poriyal.' },
-    { id: 90, name: 'Carrot & Beans Poriyal Pack', cat: 'Poriyal & Sambar Packs', sizes: 'Pack', price: '₹60', storage: 'Refrigerated', visible: true, desc: 'Fresh carrot and beans evenly diced for poriyal.' },
-    { id: 91, name: 'Beetroot Poriyal Pack',       cat: 'Poriyal & Sambar Packs', sizes: 'Pack', price: '₹60', storage: 'Refrigerated', visible: true, desc: 'Fresh beetroot diced and ready for poriyal.' },
-    { id: 92, name: 'Raw Banana Poriyal Pack',     cat: 'Poriyal & Sambar Packs', sizes: 'Pack', price: '₹60', storage: 'Refrigerated', visible: true, desc: 'Peeled raw banana cut into cubes for poriyal.' },
-    { id: 93, name: 'Ladies Finger Poriyal Pack', cat: 'Poriyal & Sambar Packs', sizes: 'Pack', price: '₹60', storage: 'Refrigerated', visible: true, desc: 'Fresh ladies finger sliced and ready for poriyal.' },
-    { id: 94, name: 'Cluster Beans Poriyal Pack', cat: 'Poriyal & Sambar Packs', sizes: 'Pack', price: '₹60', storage: 'Refrigerated', visible: true, desc: 'Fresh cluster beans trimmed and chopped for poriyal.' },
-    { id: 82, name: 'Mixed Kootu Veggies Pack',   cat: 'Poriyal & Sambar Packs', sizes: 'Pack', price: '₹60', storage: 'Refrigerated', visible: true, desc: 'Fresh mixed vegetables cut and ready for traditional kootu.' },
-    { id: 95, name: 'Bottle Gourd Kootu Pack',    cat: 'Poriyal & Sambar Packs', sizes: 'Pack', price: '₹60', storage: 'Refrigerated', visible: true, desc: 'Peeled bottle gourd cut into cubes for kootu.' },
-    { id: 96, name: 'Chow Chow Kootu Pack',       cat: 'Poriyal & Sambar Packs', sizes: 'Pack', price: '₹60', storage: 'Refrigerated', visible: true, desc: 'Fresh chow chow peeled and cubed for kootu.' },
-    { id: 97, name: 'Snake Gourd Kootu Pack',     cat: 'Poriyal & Sambar Packs', sizes: 'Pack', price: '₹60', storage: 'Refrigerated', visible: true, desc: 'Fresh snake gourd sliced and ready for kootu.' },
+    // Category: Packs
+    { id: 13, name: 'Sambar Mixed Vegetable Pack', cat: 'Packs', sizes: 'Pack', price: '₹60', storage: 'Refrigerated', visible: true, desc: 'A ready-to-cook mix of freshly cut vegetables for sambar.' },
+    { id: 84, name: 'Drumstick & Brinjal Sambar Pack', cat: 'Packs', sizes: 'Pack', price: '₹60', storage: 'Refrigerated', visible: true, desc: 'Fresh drumstick, brinjal, tomato and shallots cut for sambar.' },
+    { id: 85, name: 'Pumpkin Sambar Pack',         cat: 'Packs', sizes: 'Pack', price: '₹60', storage: 'Refrigerated', visible: true, desc: 'Fresh pumpkin and supporting vegetables prepared for sambar.' },
+    { id: 86, name: 'Radish Sambar Pack',          cat: 'Packs', sizes: 'Pack', price: '₹60', storage: 'Refrigerated', visible: true, desc: 'Fresh radish, tomato, shallots and drumstick prepared for sambar.' },
+    { id: 87, name: 'Sambar Onion Pack',           cat: 'Packs', sizes: 'Pack', price: '₹60', storage: 'Refrigerated', visible: true, desc: 'Peeled small onions with tomato and curry leaves for sambar.' },
+    { id: 81, name: 'Mixed Poriyal Veggies Pack', cat: 'Packs', sizes: 'Pack', price: '₹60', storage: 'Refrigerated', visible: true, desc: 'Finely cut mixed vegetables prepared for a quick fresh poriyal.' },
+    { id: 88, name: 'Beans Poriyal Pack',          cat: 'Packs', sizes: 'Pack', price: '₹60', storage: 'Refrigerated', visible: true, desc: 'Fresh beans evenly chopped and ready for poriyal.' },
+    { id: 89, name: 'Cabbage Poriyal Pack',        cat: 'Packs', sizes: 'Pack', price: '₹60', storage: 'Refrigerated', visible: true, desc: 'Fresh cabbage finely cut and ready for poriyal.' },
+    { id: 90, name: 'Carrot & Beans Poriyal Pack', cat: 'Packs', sizes: 'Pack', price: '₹60', storage: 'Refrigerated', visible: true, desc: 'Fresh carrot and beans evenly diced for poriyal.' },
+    { id: 91, name: 'Beetroot Poriyal Pack',       cat: 'Packs', sizes: 'Pack', price: '₹60', storage: 'Refrigerated', visible: true, desc: 'Fresh beetroot diced and ready for poriyal.' },
+    { id: 92, name: 'Raw Banana Poriyal Pack',     cat: 'Packs', sizes: 'Pack', price: '₹60', storage: 'Refrigerated', visible: true, desc: 'Peeled raw banana cut into cubes for poriyal.' },
+    { id: 93, name: 'Ladies Finger Poriyal Pack', cat: 'Packs', sizes: 'Pack', price: '₹60', storage: 'Refrigerated', visible: true, desc: 'Fresh ladies finger sliced and ready for poriyal.' },
+    { id: 94, name: 'Cluster Beans Poriyal Pack', cat: 'Packs', sizes: 'Pack', price: '₹60', storage: 'Refrigerated', visible: true, desc: 'Fresh cluster beans trimmed and chopped for poriyal.' },
+    { id: 82, name: 'Mixed Kootu Veggies Pack',   cat: 'Packs', sizes: 'Pack', price: '₹60', storage: 'Refrigerated', visible: true, desc: 'Fresh mixed vegetables cut and ready for traditional kootu.' },
+    { id: 95, name: 'Bottle Gourd Kootu Pack',    cat: 'Packs', sizes: 'Pack', price: '₹60', storage: 'Refrigerated', visible: true, desc: 'Peeled bottle gourd cut into cubes for kootu.' },
+    { id: 96, name: 'Chow Chow Kootu Pack',       cat: 'Packs', sizes: 'Pack', price: '₹60', storage: 'Refrigerated', visible: true, desc: 'Fresh chow chow peeled and cubed for kootu.' },
+    { id: 97, name: 'Snake Gourd Kootu Pack',     cat: 'Packs', sizes: 'Pack', price: '₹60', storage: 'Refrigerated', visible: true, desc: 'Fresh snake gourd sliced and ready for kootu.' },
 
     // Category: Spices & Seasonings
     { id: 14, name: 'Garlic Powder',              cat: 'Spices & Seasonings', sizes: '50g / 100g',               price: '₹120', storage: 'Dry', desc: 'Pure dehydrated garlic powder for instant seasoning.' },
@@ -3150,7 +3150,7 @@ const categoryImages = {
     'Peeled Veg':          './zafraan-images/prep-peeled-potato.png?v=3',
     'Fresh Vegetables':    './zafraan-images/veg-tomato.png?v=3',
     'Cut Vegetables':      './zafraan-images/cut-tomato.png?v=3',
-    'Poriyal & Sambar Packs': './zafraan-images/pack-sambar-veggies.png?v=2',
+    'Packs': './zafraan-images/pack-sambar-veggies.png?v=2',
     'Spices & Seasonings': './zafraan-images/08-garlic-powder.png',
     'Gourmet Mayonnaise':  './zafraan-images/15-mayonnaise.png',
     'Roasted Makhana':     './zafraan-images/19-plain-makhana.png',
