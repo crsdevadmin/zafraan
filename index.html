@@ -4132,18 +4132,23 @@ async function selectCustomerAddressPrediction(prediction) {
     await place.fetchFields({ fields: ['displayName', 'formattedAddress', 'location', 'viewport', 'addressComponents'] });
     if (!place.location) return;
     checkoutMapLocation = { lat: place.location.lat(), lng: place.location.lng() };
-    if (place.viewport) customerAddressMap.fitBounds(place.viewport);
-    else {
-        customerAddressMap.setCenter(place.location);
-        customerAddressMap.setZoom(17);
-    }
-    customerAddressMarker.setPosition(place.location);
+
+    // Fill the form before touching the map. The address must still update if
+    // Google Maps could not finish rendering on this device.
     document.getElementById('addrPincode').value = '';
+    fillAddressFromGoogleResult(place);
     try {
         await fillAddressFromGoogleCoordinates(place.location, place);
-    } catch (error) {
-        fillAddressFromGoogleResult(place);
+    } catch (error) { /* Place details above are still usable. */ }
+
+    if (customerAddressMap) {
+        if (place.viewport) customerAddressMap.fitBounds(place.viewport);
+        else {
+            customerAddressMap.setCenter(place.location);
+            customerAddressMap.setZoom(17);
+        }
     }
+    if (customerAddressMarker) customerAddressMarker.setPosition(place.location);
     const places = await google.maps.importLibrary('places');
     placesAutocompleteSession = new places.AutocompleteSessionToken();
 }
@@ -4184,10 +4189,14 @@ async function searchCustomerAddress() {
         const result = response.results[0];
         const loc = result.geometry.location;
         checkoutMapLocation = { lat: loc.lat(), lng: loc.lng() };
-        customerAddressMap.setCenter(loc);
-        customerAddressMap.setZoom(17);
-        customerAddressMarker.setPosition(loc);
+
+        // Populate the fields first so a map-rendering issue cannot block them.
         fillAddressFromGoogleResult(result, findGooglePostalCode(response.results));
+        if (customerAddressMap) {
+            customerAddressMap.setCenter(loc);
+            customerAddressMap.setZoom(17);
+        }
+        if (customerAddressMarker) customerAddressMarker.setPosition(loc);
     } catch (error) {
         document.getElementById('mapAddressStatus').textContent = 'Address not found. Try including the area or pincode.';
     }
