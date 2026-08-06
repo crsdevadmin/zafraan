@@ -3982,8 +3982,9 @@ async function initCustomerAddressPicker() {
 function fillAddressFromGoogleResult(result) {
     const components = {};
     (result.address_components || []).forEach(c => c.types.forEach(t => { if (!components[t]) components[t] = c.long_name; }));
-    document.getElementById('addrStreet').value = components.route || components.premise || '';
-    document.getElementById('addrArea').value = components.sublocality_level_1 || components.sublocality || components.neighborhood || '';
+    document.getElementById('addrSearch').value = result.formatted_address || document.getElementById('addrSearch').value;
+    document.getElementById('addrStreet').value = components.route || components.sublocality_level_3 || components.premise || '';
+    document.getElementById('addrArea').value = components.sublocality_level_2 || components.sublocality_level_1 || components.sublocality || components.neighborhood || '';
     document.getElementById('addrCity').value = components.locality || components.administrative_area_level_2 || 'Chennai';
     document.getElementById('addrPincode').value = (components.postal_code || '').replace(/\D/g, '').slice(0, 6);
     document.getElementById('mapAddressStatus').textContent = 'Pin selected. Add your door number and landmark, then confirm the address.';
@@ -4198,10 +4199,27 @@ async function useMyLocation() {
     btn.textContent = 'Getting location...';
 
     navigator.geolocation.getCurrentPosition(async (position) => {
-        const { latitude, longitude } = position.coords;
+        const { latitude, longitude, accuracy } = position.coords;
         checkoutMapLocation = { lat: latitude, lng: longitude };
-        if (window.google && window.google.maps) await setCustomerMapLocation(latitude, longitude, false);
         try {
+            const mapsLoaded = await loadCustomerGoogleMaps();
+            if (mapsLoaded) {
+                if (!customerAddressMap) await initCustomerAddressPicker();
+                await setCustomerMapLocation(latitude, longitude, true);
+                document.getElementById('addrDoor').focus();
+                btn.textContent = 'Precise location selected';
+                btn.style.background = '#005c2e';
+                const accuracyText = Number.isFinite(accuracy) ? ` GPS accuracy is approximately ${Math.round(accuracy)} metres.` : '';
+                document.getElementById('checkoutLocationNote').textContent =
+                    'Google Maps filled the nearest mapped address.' + accuracyText + ' Move the pin if needed, then enter your door / flat number.';
+                document.getElementById('mapAddressStatus').textContent =
+                    'Confirm the pin position and add your exact door number or landmark.';
+                updateConfirmText();
+                setCheckoutError('');
+                return;
+            }
+
+            // Fallback when the Google Maps browser key is not available.
             const res = await fetch(
                 `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`,
                 { headers: { 'Accept-Language': 'en-IN,en' } }
@@ -4237,7 +4255,7 @@ async function useMyLocation() {
         btn.textContent = 'Use My Location';
         // err.code 1 = PERMISSION_DENIED, 2 = POSITION_UNAVAILABLE, 3 = TIMEOUT
         showLocationGuide(err.code === 1 ? 'denied' : 'error');
-    }, { timeout: 10000 });
+    }, { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 });
 }
 
 async function placeOrder() {
