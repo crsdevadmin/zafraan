@@ -225,6 +225,8 @@
         .btn-track { flex:1; min-width:150px; border:1px solid rgba(0,230,118,.45); background:rgba(0,230,118,.08); color:var(--neon-green); padding:11px 14px; border-radius:9px; font-family:inherit; font-size:12px; font-weight:700; cursor:pointer; }
         .btn-track.stop { border-color:rgba(255,82,82,.45); background:rgba(255,82,82,.08); color:var(--red); }
         .tracking-state { width:100%; font-size:11px; color:var(--text-secondary); line-height:1.5; }
+        .delivery-inline-map { width:100%; height:240px; margin-top:14px; border:1px solid rgba(0,230,118,.28); border-radius:12px; overflow:hidden; background:#181818; }
+        .arrival-chip { display:inline-block; margin-top:10px; padding:6px 10px; border-radius:20px; background:rgba(0,230,118,.09); color:var(--neon-green); font-size:11px; font-weight:700; }
 
         /* ── ORDER CARD ── */
         .order-card {
@@ -432,6 +434,7 @@
     let trackingOrderId = '';
     let lastLocationWriteAt = 0;
     let lastLocationCoords = null;
+    let deliveryMapsLoadPromise = null;
 
     // ── HELPERS ──────────────────────────────────────────────────────────────
     function s(str) {
@@ -450,6 +453,36 @@
             return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${loc.lat},${loc.lng}`)}`;
         }
         return googleMapsUrl(order && order.deliveryAddress);
+    }
+
+    function arrivalText(order) {
+        const driver = order && order.driverLocation;
+        const customer = order && order.deliveryLocation;
+        if (!driver || !customer) return 'Customer location shown below';
+        const metres = metresBetween(
+            { lat:Number(driver.lat), lng:Number(driver.lng) },
+            { lat:Number(customer.lat), lng:Number(customer.lng) }
+        );
+        if (!Number.isFinite(metres)) return 'On the way';
+        if (metres <= 150) return 'Arriving now';
+        if (metres <= 500) return 'Arriving shortly';
+        return `On the way · ${(metres / 1000).toFixed(metres < 10000 ? 1 : 0)} km away`;
+    }
+
+    function loadDeliveryGoogleMaps() {
+        if (window.google && window.google.maps) return Promise.resolve(true);
+        if (deliveryMapsLoadPromise) return deliveryMapsLoadPromise;
+        const key = window.ZAFRAAN_GOOGLE_MAPS_BROWSER_KEY;
+        if (!key) return Promise.resolve(false);
+        deliveryMapsLoadPromise = new Promise((resolve, reject) => {
+            window.zafDeliveryMapsReady = () => resolve(true);
+            const script = document.createElement('script');
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&loading=async&callback=zafDeliveryMapsReady`;
+            script.async = true;
+            script.onerror = () => reject(new Error('Map could not be loaded'));
+            document.head.appendChild(script);
+        });
+        return deliveryMapsLoadPromise;
     }
 
     function showStatus(msg, isErr = false) {
@@ -556,6 +589,7 @@
 
         renderGrid('pendingGrid', pending, true);
         renderGrid('activeGrid', active, false);
+        setTimeout(() => initDeliveryOrderMaps(active), 0);
     }
 
     function renderGrid(id, orders, isPending) {
@@ -587,6 +621,10 @@
                         ? 'Live location is being shared with this customer. Keep this page open.'
                         : o.trackingActive ? 'Location sharing was started on another session.' : 'Start sharing when you leave for the customer.'}</div>
                 </div>`;
+            const hasCustomerPin = o.deliveryLocation && Number.isFinite(Number(o.deliveryLocation.lat)) && Number.isFinite(Number(o.deliveryLocation.lng));
+            const embeddedMap = !isPending && hasCustomerPin
+                ? `<div class="arrival-chip">${s(arrivalText(o))}</div><div class="delivery-inline-map" id="delivery-map-${s(o.orderId)}"></div>`
+                : '';
             return `
             <div class="order-card${o._new ? ' new' : ''}" id="oc-${s(o.orderId)}">
                 <div class="card-top">
@@ -608,7 +646,7 @@
                     <div class="info-cell wide">
                         <label>Delivery Address</label>
                         <p>${s(o.deliveryAddress)}</p>
-                        <a class="map-link" href="${customerMapsUrl(o)}" target="_blank" rel="noopener noreferrer">📍 Navigate in Google Maps</a>
+                        <span class="map-link" style="cursor:default;">📍 Route stays inside Zafraan below</span>
                     </div>
                 </div>
                 <div class="items-wrap">
@@ -623,8 +661,33 @@
                     ${btn}
                 </div>
                 ${trackingControls}
+                ${embeddedMap}
             </div>`;
         }).join('');
+    }
+
+    async function initDeliveryOrderMaps(orders) {
+        const mappable = orders.filter(o => o.deliveryLocation && Number.isFinite(Number(o.deliveryLocation.lat)) && Number.isFinite(Number(o.deliveryLocation.lng)));
+        if (!mappable.length) return;
+        try {
+            if (!await loadDeliveryGoogleMaps()) return;
+            mappable.forEach(order => {
+                const mapEl = document.getElementById(`delivery-map-${order.orderId}`);
+                if (!mapEl) return;
+                const customer = { lat:Number(order.deliveryLocation.lat), lng:Number(order.deliveryLocation.lng) };
+                const driver = order.driverLocation && Number.isFinite(Number(order.driverLocation.lat)) && Number.isFinite(Number(order.driverLocation.lng))
+                    ? { lat:Number(order.driverLocation.lat), lng:Number(order.driverLocation.lng) } : null;
+                const map = new google.maps.Map(mapEl, { center:driver || customer, zoom:16, mapTypeControl:false, streetViewControl:false, fullscreenControl:false });
+                new google.maps.Marker({ map, position:customer, title:'Customer', label:{ text:'C', color:'#fff', fontWeight:'700' } });
+                if (driver) {
+                    new google.maps.Marker({ map, position:driver, title:'Your live location', label:{ text:'🛵', fontSize:'20px' } });
+                    new google.maps.Polyline({ map, path:[driver, customer], geodesic:true, strokeColor:'#00e676', strokeOpacity:.85, strokeWeight:4 });
+                    const bounds = new google.maps.LatLngBounds(); bounds.extend(driver); bounds.extend(customer); map.fitBounds(bounds, 54);
+                }
+            });
+        } catch (error) {
+            showStatus('Could not display the in-app delivery map.', true);
+        }
     }
 
     // ── ORDER ACTIONS ────────────────────────────────────────────────────────

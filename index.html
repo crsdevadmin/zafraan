@@ -5013,6 +5013,24 @@ function renderStatusStepper(status) {
     }).join('') + `</div>`;
 }
 
+function trackingDistanceMetres(driver, customer) {
+    if (!driver || !customer) return Infinity;
+    const rad = value => value * Math.PI / 180;
+    const a = { lat:Number(driver.lat), lng:Number(driver.lng) };
+    const b = { lat:Number(customer.lat), lng:Number(customer.lng) };
+    const dLat = rad(b.lat - a.lat), dLng = rad(b.lng - a.lng);
+    const x = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLng / 2) ** 2;
+    return 6371000 * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
+}
+
+function customerArrivalText(order) {
+    const metres = trackingDistanceMetres(order.driverLocation, order.deliveryLocation);
+    if (!Number.isFinite(metres)) return 'On the way';
+    if (metres <= 150) return 'Arriving now';
+    if (metres <= 500) return 'Arriving shortly';
+    return `On the way · ${(metres / 1000).toFixed(metres < 10000 ? 1 : 0)} km away`;
+}
+
 function renderTrackingOrders(orders) {
     const el = document.getElementById('trackOrdersResult');
     if (!orders.length) {
@@ -5039,10 +5057,11 @@ function renderTrackingOrders(orders) {
         const routeUrl = hasDriverLocation && hasCustomerLocation
             ? `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(`${order.driverLocation.lat},${order.driverLocation.lng}`)}&destination=${encodeURIComponent(`${order.deliveryLocation.lat},${order.deliveryLocation.lng}`)}`
             : '';
+        const arrivalLabel = hasDriverLocation ? customerArrivalText(order) : 'On the way';
         const trackingBlock = order.status === 'Out for Delivery'
             ? hasDriverLocation
                 ? `<div class="live-tracking-box">
-                    <div class="live-tracking-head"><strong>${liveNow ? '● Delivery partner live' : 'Delivery partner — last location'}</strong><span>Updated ${escapeHtml(updated)}</span></div>
+                    <div class="live-tracking-head"><strong>${liveNow ? `🛵 ${escapeHtml(arrivalLabel)}` : 'Delivery partner — last location'}</strong><span>Updated ${escapeHtml(updated)}</span></div>
                     <div class="live-driver-map" id="driver-map-${escapeHtml(order.orderId)}"></div>
                     ${routeUrl ? `<a href="${routeUrl}" target="_blank" rel="noopener noreferrer" style="display:block;padding:10px 12px;color:var(--neon-green);font-size:12px;font-weight:600;text-align:center;text-decoration:none;border-top:1px solid rgba(0,230,118,.18);">Open live route &amp; ETA in Google Maps</a>` : ''}
                   </div>`
@@ -5076,7 +5095,7 @@ async function initCustomerDriverMaps(orders) {
                 ? { lat:Number(order.deliveryLocation.lat), lng:Number(order.deliveryLocation.lng) }
                 : null;
             const map = new google.maps.Map(mapEl, { center:driver, zoom:15, mapTypeControl:false, streetViewControl:false, fullscreenControl:false });
-            new google.maps.Marker({ map, position:driver, title:'Delivery partner', label:{ text:'D', color:'#000', fontWeight:'700' } });
+            new google.maps.Marker({ map, position:driver, title:'Delivery partner', label:{ text:'🛵', fontSize:'20px' } });
             if (customer) {
                 new google.maps.Marker({ map, position:customer, title:'Delivery address', label:{ text:'C', color:'#fff', fontWeight:'700' } });
                 new google.maps.Polyline({ map, path:[driver, customer], geodesic:true, strokeColor:'#00e676', strokeOpacity:.8, strokeWeight:3 });
