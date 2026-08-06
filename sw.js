@@ -1,4 +1,4 @@
-const CACHE = 'zafraan-v36';
+const CACHE = 'zafraan-v37';
 
 const PRECACHE = [
   './',
@@ -135,7 +135,10 @@ self.addEventListener('fetch', event => {
         const copy = res.clone();                          // clone synchronously, before returning
         if (res.ok) caches.open(CACHE).then(c => c.put(event.request, copy));
         return res;
-      });
+      }).catch(() => new Response('', {
+        status: 503,
+        statusText: 'Temporarily unavailable'
+      }));
     })
   );
 });
