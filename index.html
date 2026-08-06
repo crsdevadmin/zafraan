@@ -4283,6 +4283,7 @@ function closeUpiModal() {
 function showLocationGuide(reason) {
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
     const isAndroid = /Android/.test(navigator.userAgent);
+    const isMac = /Macintosh|Mac OS X/.test(navigator.userAgent);
     let steps = '';
     if (reason === 'denied') {
         if (isIOS) {
@@ -4303,6 +4304,13 @@ function showLocationGuide(reason) {
 2. Set <strong>Location</strong> to <strong>Allow</strong><br>
 3. Tap <strong>Try Again</strong>`;
         }
+    } else if (isMac) {
+        steps = `Your Mac could not determine its current location.<br><br>
+1. Open <strong>System Settings → Privacy & Security → Location Services</strong><br>
+2. Turn on <strong>Location Services</strong> and allow your browser<br>
+3. Keep <strong>Wi-Fi turned on</strong>, even if you use another internet connection<br>
+4. Return here and tap <strong>Try Again</strong><br><br>
+You can also search the address and place the map pin manually.`;
     } else {
         steps = `Could not detect your location. Make sure your device GPS / Location is turned on and try again.`;
     }
@@ -4340,7 +4348,7 @@ async function useMyLocation() {
     btn.disabled = true;
     btn.textContent = 'Getting location...';
 
-    navigator.geolocation.getCurrentPosition(async (position) => {
+    const handleLocationSuccess = async (position) => {
         const { latitude, longitude, accuracy } = position.coords;
         checkoutMapLocation = { lat: latitude, lng: longitude };
         try {
@@ -4392,12 +4400,33 @@ async function useMyLocation() {
             btn.textContent = 'Use My Location';
             showLocationGuide('error');
         }
-    }, (err) => {
+    };
+
+    const handleFinalLocationError = (err) => {
         btn.disabled = false;
         btn.textContent = 'Use My Location';
         // err.code 1 = PERMISSION_DENIED, 2 = POSITION_UNAVAILABLE, 3 = TIMEOUT
         showLocationGuide(err.code === 1 ? 'denied' : 'error');
-    }, { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 });
+    };
+
+    navigator.geolocation.getCurrentPosition(
+        handleLocationSuccess,
+        (firstError) => {
+            if (firstError.code === 1) {
+                handleFinalLocationError(firstError);
+                return;
+            }
+            btn.textContent = 'Trying nearby location...';
+            // Macs sometimes cannot provide a high-accuracy CoreLocation fix.
+            // Retry using the best recently available Wi-Fi/network position.
+            navigator.geolocation.getCurrentPosition(
+                handleLocationSuccess,
+                handleFinalLocationError,
+                { enableHighAccuracy: false, maximumAge: 300000, timeout: 15000 }
+            );
+        },
+        { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 }
+    );
 }
 
 async function placeOrder() {
