@@ -1,4 +1,4 @@
-const CACHE = 'zafraan-v28';
+const CACHE = 'zafraan-v29';
 
 const PRECACHE = [
   './',
@@ -98,6 +98,20 @@ self.addEventListener('fetch', event => {
 
   // Skip non-GET and cross-origin (Firebase, Google Fonts, etc.)
   if (event.request.method !== 'GET' || url.origin !== location.origin) return;
+
+  // Configuration can contain updated browser keys, so never serve a stale copy.
+  if (url.pathname.endsWith('/firebase-config.js')) {
+    event.respondWith(
+      fetch(event.request, { cache: 'no-store' })
+        .then(res => {
+          const copy = res.clone();
+          if (res.ok) caches.open(CACHE).then(c => c.put(event.request, copy));
+          return res;
+        })
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
 
   // HTML pages: network-first so content stays fresh
   if (event.request.headers.get('accept')?.includes('text/html')) {
