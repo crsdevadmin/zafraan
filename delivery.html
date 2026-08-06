@@ -221,6 +221,10 @@
         .badge.amber { background: var(--amber); }
 
         .orders-grid { display: grid; gap: 16px; }
+        .tracking-controls { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+        .btn-track { flex:1; min-width:150px; border:1px solid rgba(0,230,118,.45); background:rgba(0,230,118,.08); color:var(--neon-green); padding:11px 14px; border-radius:9px; font-family:inherit; font-size:12px; font-weight:700; cursor:pointer; }
+        .btn-track.stop { border-color:rgba(255,82,82,.45); background:rgba(255,82,82,.08); color:var(--red); }
+        .tracking-state { width:100%; font-size:11px; color:var(--text-secondary); line-height:1.5; }
 
         /* ── ORDER CARD ── */
         .order-card {
@@ -424,6 +428,10 @@
     let unsubscribe = null;
     let knownIds    = new Set();
     let allOrders   = [];
+    let trackingWatchId = null;
+    let trackingOrderId = '';
+    let lastLocationWriteAt = 0;
+    let lastLocationCoords = null;
 
     // ── HELPERS ──────────────────────────────────────────────────────────────
     function s(str) {
@@ -434,6 +442,14 @@
 
     function googleMapsUrl(address) {
         return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(String(address || ''))}`;
+    }
+
+    function customerMapsUrl(order) {
+        const loc = order && order.deliveryLocation;
+        if (loc && Number.isFinite(Number(loc.lat)) && Number.isFinite(Number(loc.lng))) {
+            return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${loc.lat},${loc.lng}`)}`;
+        }
+        return googleMapsUrl(order && order.deliveryAddress);
     }
 
     function showStatus(msg, isErr = false) {
@@ -561,6 +577,16 @@
             const btn = isPending
                 ? `<button class="btn-action btn-dispatch" onclick="dispatchOrder('${s(o.orderId)}',this)">Accept &amp; Dispatch</button>`
                 : `<button class="btn-action btn-deliver"  onclick="promptDeliverOtp('${s(o.orderId)}',this)">Mark Delivered</button>`;
+            const trackingActive = trackingOrderId === o.orderId && trackingWatchId !== null;
+            const trackingControls = isPending ? '' : `
+                <div class="tracking-controls">
+                    <button class="btn-track ${trackingActive ? 'stop' : ''}" onclick="${trackingActive ? 'stopLiveTracking' : 'startLiveTracking'}('${s(o.orderId)}',this)">
+                        ${trackingActive ? 'Stop Live Tracking' : 'Start Live Tracking'}
+                    </button>
+                    <div class="tracking-state">${trackingActive
+                        ? 'Live location is being shared with this customer. Keep this page open.'
+                        : o.trackingActive ? 'Location sharing was started on another session.' : 'Start sharing when you leave for the customer.'}</div>
+                </div>`;
             return `
             <div class="order-card${o._new ? ' new' : ''}" id="oc-${s(o.orderId)}">
                 <div class="card-top">
@@ -582,7 +608,7 @@
                     <div class="info-cell wide">
                         <label>Delivery Address</label>
                         <p>${s(o.deliveryAddress)}</p>
-                        <a class="map-link" href="${googleMapsUrl(o.deliveryAddress)}" target="_blank" rel="noopener noreferrer">📍 Open in Google Maps</a>
+                        <a class="map-link" href="${customerMapsUrl(o)}" target="_blank" rel="noopener noreferrer">📍 Navigate in Google Maps</a>
                     </div>
                 </div>
                 <div class="items-wrap">
@@ -596,6 +622,7 @@
                     </div>
                     ${btn}
                 </div>
+                ${trackingControls}
             </div>`;
         }).join('');
     }
@@ -606,6 +633,9 @@
         try {
             await updateDoc(doc(db, 'orders', orderId), {
                 status: 'Out for Delivery',
+                assignedDeliveryUid: currentUser.uid,
+                assignedDeliveryEmail: currentUser.email,
+                trackingActive: false,
                 updatedAt: new Date().toISOString(),
                 updatedBy: currentUser.email
             });
@@ -613,6 +643,85 @@
             showStatus('Error: ' + e.message, true);
             btn.disabled = false; btn.textContent = 'Accept & Dispatch';
         }
+    };
+
+    function metresBetween(a, b) {
+        if (!a || !b) return Infinity;
+        const rad = n => n * Math.PI / 180;
+        const dLat = rad(b.lat - a.lat), dLng = rad(b.lng - a.lng);
+        const x = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLng / 2) ** 2;
+        return 6371000 * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
+    }
+
+    async function saveDriverLocation(orderId, position) {
+        const now = Date.now();
+        const next = { lat: position.coords.latitude, lng: position.coords.longitude };
+        if (now - lastLocationWriteAt < 8000 && metresBetween(lastLocationCoords, next) < 15) return;
+        lastLocationWriteAt = now;
+        lastLocationCoords = next;
+        await updateDoc(doc(db, 'orders', orderId), {
+            driverLocation: {
+                lat: next.lat,
+                lng: next.lng,
+                accuracy: Number.isFinite(position.coords.accuracy) ? Math.round(position.coords.accuracy) : null,
+                heading: Number.isFinite(position.coords.heading) ? position.coords.heading : null,
+                speed: Number.isFinite(position.coords.speed) ? position.coords.speed : null,
+                updatedAt: new Date().toISOString()
+            },
+            trackingActive: true,
+            assignedDeliveryUid: currentUser.uid,
+            assignedDeliveryEmail: currentUser.email,
+            updatedAt: new Date().toISOString()
+        });
+    }
+
+    window.startLiveTracking = function(orderId, btn) {
+        if (!navigator.geolocation) return showStatus('Location tracking is not supported on this phone.', true);
+        if (trackingWatchId !== null && trackingOrderId !== orderId) {
+            return showStatus('Stop the current delivery tracking before starting another order.', true);
+        }
+        btn.disabled = true;
+        btn.textContent = 'Waiting for GPS…';
+        trackingOrderId = orderId;
+        lastLocationWriteAt = 0;
+        lastLocationCoords = null;
+        trackingWatchId = navigator.geolocation.watchPosition(
+            async position => {
+                try {
+                    await saveDriverLocation(orderId, position);
+                    showStatus('Live location is now shared with the customer.');
+                    renderOrders();
+                } catch (error) {
+                    showStatus('Could not share location: ' + error.message, true);
+                }
+            },
+            error => {
+                showStatus(error.code === 1 ? 'Allow location access to start delivery tracking.' : 'GPS location is unavailable. Turn on Location and try again.', true);
+                if (trackingWatchId !== null) navigator.geolocation.clearWatch(trackingWatchId);
+                trackingWatchId = null;
+                trackingOrderId = '';
+                renderOrders();
+            },
+            { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 }
+        );
+    };
+
+    window.stopLiveTracking = async function(orderId) {
+        if (trackingWatchId !== null) navigator.geolocation.clearWatch(trackingWatchId);
+        trackingWatchId = null;
+        trackingOrderId = '';
+        lastLocationCoords = null;
+        try {
+            await updateDoc(doc(db, 'orders', orderId), {
+                trackingActive: false,
+                trackingStoppedAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            });
+            showStatus('Live location sharing stopped.');
+        } catch (error) {
+            showStatus('Could not stop tracking: ' + error.message, true);
+        }
+        renderOrders();
     };
 
     // Step 1 — ask the partner to enter the customer's OTP before delivering
@@ -650,8 +759,14 @@
     window.deliverOrder = async function(orderId, btn, otpVerified) {
         btn.disabled = true; btn.textContent = 'Marking…';
         try {
+            if (trackingOrderId === orderId) {
+                if (trackingWatchId !== null) navigator.geolocation.clearWatch(trackingWatchId);
+                trackingWatchId = null;
+                trackingOrderId = '';
+            }
             await updateDoc(doc(db, 'orders', orderId), {
                 status: 'Delivered',
+                trackingActive: false,
                 otpVerified: !!otpVerified,
                 deliveredAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
@@ -687,6 +802,11 @@
             knownIds = freshIds;
             fresh.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
             allOrders = fresh;
+            if (trackingOrderId && !fresh.some(o => o.orderId === trackingOrderId && o.status === 'Out for Delivery')) {
+                if (trackingWatchId !== null) navigator.geolocation.clearWatch(trackingWatchId);
+                trackingWatchId = null;
+                trackingOrderId = '';
+            }
             renderOrders();
 
             newOrders.forEach(o => {
@@ -731,6 +851,9 @@
         );
         document.getElementById('logoutBtn').addEventListener('click', async () => {
             if (unsubscribe) unsubscribe();
+            if (trackingWatchId !== null) navigator.geolocation.clearWatch(trackingWatchId);
+            trackingWatchId = null;
+            trackingOrderId = '';
             await signOut(auth);
             document.getElementById('dashboard').style.display = 'none';
             document.getElementById('loginScreen').style.display = 'flex';

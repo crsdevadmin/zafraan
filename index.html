@@ -1462,6 +1462,11 @@
         .track-order-date { font-size: 11px; color: var(--text-secondary); margin-bottom: 14px; }
         .track-order-items { font-size: 13px; color: var(--text-secondary); margin-bottom: 14px; line-height: 1.6; }
         .track-order-total { font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 16px; }
+        .live-tracking-box { margin-top:14px; border:1px solid rgba(0,230,118,.28); border-radius:10px; overflow:hidden; background:rgba(0,230,118,.04); }
+        .live-tracking-head { padding:10px 12px; display:flex; justify-content:space-between; gap:10px; font-size:11px; color:var(--text-secondary); }
+        .live-tracking-head strong { color:var(--neon-green); font-weight:600; }
+        .live-driver-map { width:100%; height:220px; background:#181818; }
+        .live-tracking-wait { margin-top:14px; padding:12px; border:1px dashed rgba(255,171,64,.35); border-radius:9px; color:#ffab40; font-size:12px; line-height:1.5; }
 
         /* Status stepper */
         .status-stepper { display: flex; align-items: flex-start; gap: 0; }
@@ -5022,15 +5027,66 @@ function renderTrackingOrders(orders) {
         const otpRow = (order.deliveryOtp && order.status !== 'Delivered' && order.status !== 'Cancelled')
             ? `<div style="margin-top:12px;background:rgba(0,230,118,0.08);border:1px dashed var(--neon-green);border-radius:8px;padding:10px 12px;text-align:center;"><span style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--neon-green);">Delivery OTP</span><div style="font-size:24px;font-weight:700;letter-spacing:8px;color:#fff;padding-left:8px;">${escapeHtml(order.deliveryOtp)}</div><div style="font-size:10px;color:var(--text-secondary);margin-top:4px;">Give to the delivery partner on arrival</div></div>`
             : '';
+        const hasDriverLocation = order.driverLocation &&
+            Number.isFinite(Number(order.driverLocation.lat)) && Number.isFinite(Number(order.driverLocation.lng));
+        const updated = hasDriverLocation && order.driverLocation.updatedAt
+            ? new Date(order.driverLocation.updatedAt).toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit', second:'2-digit' })
+            : '';
+        const locationAge = hasDriverLocation && order.driverLocation.updatedAt
+            ? Date.now() - new Date(order.driverLocation.updatedAt).getTime() : Infinity;
+        const liveNow = order.trackingActive === true && locationAge < 60000;
+        const hasCustomerLocation = order.deliveryLocation && Number.isFinite(Number(order.deliveryLocation.lat)) && Number.isFinite(Number(order.deliveryLocation.lng));
+        const routeUrl = hasDriverLocation && hasCustomerLocation
+            ? `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(`${order.driverLocation.lat},${order.driverLocation.lng}`)}&destination=${encodeURIComponent(`${order.deliveryLocation.lat},${order.deliveryLocation.lng}`)}`
+            : '';
+        const trackingBlock = order.status === 'Out for Delivery'
+            ? hasDriverLocation
+                ? `<div class="live-tracking-box">
+                    <div class="live-tracking-head"><strong>${liveNow ? '● Delivery partner live' : 'Delivery partner — last location'}</strong><span>Updated ${escapeHtml(updated)}</span></div>
+                    <div class="live-driver-map" id="driver-map-${escapeHtml(order.orderId)}"></div>
+                    ${routeUrl ? `<a href="${routeUrl}" target="_blank" rel="noopener noreferrer" style="display:block;padding:10px 12px;color:var(--neon-green);font-size:12px;font-weight:600;text-align:center;text-decoration:none;border-top:1px solid rgba(0,230,118,.18);">Open live route &amp; ETA in Google Maps</a>` : ''}
+                  </div>`
+                : `<div class="live-tracking-wait">The delivery partner has not started live location sharing yet. This page will update automatically.</div>`
+            : '';
         return `<div class="track-order-card">
             <div class="track-order-id">${escapeHtml(order.orderId)}</div>
             <div class="track-order-date">${date}</div>
             ${renderStatusStepper(String(order.status || ''))}
             <div class="track-order-items" style="margin-top:14px;">${itemsSummary}</div>
             <div class="track-order-total">Total: ₹${escapeHtml(order.totalPrice)}</div>
+            ${trackingBlock}
             ${otpRow}
         </div>`;
     }).join('');
+    setTimeout(() => initCustomerDriverMaps(orders), 0);
+}
+
+async function initCustomerDriverMaps(orders) {
+    const active = orders.filter(order => order.status === 'Out for Delivery' && order.driverLocation &&
+        Number.isFinite(Number(order.driverLocation.lat)) && Number.isFinite(Number(order.driverLocation.lng)));
+    if (!active.length) return;
+    try {
+        const loaded = await loadCustomerGoogleMaps();
+        if (!loaded) return;
+        active.forEach(order => {
+            const mapEl = document.getElementById(`driver-map-${order.orderId}`);
+            if (!mapEl) return;
+            const driver = { lat:Number(order.driverLocation.lat), lng:Number(order.driverLocation.lng) };
+            const customer = order.deliveryLocation && Number.isFinite(Number(order.deliveryLocation.lat)) && Number.isFinite(Number(order.deliveryLocation.lng))
+                ? { lat:Number(order.deliveryLocation.lat), lng:Number(order.deliveryLocation.lng) }
+                : null;
+            const map = new google.maps.Map(mapEl, { center:driver, zoom:15, mapTypeControl:false, streetViewControl:false, fullscreenControl:false });
+            new google.maps.Marker({ map, position:driver, title:'Delivery partner', label:{ text:'D', color:'#000', fontWeight:'700' } });
+            if (customer) {
+                new google.maps.Marker({ map, position:customer, title:'Delivery address', label:{ text:'C', color:'#fff', fontWeight:'700' } });
+                new google.maps.Polyline({ map, path:[driver, customer], geodesic:true, strokeColor:'#00e676', strokeOpacity:.8, strokeWeight:3 });
+                const bounds = new google.maps.LatLngBounds();
+                bounds.extend(driver); bounds.extend(customer); map.fitBounds(bounds, 56);
+            }
+        });
+    } catch (error) {
+        console.warn('Live delivery map unavailable:', error.message);
+    }
 }
 
 let lastTrackedPhone = '';
