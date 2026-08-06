@@ -3911,6 +3911,7 @@ let googleMapsLoadPromise = null;
 let placesAutocompleteSession = null;
 let addressSearchTimer = null;
 let latestAddressRequest = 0;
+let checkoutGoogleFormattedAddress = '';
 
 function renderCheckoutAddresses() {
     const el = document.getElementById('checkoutAddressList');
@@ -3930,6 +3931,7 @@ function renderCheckoutAddresses() {
 function selectCheckoutAddress(i) {
     selectedCheckoutAddrIndex = i;
     const selected = ((window.zafProfile && window.zafProfile.addresses) || [])[i];
+    checkoutGoogleFormattedAddress = selected?.mapFormattedAddress || '';
     checkoutMapLocation = selected && Number.isFinite(Number(selected.lat)) && Number.isFinite(Number(selected.lng))
         ? { lat: Number(selected.lat), lng: Number(selected.lng) }
         : null;
@@ -3950,6 +3952,8 @@ function toggleNewAddress() {
     } else {
         block.style.display = 'block';
         selectedCheckoutAddrIndex = -1;
+        checkoutGoogleFormattedAddress = '';
+        checkoutMapLocation = null;
         document.getElementById('toggleNewAddrBtn').textContent = '− Use a saved address instead';
         document.getElementById('confirmAddressCheck').checked = false;
         renderCheckoutAddresses();
@@ -3970,7 +3974,8 @@ function getCheckoutAddressObj() {
         city:    document.getElementById('addrCity').value.trim(),
         pincode: document.getElementById('addrPincode').value.trim(),
         lat: checkoutMapLocation ? checkoutMapLocation.lat : null,
-        lng: checkoutMapLocation ? checkoutMapLocation.lng : null
+        lng: checkoutMapLocation ? checkoutMapLocation.lng : null,
+        mapFormattedAddress: checkoutGoogleFormattedAddress
     };
 }
 
@@ -4021,12 +4026,19 @@ function fillAddressFromGoogleResult(result) {
     (result.address_components || result.addressComponents || []).forEach(c =>
         (c.types || []).forEach(t => { if (!components[t]) components[t] = c.long_name || c.longText || c.shortText || ''; })
     );
-    document.getElementById('addrSearch').value = result.formatted_address || result.formattedAddress || document.getElementById('addrSearch').value;
-    document.getElementById('addrStreet').value = components.route || components.sublocality_level_3 || components.premise || '';
-    document.getElementById('addrArea').value = components.sublocality_level_2 || components.sublocality_level_1 || components.sublocality || components.neighborhood || '';
+    checkoutGoogleFormattedAddress = result.formatted_address || result.formattedAddress || '';
+    if (checkoutGoogleFormattedAddress) document.getElementById('addrSearch').value = checkoutGoogleFormattedAddress;
+    const detectedDoor = [components.subpremise, components.premise, components.street_number].filter(Boolean).join(', ');
+    if (!document.getElementById('addrDoor').value.trim() && detectedDoor) {
+        document.getElementById('addrDoor').value = detectedDoor;
+    }
+    document.getElementById('addrStreet').value = components.route || components.sublocality_level_3 || components.neighborhood || components.premise || '';
+    document.getElementById('addrArea').value = components.sublocality_level_2 || components.sublocality_level_1 || components.sublocality || components.neighborhood || components.administrative_area_level_3 || '';
     document.getElementById('addrCity').value = components.locality || components.administrative_area_level_2 || 'Chennai';
     document.getElementById('addrPincode').value = (components.postal_code || '').replace(/\D/g, '').slice(0, 6);
-    document.getElementById('mapAddressStatus').textContent = 'Pin selected. Add your door number and landmark, then confirm the address.';
+    document.getElementById('mapAddressStatus').textContent = checkoutGoogleFormattedAddress
+        ? `Google detected: ${checkoutGoogleFormattedAddress} — verify the pin and add any missing door / flat details.`
+        : 'Pin selected. Add your door number and landmark, then confirm the address.';
     updateConfirmText();
 }
 
@@ -4235,6 +4247,7 @@ async function checkoutUPI() {
     // Default address selection: first saved, else manual
     const list = window.zafProfile.addresses || [];
     selectedCheckoutAddrIndex = list.length ? 0 : -1;
+    checkoutGoogleFormattedAddress = list.length ? (list[0].mapFormattedAddress || '') : '';
     checkoutMapLocation = list.length && Number.isFinite(Number(list[0].lat)) && Number.isFinite(Number(list[0].lng))
         ? { lat: Number(list[0].lat), lng: Number(list[0].lng) }
         : null;
@@ -4430,7 +4443,7 @@ async function placeOrder() {
         const saveChk = document.getElementById('saveNewAddrCheck');
         if (saveChk && saveChk.checked && typeof window.zafSaveAddresses === 'function') {
             const list = ((window.zafProfile.addresses) || []).slice();
-            list.push({ label: addrObj.label || 'Home', door: addrObj.door, street: addrObj.street, area: addrObj.area, city: addrObj.city, pincode: addrObj.pincode, lat: addrObj.lat, lng: addrObj.lng });
+            list.push({ label: addrObj.label || 'Home', door: addrObj.door, street: addrObj.street, area: addrObj.area, city: addrObj.city, pincode: addrObj.pincode, lat: addrObj.lat, lng: addrObj.lng, mapFormattedAddress: addrObj.mapFormattedAddress });
             window.zafSaveAddresses(list);
         }
     }
