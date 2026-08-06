@@ -3954,6 +3954,9 @@ function toggleNewAddress() {
         selectedCheckoutAddrIndex = -1;
         checkoutGoogleFormattedAddress = '';
         checkoutMapLocation = null;
+        ['addrSearch','addrDoor','addrStreet','addrArea','addrCity','addrPincode'].forEach(id => {
+            document.getElementById(id).value = '';
+        });
         document.getElementById('toggleNewAddrBtn').textContent = '− Use a saved address instead';
         document.getElementById('confirmAddressCheck').checked = false;
         renderCheckoutAddresses();
@@ -4040,9 +4043,8 @@ function fillAddressFromGoogleResult(result, fallbackPincode = '') {
     checkoutGoogleFormattedAddress = result.formatted_address || result.formattedAddress || '';
     if (checkoutGoogleFormattedAddress) document.getElementById('addrSearch').value = checkoutGoogleFormattedAddress;
     const detectedDoor = [components.subpremise, components.premise, components.street_number].filter(Boolean).join(', ');
-    if (!document.getElementById('addrDoor').value.trim() && detectedDoor) {
-        document.getElementById('addrDoor').value = detectedDoor;
-    }
+    // A newly selected place replaces the previous address completely.
+    document.getElementById('addrDoor').value = detectedDoor;
     document.getElementById('addrStreet').value = components.route || components.sublocality_level_3 || components.neighborhood || components.premise || '';
     document.getElementById('addrArea').value = components.sublocality_level_2 || components.sublocality_level_1 || components.sublocality || components.neighborhood || components.administrative_area_level_3 || '';
     document.getElementById('addrCity').value = components.locality || components.administrative_area_level_2 || 'Chennai';
