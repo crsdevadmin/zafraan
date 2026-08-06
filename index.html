@@ -3990,7 +3990,7 @@ function loadCustomerGoogleMaps() {
     googleMapsLoadPromise = new Promise((resolve, reject) => {
         window.zafGoogleMapsReady = () => resolve(true);
         const script = document.createElement('script');
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&libraries=places&callback=zafGoogleMapsReady`;
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&libraries=places&loading=async&callback=zafGoogleMapsReady`;
         script.async = true;
         script.onerror = () => reject(new Error('Google Maps could not be loaded.'));
         document.head.appendChild(script);
@@ -4056,10 +4056,15 @@ function fillAddressFromGoogleResult(result, fallbackPincode = '') {
 }
 
 async function fillAddressFromGoogleCoordinates(location, fallbackResult = null) {
-    const response = await new google.maps.Geocoder().geocode({ location });
-    const results = response.results || [];
-    const detailedResult = results[0] || fallbackResult;
-    if (detailedResult) fillAddressFromGoogleResult(detailedResult, findGooglePostalCode(results));
+    try {
+        const response = await new google.maps.Geocoder().geocode({ location });
+        const results = response.results || [];
+        const detailedResult = results[0] || fallbackResult;
+        if (detailedResult) fillAddressFromGoogleResult(detailedResult, findGooglePostalCode(results));
+    } catch (error) {
+        if (fallbackResult) fillAddressFromGoogleResult(fallbackResult);
+        else throw error;
+    }
 }
 
 async function setupCustomerAddressAutocomplete() {
@@ -4130,6 +4135,10 @@ async function showCustomerAddressSuggestions(value) {
 
 async function selectCustomerAddressPrediction(prediction) {
     document.getElementById('addrSuggestions').style.display = 'none';
+    document.getElementById('addrSearch').value = prediction.text.toString();
+    ['addrDoor','addrStreet','addrArea','addrCity','addrPincode'].forEach(id => {
+        document.getElementById(id).value = '';
+    });
     const place = prediction.toPlace();
     await place.fetchFields({ fields: ['displayName', 'formattedAddress', 'location', 'viewport', 'addressComponents'] });
     if (!place.location) return;
@@ -4186,17 +4195,28 @@ async function searchCustomerAddress() {
     }
     if (!customerAddressMap) await initCustomerAddressPicker();
     try {
-        const response = await new google.maps.Geocoder().geocode({ address: `${query}, Chennai, Tamil Nadu, India`, region: 'IN' });
-        if (!response.results.length) throw new Error('No address found');
-        const result = response.results[0];
-        const loc = result.geometry.location;
+        const placesLibrary = await google.maps.importLibrary('places');
+        const response = await placesLibrary.Place.searchByText({
+            textQuery: `${query}, Chennai, Tamil Nadu, India`,
+            fields: ['formattedAddress', 'location', 'viewport', 'addressComponents'],
+            locationBias: { lat: 12.9216, lng: 80.1587 },
+            language: 'en',
+            region: 'in',
+            maxResultCount: 1
+        });
+        if (!response.places.length || !response.places[0].location) throw new Error('No address found');
+        const result = response.places[0];
+        const loc = result.location;
         checkoutMapLocation = { lat: loc.lat(), lng: loc.lng() };
 
         // Populate the fields first so a map-rendering issue cannot block them.
-        fillAddressFromGoogleResult(result, findGooglePostalCode(response.results));
+        fillAddressFromGoogleResult(result, findGooglePostalCode(response.places));
         if (customerAddressMap) {
-            customerAddressMap.setCenter(loc);
-            customerAddressMap.setZoom(17);
+            if (result.viewport) customerAddressMap.fitBounds(result.viewport);
+            else {
+                customerAddressMap.setCenter(loc);
+                customerAddressMap.setZoom(17);
+            }
         }
         if (customerAddressMarker) customerAddressMarker.setPosition(loc);
     } catch (error) {
@@ -4402,36 +4422,18 @@ async function useMyLocation() {
                 return;
             }
 
-            // Fallback when the Google Maps browser key is not available.
-            const res = await fetch(
-                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`,
-                { headers: { 'Accept-Language': 'en-IN,en' } }
-            );
-            const data = await res.json();
-            const a = data.address || {};
-
-            document.getElementById('addrStreet').value  =
-                a.road || a.pedestrian || a.footway || a.path || '';
-            document.getElementById('addrArea').value    =
-                a.neighbourhood || a.suburb || a.quarter || a.residential ||
-                a.village || a.town || a.city_district || '';
-            document.getElementById('addrCity').value    =
-                a.city || a.state_district || a.county || '';
-            document.getElementById('addrPincode').value =
-                a.postcode ? a.postcode.replace(/\s/g, '').slice(0, 6) : '';
-
-            // Focus door field so user can type their flat/door number right away
-            document.getElementById('addrDoor').focus();
-
-            btn.textContent = 'Location filled';
-            btn.style.background = '#005c2e';
-            document.getElementById('checkoutLocationNote').textContent = 'Area filled! Now enter your door / flat number above.';
-            if (typeof updateConfirmText === 'function') updateConfirmText();
-            setCheckoutError('');
-        } catch(e) {
             btn.disabled = false;
             btn.textContent = 'Use My Location';
-            showLocationGuide('error');
+            document.getElementById('checkoutLocationNote').textContent =
+                'Google Maps is unavailable. Search for your address or enter it manually.';
+        } catch(e) {
+            btn.disabled = false;
+            btn.textContent = 'Location pin selected';
+            document.getElementById('mapAddressStatus').style.display = 'block';
+            document.getElementById('mapAddressStatus').textContent =
+                'Your location pin was found, but Google could not convert it to an address. Enable Geocoding API, or search and select the address below.';
+            document.getElementById('checkoutLocationNote').textContent =
+                'Current-location address lookup needs Geocoding API enabled for the Google Maps key.';
         }
     };
 
