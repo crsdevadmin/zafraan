@@ -4021,7 +4021,18 @@ async function initCustomerAddressPicker() {
     }
 }
 
-function fillAddressFromGoogleResult(result) {
+function findGooglePostalCode(results) {
+    for (const result of (results || [])) {
+        for (const component of (result.address_components || result.addressComponents || [])) {
+            if ((component.types || []).includes('postal_code')) {
+                return String(component.long_name || component.longText || component.shortText || '').replace(/\D/g, '').slice(0, 6);
+            }
+        }
+    }
+    return '';
+}
+
+function fillAddressFromGoogleResult(result, fallbackPincode = '') {
     const components = {};
     (result.address_components || result.addressComponents || []).forEach(c =>
         (c.types || []).forEach(t => { if (!components[t]) components[t] = c.long_name || c.longText || c.shortText || ''; })
@@ -4035,11 +4046,18 @@ function fillAddressFromGoogleResult(result) {
     document.getElementById('addrStreet').value = components.route || components.sublocality_level_3 || components.neighborhood || components.premise || '';
     document.getElementById('addrArea').value = components.sublocality_level_2 || components.sublocality_level_1 || components.sublocality || components.neighborhood || components.administrative_area_level_3 || '';
     document.getElementById('addrCity').value = components.locality || components.administrative_area_level_2 || 'Chennai';
-    document.getElementById('addrPincode').value = (components.postal_code || '').replace(/\D/g, '').slice(0, 6);
+    document.getElementById('addrPincode').value = (components.postal_code || fallbackPincode || '').replace(/\D/g, '').slice(0, 6);
     document.getElementById('mapAddressStatus').textContent = checkoutGoogleFormattedAddress
         ? `Google detected: ${checkoutGoogleFormattedAddress} — verify the pin and add any missing door / flat details.`
         : 'Pin selected. Add your door number and landmark, then confirm the address.';
     updateConfirmText();
+}
+
+async function fillAddressFromGoogleCoordinates(location, fallbackResult = null) {
+    const response = await new google.maps.Geocoder().geocode({ location });
+    const results = response.results || [];
+    const detailedResult = results[0] || fallbackResult;
+    if (detailedResult) fillAddressFromGoogleResult(detailedResult, findGooglePostalCode(results));
 }
 
 async function setupCustomerAddressAutocomplete() {
@@ -4120,7 +4138,12 @@ async function selectCustomerAddressPrediction(prediction) {
         customerAddressMap.setZoom(17);
     }
     customerAddressMarker.setPosition(place.location);
-    fillAddressFromGoogleResult(place);
+    document.getElementById('addrPincode').value = '';
+    try {
+        await fillAddressFromGoogleCoordinates(place.location, place);
+    } catch (error) {
+        fillAddressFromGoogleResult(place);
+    }
     const places = await google.maps.importLibrary('places');
     placesAutocompleteSession = new places.AutocompleteSessionToken();
 }
@@ -4141,8 +4164,7 @@ async function setCustomerMapLocation(lat, lng, reverseGeocode) {
         customerAddressMap.setZoom(17);
     }
     if (reverseGeocode && window.google && google.maps) {
-        const results = await new google.maps.Geocoder().geocode({ location: checkoutMapLocation });
-        if (results.results && results.results[0]) fillAddressFromGoogleResult(results.results[0]);
+        await fillAddressFromGoogleCoordinates(checkoutMapLocation);
     }
 }
 
@@ -4165,7 +4187,7 @@ async function searchCustomerAddress() {
         customerAddressMap.setCenter(loc);
         customerAddressMap.setZoom(17);
         customerAddressMarker.setPosition(loc);
-        fillAddressFromGoogleResult(result);
+        fillAddressFromGoogleResult(result, findGooglePostalCode(response.results));
     } catch (error) {
         document.getElementById('mapAddressStatus').textContent = 'Address not found. Try including the area or pincode.';
     }
