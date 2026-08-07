@@ -294,7 +294,10 @@
             color: var(--neon-green);
             font-size: 12px;
             font-weight: 600;
+            font-family: inherit;
             text-decoration: none;
+            background: transparent;
+            cursor: pointer;
         }
         .map-link:hover { background: rgba(0,230,118,0.08); }
 
@@ -625,6 +628,9 @@
             const embeddedMap = !isPending && hasCustomerPin
                 ? `<div class="arrival-chip">${s(arrivalText(o))}</div><div class="delivery-inline-map" id="delivery-map-${s(o.orderId)}"></div>`
                 : '';
+            const mapAction = isPending ? '' : hasCustomerPin
+                ? `<button type="button" class="map-link" onclick="showInlineRoute('${s(o.orderId)}')">📍 Show Route Below</button>`
+                : `<div style="margin-top:8px;color:var(--text-muted);font-size:11px;">No map pin was saved for this older order.</div>`;
             return `
             <div class="order-card${o._new ? ' new' : ''}" id="oc-${s(o.orderId)}">
                 <div class="card-top">
@@ -646,7 +652,7 @@
                     <div class="info-cell wide">
                         <label>Delivery Address</label>
                         <p>${s(o.deliveryAddress)}</p>
-                        <span class="map-link" style="cursor:default;">📍 Route stays inside Zafraan below</span>
+                        ${mapAction}
                     </div>
                 </div>
                 <div class="items-wrap">
@@ -665,6 +671,17 @@
             </div>`;
         }).join('');
     }
+
+    window.showInlineRoute = function(orderId) {
+        const mapEl = document.getElementById('delivery-map-' + orderId);
+        if (!mapEl) {
+            showStatus('This order does not have a saved customer map pin.', true);
+            return;
+        }
+        mapEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        mapEl.style.boxShadow = '0 0 0 2px #00e676, 0 0 24px rgba(0,230,118,.3)';
+        setTimeout(() => { mapEl.style.boxShadow = ''; }, 1800);
+    };
 
     async function initDeliveryOrderMaps(orders) {
         const mappable = orders.filter(o => o.deliveryLocation && Number.isFinite(Number(o.deliveryLocation.lat)) && Number.isFinite(Number(o.deliveryLocation.lng)));
