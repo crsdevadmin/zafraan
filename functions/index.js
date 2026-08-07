@@ -91,8 +91,33 @@ async function canonicalCart(rawItems) {
       size: item.size,
       qty: item.qty,
       price,
+      cat: String(product.cat || "").slice(0, 80),
+      prepTime: String(product.prepTime || "").slice(0, 40),
     };
   });
+}
+
+function preparationMinutesFromText(value) {
+  const text = String(value || "").trim().toLowerCase();
+  const hours = text.match(/(\d+(?:\.\d+)?)\s*(?:hour|hr)/);
+  if (hours) return Math.max(0, Math.round(Number(hours[1]) * 60));
+  const minutes = text.match(/(\d+)\s*(?:minute|min)/);
+  return minutes ? Math.max(0, Number(minutes[1])) : 0;
+}
+
+function preparationMinutesForItems(items) {
+  let longest = 0;
+  let preparedItems = 0;
+  for (const item of items) {
+    const requiresPreparation = ["Peeled Veg", "Cut Vegetables", "Packs"].includes(item.cat);
+    if (requiresPreparation) preparedItems += 1;
+    longest = Math.max(
+        longest,
+        preparationMinutesFromText(item.prepTime) || (requiresPreparation ? 30 : 0),
+    );
+  }
+  if (preparedItems > 1) longest = Math.min(60, Math.max(longest, 30 + (preparedItems - 1) * 10));
+  return Math.min(60, Math.max(0, longest));
 }
 
 function razorpayClient() {
@@ -220,6 +245,8 @@ exports.verifyRazorpayPayment = onCall(
       const userRef = db.collection("users").doc(uid);
       const deliveryOtp = String(crypto.randomInt(1000, 10000));
       const createdAt = new Date().toISOString();
+      const preparationMinutes = preparationMinutesForItems(intent.items);
+      const estimatedReadyAt = new Date(Date.now() + preparationMinutes * 60000).toISOString();
 
       const order = {
         orderId,
@@ -237,7 +264,9 @@ exports.verifyRazorpayPayment = onCall(
         paymentMethod: "Razorpay (Online)",
         razorpayOrderId,
         razorpayPaymentId,
-        status: "Paid/Processing",
+        preparationMinutes,
+        estimatedReadyAt,
+        status: "Preparing",
         createdAt,
       };
 

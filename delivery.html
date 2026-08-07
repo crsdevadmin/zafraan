@@ -432,6 +432,7 @@
     let collection, doc, onSnapshot, updateDoc, setDoc;
     let unsubscribe = null;
     let knownIds    = new Set();
+    let knownStatuses = new Map();
     let allOrders   = [];
     let trackingWatchId = null;
     let trackingOrderId = '';
@@ -581,7 +582,7 @@
 
     // ── RENDER ───────────────────────────────────────────────────────────────
     function renderOrders() {
-        const pending   = allOrders.filter(o => ['Confirmed', 'Paid/Processing'].includes(o.status));
+        const pending   = allOrders.filter(o => o.status === 'Ready for Pickup');
         const active    = allOrders.filter(o => o.status === 'Out for Delivery');
 
         document.getElementById('pendingBadge').textContent = pending.length;
@@ -607,7 +608,7 @@
             const time = new Date(o.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             const date = new Date(o.createdAt).toLocaleDateString([], { day: 'numeric', month: 'short' });
             const pillClass   = isPending ? 'pill-green' : 'pill-amber';
-            const statusLabel = o.status === 'Paid/Processing' ? 'Confirmed' : o.status;
+            const statusLabel = o.status;
             const items = (o.items || []).map(it =>
                 `<div class="item-row"><span>${s(it.name)} (${s(it.size)}) × ${s(it.qty)}</span><span>₹${s(it.price * it.qty)}</span></div>`
             ).join('');
@@ -626,11 +627,12 @@
                 </div>`;
             const hasCustomerPin = o.deliveryLocation && Number.isFinite(Number(o.deliveryLocation.lat)) && Number.isFinite(Number(o.deliveryLocation.lng));
             const embeddedMap = !isPending && hasCustomerPin
-                ? `<div class="arrival-chip">${s(arrivalText(o))}</div><div class="delivery-inline-map" id="delivery-map-${s(o.orderId)}"></div>`
+                ? `<div class="arrival-chip" id="arrival-${s(o.orderId)}">${s(arrivalText(o))}</div><div class="delivery-inline-map" id="delivery-map-${s(o.orderId)}"></div>`
                 : '';
             const mapAction = isPending ? '' : hasCustomerPin
                 ? `<button type="button" class="map-link" onclick="showInlineRoute('${s(o.orderId)}')">📍 Show Route Below</button>`
-                : `<div style="margin-top:8px;color:var(--text-muted);font-size:11px;">No map pin was saved for this older order.</div>`;
+                : `<button type="button" class="map-link" onclick="findCustomerPin('${s(o.orderId)}',this)">📍 Find Address on Map</button>
+                   <div style="margin-top:6px;color:var(--text-muted);font-size:11px;">This older order has no saved map pin. Confirm the result before travelling.</div>`;
             return `
             <div class="order-card${o._new ? ' new' : ''}" id="oc-${s(o.orderId)}">
                 <div class="card-top">
@@ -683,6 +685,38 @@
         setTimeout(() => { mapEl.style.boxShadow = ''; }, 1800);
     };
 
+    window.findCustomerPin = async function(orderId, btn) {
+        const order = allOrders.find(item => item.orderId === orderId);
+        if (!order || !order.deliveryAddress) {
+            showStatus('This order does not have a usable delivery address.', true);
+            return;
+        }
+        btn.disabled = true;
+        btn.textContent = 'Finding address…';
+        try {
+            if (!await loadDeliveryGoogleMaps()) throw new Error('Google Maps is unavailable');
+            const response = await new google.maps.Geocoder().geocode({
+                address: order.deliveryAddress,
+                region: 'IN'
+            });
+            if (!response.results || !response.results.length) throw new Error('Address was not found');
+            const result = response.results[0];
+            const location = result.geometry.location;
+            await updateDoc(doc(db, 'orders', orderId), {
+                deliveryLocation: { lat: location.lat(), lng: location.lng() },
+                mapResolvedAddress: result.formatted_address || order.deliveryAddress,
+                mapPinResolvedAt: new Date().toISOString(),
+                mapPinResolvedBy: currentUser.email,
+                updatedAt: new Date().toISOString()
+            });
+            showStatus('Customer map pin saved. Check the map below before travelling.');
+        } catch (error) {
+            showStatus('Could not find this address: ' + error.message, true);
+            btn.disabled = false;
+            btn.textContent = '📍 Try Address Again';
+        }
+    };
+
     async function initDeliveryOrderMaps(orders) {
         const mappable = orders.filter(o => o.deliveryLocation && Number.isFinite(Number(o.deliveryLocation.lat)) && Number.isFinite(Number(o.deliveryLocation.lng)));
         if (!mappable.length) return;
@@ -698,8 +732,25 @@
                 new google.maps.Marker({ map, position:customer, title:'Customer', label:{ text:'C', color:'#fff', fontWeight:'700' } });
                 if (driver) {
                     new google.maps.Marker({ map, position:driver, title:'Your live location', label:{ text:'🛵', fontSize:'20px' } });
-                    new google.maps.Polyline({ map, path:[driver, customer], geodesic:true, strokeColor:'#00e676', strokeOpacity:.85, strokeWeight:4 });
-                    const bounds = new google.maps.LatLngBounds(); bounds.extend(driver); bounds.extend(customer); map.fitBounds(bounds, 54);
+                    const fallbackLine = () => {
+                        new google.maps.Polyline({ map, path:[driver, customer], geodesic:true, strokeColor:'#00e676', strokeOpacity:.85, strokeWeight:4 });
+                        const bounds = new google.maps.LatLngBounds(); bounds.extend(driver); bounds.extend(customer); map.fitBounds(bounds, 54);
+                    };
+                    new google.maps.DirectionsService().route({
+                        origin: driver,
+                        destination: customer,
+                        travelMode: google.maps.TravelMode.DRIVING
+                    }).then(response => {
+                        new google.maps.DirectionsRenderer({
+                            map,
+                            directions: response,
+                            suppressMarkers: true,
+                            polylineOptions: { strokeColor:'#00e676', strokeOpacity:.9, strokeWeight:5 }
+                        });
+                        const leg = response.routes?.[0]?.legs?.[0];
+                        const chip = document.getElementById(`arrival-${order.orderId}`);
+                        if (chip && leg) chip.textContent = `${arrivalText(order)} · ${leg.distance?.text || ''} · about ${leg.duration?.text || ''}`;
+                    }).catch(fallbackLine);
                 }
             });
         } catch (error) {
@@ -765,24 +816,44 @@
         trackingOrderId = orderId;
         lastLocationWriteAt = 0;
         lastLocationCoords = null;
-        trackingWatchId = navigator.geolocation.watchPosition(
-            async position => {
-                try {
-                    await saveDriverLocation(orderId, position);
-                    showStatus('Live location is now shared with the customer.');
-                    renderOrders();
-                } catch (error) {
-                    showStatus('Could not share location: ' + error.message, true);
-                }
-            },
-            error => {
-                showStatus(error.code === 1 ? 'Allow location access to start delivery tracking.' : 'GPS location is unavailable. Turn on Location and try again.', true);
-                if (trackingWatchId !== null) navigator.geolocation.clearWatch(trackingWatchId);
-                trackingWatchId = null;
+        const fail = error => {
+            showStatus(error.code === 1 ? 'Allow location access to start delivery tracking.' : 'GPS location is unavailable. Turn on Location and try again.', true);
+            if (trackingWatchId !== null) navigator.geolocation.clearWatch(trackingWatchId);
+            trackingWatchId = null;
+            trackingOrderId = '';
+            renderOrders();
+        };
+        const beginWatch = async position => {
+            try {
+                await saveDriverLocation(orderId, position);
+                showStatus('Live location is now shared with the customer.');
+                trackingWatchId = navigator.geolocation.watchPosition(
+                    next => saveDriverLocation(orderId, next).catch(error => showStatus('Could not update location: ' + error.message, true)),
+                    error => {
+                        if (error.code === 1) fail(error);
+                        else showStatus('Waiting for a better GPS signal…', true);
+                    },
+                    { enableHighAccuracy: true, maximumAge: 5000, timeout: 30000 }
+                );
+                renderOrders();
+            } catch (error) {
+                showStatus('Could not share location: ' + error.message, true);
                 trackingOrderId = '';
                 renderOrders();
+            }
+        };
+        navigator.geolocation.getCurrentPosition(
+            beginWatch,
+            firstError => {
+                if (firstError.code === 1) return fail(firstError);
+                btn.textContent = 'Trying nearby location…';
+                navigator.geolocation.getCurrentPosition(
+                    beginWatch,
+                    fail,
+                    { enableHighAccuracy: false, maximumAge: 300000, timeout: 15000 }
+                );
             },
-            { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 }
+            { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 }
         );
     };
 
@@ -864,22 +935,24 @@
         if (unsubscribe) { unsubscribe(); unsubscribe = null; }
 
         unsubscribe = onSnapshot(collection(db, 'orders'), snapshot => {
-            const fresh = [], freshIds = new Set(), newOrders = [];
+            const fresh = [], freshIds = new Set(), freshStatuses = new Map(), newOrders = [];
 
             snapshot.forEach(d => {
                 fresh.push(d.data());
                 freshIds.add(d.id);
+                freshStatuses.set(d.id, d.data().status);
             });
 
-            if (knownIds.size > 0) {
+            if (knownStatuses.size > 0) {
                 fresh.forEach(o => {
-                    if (!knownIds.has(o.orderId) && ['Confirmed', 'Paid/Processing'].includes(o.status)) {
+                    if (o.status === 'Ready for Pickup' && knownStatuses.get(o.orderId) !== 'Ready for Pickup') {
                         o._new = true;
                         newOrders.push(o);
                     }
                 });
             }
             knownIds = freshIds;
+            knownStatuses = freshStatuses;
             fresh.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
             allOrders = fresh;
             if (trackingOrderId && !fresh.some(o => o.orderId === trackingOrderId && o.status === 'Out for Delivery')) {

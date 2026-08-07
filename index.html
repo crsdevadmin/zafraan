@@ -3525,7 +3525,9 @@ function addToCart() {
             price: unitPrice,
             qty: currentQty,
             size: size,
-            img: productImages[p.name]
+            img: productImages[p.name],
+            cat: p.cat,
+            prepTime: p.prepTime || ''
         });
     }
     
@@ -4248,8 +4250,33 @@ function checkoutTotals() {
     return { totalCash, deliveryCharge, payable, coins, maxRedeem, coinsUsed, grandTotal };
 }
 
+function preparationMinutesFromText(value) {
+    const text = String(value || '').trim().toLowerCase();
+    if (!text) return 0;
+    const hours = text.match(/(\d+(?:\.\d+)?)\s*(?:hour|hr)/);
+    if (hours) return Math.max(0, Math.round(Number(hours[1]) * 60));
+    const minutes = text.match(/(\d+)\s*(?:minute|min)/);
+    return minutes ? Math.max(0, Number(minutes[1])) : 0;
+}
+
+function getCartPreparationMinutes() {
+    let longest = 0;
+    let preparedItems = 0;
+    cart.forEach(item => {
+        const product = getCatalogProductById(item.id);
+        const category = item.cat || product?.cat || '';
+        const configured = preparationMinutesFromText(item.prepTime || product?.prepTime);
+        const requiresPreparation = ['Peeled Veg', 'Cut Vegetables', 'Packs'].includes(category);
+        if (requiresPreparation) preparedItems += 1;
+        longest = Math.max(longest, configured || (requiresPreparation ? 30 : 0));
+    });
+    if (preparedItems > 1) longest = Math.min(60, Math.max(longest, 30 + (preparedItems - 1) * 10));
+    return Math.min(60, Math.max(0, longest));
+}
+
 function renderCheckoutSummary() {
     const t = checkoutTotals();
+    const preparationMinutes = getCartPreparationMinutes();
     const summaryEl = document.getElementById('checkoutOrderSummary');
     const deliveryRow = t.deliveryCharge > 0
         ? `<div class="summary-row"><span>Delivery Charge</span><span>₹${t.deliveryCharge}</span></div>`
@@ -4262,7 +4289,9 @@ function renderCheckoutSummary() {
             <span>${item.name} <span style="color:var(--text-secondary);font-size:12px;">(${item.size}) ×${item.qty}</span></span>
             <span>₹${item.price * item.qty}</span>
         </div>
-    `).join('') + deliveryRow + coinsRow + `<div class="summary-total"><span>Total</span><span>₹${t.grandTotal}</span></div>`;
+    `).join('') +
+        (preparationMinutes > 0 ? `<div class="summary-row" style="color:#ffab40;"><span>Estimated preparation</span><span>${preparationMinutes} mins</span></div>` : '') +
+        deliveryRow + coinsRow + `<div class="summary-total"><span>Total</span><span>₹${t.grandTotal}</span></div>`;
 }
 
 function onCoinsInput() {
@@ -4534,17 +4563,28 @@ async function placeOrder() {
     const deliveryOtp = String(Math.floor(1000 + Math.random() * 9000));
 
     const createdAt = new Date().toISOString();
+    const preparationMinutes = getCartPreparationMinutes();
+    const estimatedReadyAt = new Date(Date.now() + preparationMinutes * 60000).toISOString();
     const orderId = 'ZAF-' + Date.now();
     const orderData = {
         orderId, customerName: name, customerPhone: phone, deliveryAddress: address,
         deliveryLocation: Number.isFinite(Number(addrObj.lat)) && Number.isFinite(Number(addrObj.lng)) ? { lat: Number(addrObj.lat), lng: Number(addrObj.lng) } : null,
-        items: cart.map(item => ({ name: item.name, size: item.size, qty: item.qty, price: item.price })),
+        items: cart.map(item => {
+            const product = getCatalogProductById(item.id);
+            return {
+                name: item.name, size: item.size, qty: item.qty, price: item.price,
+                cat: item.cat || product?.cat || '',
+                prepTime: item.prepTime || product?.prepTime || ''
+            };
+        }),
         totalPrice: grandTotal, deliveryCharge, coinsUsed,
         userId: window.zafProfile.uid || '',
         referralCodeUsed: window.zafProfile.referredBy || '',
         deliveryOtp,
         paymentMethod: isUpi ? UPI_NAMES[selectedUpiApp] + ' (UPI)' : 'Cash on Delivery',
-        status: isUpi ? 'Pending Payment' : 'Confirmed', createdAt
+        preparationMinutes,
+        estimatedReadyAt,
+        status: isUpi ? 'Pending Payment' : 'Preparing', createdAt
     };
 
     const placeOrderBtn = document.getElementById('placeOrderBtn');
@@ -4989,13 +5029,15 @@ async function deductMyCredit(phoneDigits, amount) {
 // ---- Order Tracking ----
 const STATUS_STEPS = [
     { key: 'Pending Payment',  label: 'Received',   icon: '📋' },
-    { key: 'Paid/Processing',  label: 'Confirmed',  icon: '✓'  },
+    { key: 'Preparing',        label: 'Preparing',  icon: '🥕' },
+    { key: 'Ready for Pickup', label: 'Ready',      icon: '✓'  },
     { key: 'Out for Delivery', label: 'On the Way', icon: '🛵' },
     { key: 'Delivered',        label: 'Delivered',  icon: '✓'  },
 ];
 
 function getStatusStepIndex(status) {
     if (status === 'Cancelled') return -1;
+    if (['Confirmed', 'Paid/Processing', 'Payment Received'].includes(status)) return 1;
     return STATUS_STEPS.findIndex(s => s.key === status);
 }
 
@@ -5045,6 +5087,11 @@ function renderTrackingOrders(orders) {
         const otpRow = (order.deliveryOtp && order.status !== 'Delivered' && order.status !== 'Cancelled')
             ? `<div style="margin-top:12px;background:rgba(0,230,118,0.08);border:1px dashed var(--neon-green);border-radius:8px;padding:10px 12px;text-align:center;"><span style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--neon-green);">Delivery OTP</span><div style="font-size:24px;font-weight:700;letter-spacing:8px;color:#fff;padding-left:8px;">${escapeHtml(order.deliveryOtp)}</div><div style="font-size:10px;color:var(--text-secondary);margin-top:4px;">Give to the delivery partner on arrival</div></div>`
             : '';
+        const prepRow = order.status === 'Preparing' && order.estimatedReadyAt
+            ? `<div style="margin-top:12px;padding:10px 12px;border-radius:8px;background:rgba(255,171,64,.08);color:#ffab40;font-size:12px;">Preparing your order · estimated ready by ${escapeHtml(new Date(order.estimatedReadyAt).toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit'}))}</div>`
+            : order.status === 'Ready for Pickup'
+                ? `<div style="margin-top:12px;padding:10px 12px;border-radius:8px;background:rgba(0,230,118,.08);color:var(--neon-green);font-size:12px;">Your order is ready. A delivery partner can now collect it.</div>`
+                : '';
         const hasDriverLocation = order.driverLocation &&
             Number.isFinite(Number(order.driverLocation.lat)) && Number.isFinite(Number(order.driverLocation.lng));
         const updated = hasDriverLocation && order.driverLocation.updatedAt
@@ -5061,7 +5108,7 @@ function renderTrackingOrders(orders) {
         const trackingBlock = order.status === 'Out for Delivery'
             ? hasDriverLocation
                 ? `<div class="live-tracking-box">
-                    <div class="live-tracking-head"><strong>${liveNow ? `🛵 ${escapeHtml(arrivalLabel)}` : 'Delivery partner — last location'}</strong><span>Updated ${escapeHtml(updated)}</span></div>
+                    <div class="live-tracking-head"><strong id="tracking-arrival-${escapeHtml(order.orderId)}">${liveNow ? `🛵 ${escapeHtml(arrivalLabel)}` : 'Delivery partner — last location'}</strong><span>Updated ${escapeHtml(updated)}</span></div>
                     <div class="live-driver-map" id="driver-map-${escapeHtml(order.orderId)}"></div>
                     ${routeUrl ? `<a href="${routeUrl}" target="_blank" rel="noopener noreferrer" style="display:block;padding:10px 12px;color:var(--neon-green);font-size:12px;font-weight:600;text-align:center;text-decoration:none;border-top:1px solid rgba(0,230,118,.18);">Open live route &amp; ETA in Google Maps</a>` : ''}
                   </div>`
@@ -5073,6 +5120,7 @@ function renderTrackingOrders(orders) {
             ${renderStatusStepper(String(order.status || ''))}
             <div class="track-order-items" style="margin-top:14px;">${itemsSummary}</div>
             <div class="track-order-total">Total: ₹${escapeHtml(order.totalPrice)}</div>
+            ${prepRow}
             ${trackingBlock}
             ${otpRow}
         </div>`;
@@ -5098,9 +5146,26 @@ async function initCustomerDriverMaps(orders) {
             new google.maps.Marker({ map, position:driver, title:'Delivery partner', label:{ text:'🛵', fontSize:'20px' } });
             if (customer) {
                 new google.maps.Marker({ map, position:customer, title:'Delivery address', label:{ text:'C', color:'#fff', fontWeight:'700' } });
-                new google.maps.Polyline({ map, path:[driver, customer], geodesic:true, strokeColor:'#00e676', strokeOpacity:.8, strokeWeight:3 });
-                const bounds = new google.maps.LatLngBounds();
-                bounds.extend(driver); bounds.extend(customer); map.fitBounds(bounds, 56);
+                const fallbackLine = () => {
+                    new google.maps.Polyline({ map, path:[driver, customer], geodesic:true, strokeColor:'#00e676', strokeOpacity:.8, strokeWeight:3 });
+                    const bounds = new google.maps.LatLngBounds();
+                    bounds.extend(driver); bounds.extend(customer); map.fitBounds(bounds, 56);
+                };
+                new google.maps.DirectionsService().route({
+                    origin: driver,
+                    destination: customer,
+                    travelMode: google.maps.TravelMode.DRIVING
+                }).then(response => {
+                    new google.maps.DirectionsRenderer({
+                        map,
+                        directions: response,
+                        suppressMarkers: true,
+                        polylineOptions: { strokeColor:'#00e676', strokeOpacity:.9, strokeWeight:5 }
+                    });
+                    const leg = response.routes?.[0]?.legs?.[0];
+                    const arrival = document.getElementById(`tracking-arrival-${order.orderId}`);
+                    if (arrival && leg) arrival.textContent = `🛵 ${customerArrivalText(order)} · about ${leg.duration?.text || ''}`;
+                }).catch(fallbackLine);
             }
         });
     } catch (error) {

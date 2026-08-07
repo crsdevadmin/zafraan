@@ -1524,6 +1524,8 @@
             switch (status) {
                 case 'Pending Payment': return 'status-pending';
                 case 'Paid/Processing': return 'status-paid';
+                case 'Preparing': return 'status-pending';
+                case 'Ready for Pickup': return 'status-paid';
                 case 'Out for Delivery': return 'status-paid';
                 case 'Delivered': return 'status-delivered';
                 case 'Cancelled': return 'status-cancelled';
@@ -1532,7 +1534,7 @@
         }
 
         function statusToFilter(status) {
-            if (['Confirmed','Pending Payment','Payment Received','Paid/Processing'].includes(status)) return 'ordered';
+            if (['Confirmed','Pending Payment','Payment Received','Paid/Processing','Preparing','Ready for Pickup'].includes(status)) return 'ordered';
             if (status === 'Out for Delivery') return 'dispatched';
             if (status === 'Delivered') return 'delivered';
             if (status === 'Cancelled') return 'cancelled';
@@ -1672,6 +1674,8 @@
                                     <select class="status-select" data-order-id="${sanitize(order.orderId)}" onchange="updateOrderStatus(this.dataset.orderId, this.value)">
                                         <option value="Pending Payment" ${order.status === 'Pending Payment' ? 'selected' : ''}>Pending Payment</option>
                                         <option value="Paid/Processing" ${order.status === 'Paid/Processing' ? 'selected' : ''}>Confirmed</option>
+                                        <option value="Preparing" ${order.status === 'Preparing' ? 'selected' : ''}>Preparing</option>
+                                        <option value="Ready for Pickup" ${order.status === 'Ready for Pickup' ? 'selected' : ''}>Ready for Pickup</option>
                                         <option value="Out for Delivery" ${order.status === 'Out for Delivery' ? 'selected' : ''}>Out for Delivery</option>
                                         <option value="Delivered" ${order.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
                                         <option value="Cancelled" ${order.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
@@ -1842,11 +1846,13 @@
             
             try {
                 const orderRef = doc(db, 'orders', orderId);
-                await updateDoc(orderRef, {
+                const updates = {
                     status: newStatus,
                     updatedAt: new Date().toISOString(),
                     updatedBy: currentUser.email
-                });
+                };
+                if (newStatus === 'Ready for Pickup') updates.readyForPickupAt = new Date().toISOString();
+                await updateDoc(orderRef, updates);
                 
                 // Update local model
                 const order = ordersList.find(o => o.orderId === orderId);
