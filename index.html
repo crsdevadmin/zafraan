@@ -3355,6 +3355,19 @@ const productImages = {
   'Cut Broad Beans': './zafraan-images/cut-broad-beans.png'
 };
 
+function productPreparationMinutes(product) {
+    const configured = preparationMinutesFromText(product?.prepTime);
+    if (configured > 0) return configured;
+    return ['Peeled Veg', 'Cut Vegetables', 'Packs'].includes(product?.cat) ? 30 : 0;
+}
+
+function productPreparationLabel(product) {
+    const minutes = productPreparationMinutes(product);
+    if (minutes <= 0) return 'Ready now';
+    if (minutes === 60) return 'Ready in 1 hour';
+    return `Ready in ${minutes} minutes`;
+}
+
 function buildProductCard(p, isSpecialCard = false) {
     const isSizeBased = getSizeGrams(p.sizes);
     const rawPrice = typeof p.price === 'string' ? Number(p.price.replace(/[^\d.]/g, '')) : Number(p.price);
@@ -3380,7 +3393,7 @@ function buildProductCard(p, isSpecialCard = false) {
             <div class="product-cat">${p.cat}</div>
             <div class="product-name">${p.name}</div>
             <div class="product-sizes">${p.sizes}${isSizeBased ? ` · base ₹${rawPrice}/100g` : ''}</div>
-            ${p.prepTime ? `<div class="prep-time-badge">⏱ Ready in ${p.prepTime}</div>` : ''}
+            <div class="prep-time-badge">⏱ ${productPreparationLabel(p)}</div>
             <div class="product-footer">
                 <div class="product-price-block">
                     ${mrp ? `<span class="product-mrp">${mrpDisplay}</span>` : ''}
@@ -3454,7 +3467,7 @@ function openModal(id) {
     
     document.getElementById('modalCat').textContent = p.cat;
     document.getElementById('modalTitle').textContent = p.name;
-    document.getElementById('modalDesc').textContent = p.prepTime ? `⏱ Ready in ${p.prepTime}` : '';
+    document.getElementById('modalDesc').textContent = `⏱ ${productPreparationLabel(p)}`;
     document.getElementById('modalQty').textContent = currentQty;
     
     const sizes = p.sizes
